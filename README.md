@@ -56,10 +56,13 @@ Here is a brief summary of the supported features
 What is still missing ( mainly due to the crappy Swift support for reflection )
 * method injection
 * constructor injection
-* `FactoryBean`s
+* `FactoryBean`´s
 * let me think...hmmm
 
 And there are also limitations ( darn )
 * all objects need to derive from `NSObject` and inlcude a `@objc` annotation
 * all objects need to have a dafault `init` function
 * all properties that are injected cannot be optional! ( Woooo.. )
+
+Roadmap
+* support the different package managers
