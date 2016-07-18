@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+    xmlns:configuration="http://www.springframework.org/schema/configuration"
+    xmlns="http://www.springframework.org/schema/beans"
+    xsi:schemaLocation="
+    http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+    http://www.springframework.org/schema/configuration http://www.springframework.org/schema/util/spring-util.xsd">
+    
+    <!--post processor -->
+    
+    <!--bean class="SampleBeanPostProcessor"/-->
+    
+    <!-- some configuration sources -->
+    
+    <!--bean id="x" class="PlistConfigurationSource">
+        <property name="name" value="Info"/>
+    </bean-->
+    
+    <bean id="x1" class="ProcessInfoConfigurationSource"/>
+    
+    <!-- yikes, a cycle -->
+    
+    <!--bean id="r0" class="Data" depends-on="r1"/>
+     <bean id="r1" class="Data" depends-on="r0"/-->
+    
+    <!-- beans -->
+    
+    <bean id="b0" class="Data">
+        
+        <!-- ouch, unknown property -->
+        
+        <property name="string" value="b0"/>
+        
+        <property name="int" value="1"/>
+        <property name="float" value="-1.1"/>
+        <property name="double" value="-2.2"/>
+        <!--property name="character" value="b0"/-->
+    </bean>
+    
+    <bean class="Foo">
+        <property name="name" value="${andi=Andreas?}"/>
+        <property name="age" value="${SIMULATOR_MAINSCREEN_HEIGHT=51}"/>
+    </bean>
+    
+    <bean id="bar" abstract="true" class="Bar">
+        <property name="name" value="${andi=Andreas?}"/>
+    </bean>
+    
+    
+    <!--test configuration values -->
+    
+    <configuration:configuration namespace="com.foo">
+        <configuration:define key="bla" type="Int" value="bla"/>
+    </configuration:configuration>
+</beans>
