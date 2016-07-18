@@ -1,5 +1,6 @@
 # inject
-Dependency Injection Container for Swift
+
+I wanted to learn Swift so i decided to try something easy as a start; a dependency Injection Container for Swift :-)
 
 `Inject` is a dependency injection container for Swift that picks up the basic Spring ideas.
 
@@ -41,7 +42,7 @@ let sameBean = try! context.getBean(byType: Data.self) as! Data
 ```
 
 Here is a brief summary of the supported features
-* full dependency management including `depends-on`, `ref`, embedded `<bean>`s as property values, and injections
+* full dependency management including `depends-on`, `ref`, embedded `<bean>`'s as property values, and injections
 * property injections ( only.. ) including automatic type conversions
 * injections resembling the spring `@Inject` autowiring mechanism
 * support for different scopes including `singleton`  and `protoype` as builtin flavors
@@ -56,10 +57,13 @@ Here is a brief summary of the supported features
 What is still missing ( mainly due to the crappy Swift support for reflection )
 * method injection
 * constructor injection
-* `FactoryBean`s
+* `FactoryBean`'s
 * let me think...hmmm
 
 And there are also limitations ( darn )
-* all objects need to derive from `NSObject` and inlcude a `@objc` annotation
+* all objects need to derive from `NSObject` and include a `@objc` annotation
 * all objects need to have a dafault `init` function
 * all properties that are injected cannot be optional! ( Woooo.. )
+
+Roadmap
+* support the different package managers
