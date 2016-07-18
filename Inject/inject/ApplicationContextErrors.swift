@@ -37,7 +37,7 @@ public enum ApplicationContextErrors: ErrorType , CustomStringConvertible {
         case .AmbiguousBeanByType(let type):
             builder.append("\(self.dynamicType).AmbiguousBeanByType: ambiguous bean by type \(type)");
             
-        case .AmbiguousBeanById(let id, let context):
+        case .AmbiguousBeanById(let id, _):
             builder.append("\(self.dynamicType).AmbiguousBeanById: ambiguous bean by id \(id)");
             
         case .UnknownBeanByType(let type):

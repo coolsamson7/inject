@@ -142,7 +142,7 @@ public class ApplicationContextLoader: XMLParser {
         
         // public
         
-        public func convert(context : ApplicationContext) throws -> ApplicationContext.PropertyDeclaration {
+        internal func convert(context : ApplicationContext) throws -> ApplicationContext.PropertyDeclaration {
             let property = ApplicationContext.PropertyDeclaration()
             
             property.origin = origin
@@ -368,7 +368,7 @@ public class ApplicationContextLoader: XMLParser {
             dependency.index = index
             dependency.lowLink = index
             
-            index++
+            index += 1
             
             stack.append(dependency) // add to the stack
             
@@ -421,7 +421,7 @@ public class ApplicationContextLoader: XMLParser {
             Tracer.trace("loader", level: .HIGH, message: "collect bean information")
         }
         
-        var beanDeclarations = try convert(beans)
+        let beanDeclarations = try convert(beans)
         
         // collect
         
@@ -453,7 +453,7 @@ public class ApplicationContextLoader: XMLParser {
                     builder.append(declaration).append(" ")
                 }
                 
-                index++
+                index += 1
             }
             
             throw ApplicationContextErrors.CylicDependencies(message: builder.toString())

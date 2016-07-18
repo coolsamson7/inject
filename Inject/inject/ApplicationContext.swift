@@ -243,7 +243,7 @@ public class ApplicationContext : BeanFactory {
                         do {
                             value = try conversion(object: try loader.resolve(stringValue))
                         }
-                        catch ConversionErrors.ConversionException(let value, let targetType, let context) {
+                        catch ConversionErrors.ConversionException( _, let targetType, _) {
                             throw ConversionErrors.ConversionException(value: stringValue, targetType: targetType, context: "[\(origin!.line):\(origin!.column)]")
                         }
                     }
@@ -406,7 +406,7 @@ public class ApplicationContext : BeanFactory {
     func addDeclaration(declaration : ApplicationContext.BeanDeclaration) throws -> ApplicationContext.BeanDeclaration {
         // remember id
         
-        if let id = declaration.id { // doesn't matter if abstract or not
+        if declaration.id != nil { // doesn't matter if abstract or not
             try rememberId(declaration)
         }
         
@@ -422,7 +422,7 @@ public class ApplicationContext : BeanFactory {
     }
     
     func getCandidate(type : Any.Type) throws -> ApplicationContext.BeanDeclaration {
-        let clazz = Classes.unwrapOptional(type)
+        let clazz : AnyClass = Classes.unwrapOptional(type)
         
         let candidates = findByType(BeanDescriptor.forClass(clazz))
         

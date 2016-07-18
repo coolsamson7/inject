@@ -69,7 +69,7 @@ public class Tracer {
     class func setTraceLevel(path : String, level : Level)  -> Void {
         traceLevels[path] = level;
         
-        modifications++
+        modifications += 1
     }
     
     class func getTraceLevel(path : String) -> Level {

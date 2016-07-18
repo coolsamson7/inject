@@ -20,7 +20,7 @@ public class BeanInjection : Injection {
                 return try context.getBean(byId: beanInject.id!);
             }
             else {
-                let clazz = Classes.class4Name(Types.unwrapOptionalType(property.getPropertyType()))
+                let clazz : AnyClass = Classes.class4Name(Types.unwrapOptionalType(property.getPropertyType()))
                 
                 return try context.getBean(byType: clazz)
             }

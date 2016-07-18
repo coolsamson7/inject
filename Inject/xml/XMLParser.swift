@@ -128,14 +128,14 @@ public class XMLParser: NSObject {
                         do {
                             try property.set(instance, value: value)
                         }
-                        catch ConversionErrors.ConversionException(let value, let targetType, let context) {
+                        catch ConversionErrors.ConversionException(let value, let targetType, _) {
                             throw ConversionErrors.ConversionException(value: value, targetType: targetType, context: "[\(parser.lineNumber):\(parser.columnNumber)]" )
                         }
                         //catch {
                         //    throw error
                         //}
                     }
-                    else if let attributeContainer = instance as? AttributeContainer {
+                    else if instance is AttributeContainer {
                         //TODO attributeContainer[key] = value
                     }
                     else {
@@ -238,7 +238,7 @@ public class XMLParser: NSObject {
         // NSXMLParserDelegate
         
         // didStartElement
-        public func parser(parser: NSXMLParser, didStartElement elementName: String, namespaceURI: String?, qualifiedName qName: String?, attributes attributeDict: [String : String]) {
+        internal func parser(parser: NSXMLParser, didStartElement elementName: String, namespaceURI: String?, qualifiedName qName: String?, attributes attributeDict: [String : String]) {
             if _error == nil {
                 do {
                     if currentOperation != nil && currentOperation!.canHandle(elementName) {
@@ -281,14 +281,14 @@ public class XMLParser: NSObject {
         }
         
         // didEndElement
-        public func parser(parser: NSXMLParser, didEndElement elementName: String, namespaceURI: String?, qualifiedName qName: String?) {
+        internal func parser(parser: NSXMLParser, didEndElement elementName: String, namespaceURI: String?, qualifiedName qName: String?) {
             if _error == nil {
                 pop()
             }
         }
         
         // foundCharacters
-        public func parser(parser: NSXMLParser, foundCharacters string: String) {
+        internal func parser(parser: NSXMLParser, foundCharacters string: String) {
             if _error == nil {
                 do {
                     try currentOperation!.characters(string)
@@ -303,12 +303,12 @@ public class XMLParser: NSObject {
         }
         
         //parseErrorOccurred
-        public func parser(parser: NSXMLParser, parseErrorOccurred parseError: NSError) {
+        internal func parser(parser: NSXMLParser, parseErrorOccurred parseError: NSError) {
             reportParseError(parseError)
         }
         
         //validationErrorOccurred
-        public func parser(parser: NSXMLParser, validationErrorOccurred validationError: NSError) {
+        internal func parser(parser: NSXMLParser, validationErrorOccurred validationError: NSError) {
             reportValidationError(validationError)
         }
     }

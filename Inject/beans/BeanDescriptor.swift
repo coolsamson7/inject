@@ -206,76 +206,7 @@ public class BeanDescriptor : CustomStringConvertible {
     }
     
     // private
-    
-    private func analyzeProperty(clazz: AnyClass, name: String) -> (Any.Type, Bool, Bool) {
-        let objc_prop = class_getProperty(clazz, name);
-        
-        let attributes = NSString(UTF8String: property_getAttributes(objc_prop))!.componentsSeparatedByString(",")
-        
-        var readOnly: Bool = false;
-        var type: Any.Type? = nil;
-        var literal = true;
-        
-        // refer t: https://developer.apple.com/library/mac/documentation/Cocoa/Conceptual/ObjCRuntimeGuide/Articles/ocrtTypeEncodings.html#//apple_ref/doc/uid/TP40008048-CH100-SW1
-        for attribute in attributes {
-            if (attribute[0] == "T") {
-                print("\(clazz).\(name)=\(attribute[1])")
-                
-                switch attribute[1] {
-                case "@":
-                    print(attributes)
-                    if attribute.rangeOfString("\"") != nil {
-                        let name = attribute[attribute.startIndex.advancedBy(3) ..< attribute.endIndex.advancedBy(-1)];
-                        type = NSClassFromString(name)! // HMM...what about NSString
-                        literal = type == String.self || type == NSString.self
-                        
-                        print("found name \(name) -> class \(type)")
-                        if (type == NSArray.self) {
-                            print("ARRAY");
-                        }
-                    }
-                    else {
-                        type = NSObject.self; // TODO
-                    }
-                case "c", "C":
-                    
-                    type = Character.self;
-                case "i", "q", "l", "s", "I", "S", "L", "Q": // ?
-                    
-                    type = Int.self;
-                case "f":
-                    type = Float.self;
-                case "d":
-                    type = Double.self;
-                case "c":
-                    type = Character.self;
-                case "B":
-                    type = Bool.self;
-                    
-                    
-                default:
-                    print("strange type \"\(attribute[1])\"")
-                    type = Bool.self;
-                    break
-                } // switch
-            } // if
-            else {
-                switch attribute[0] {
-                case "R": // read only
-                    readOnly = true
-                case "V": // NAME
-                    break
-                default:
-                    break
-                    // IGNORE
-                }
-            }
-        } // for
-        
-        return (type!, literal, readOnly);
-        
-    }
-    
+
     func analyzeProperty(name : String, value: Any, index : Int, overallIndex : Int) -> AttributeDescriptor {
         let mirror : Mirror  = Mirror(reflecting: value)
         var type = mirror.subjectType
@@ -343,9 +274,13 @@ public class BeanDescriptor : CustomStringConvertible {
         }
         
         var startIndex = properties.count
-        
+
+        // creata a sample instance
+
         let instance  = create();
-        
+
+        // and check the mirror...
+
         let mirror = Mirror(reflecting: instance)
         if let displayStyle = mirror.displayStyle {
             if displayStyle == .Class {
@@ -353,42 +288,25 @@ public class BeanDescriptor : CustomStringConvertible {
                 
                 var index = 0
                 for case let (label?, value) in mirror.children {
-                    let property = analyzeProperty(label, value: value, index: index++, overallIndex: startIndex++)
+                    let property = analyzeProperty(label, value: value, index: index, overallIndex: startIndex)
                     
                     ownProperties.append(property)
                     allProperties.append(property)
                     
                     properties[property.name] = property;
+                    
+                    index += 1
+                    startIndex += 1
                 } // for
             }
         }
-        
+
+        // this is a hack since swift does not include something like a static initializer
+        // ( and i am obviously too stupid to call a class func :-) )
+
         if let classInitializer = instance as? ClassInitializer {
             classInitializer.initializeClass()
         }
-        
-        /* local class
-         
-         var count: UInt32 = 0
-         let propertyList = class_copyPropertyList(clazz, &count)
-         for i in 0 ..< Int(count) {
-         let property = propertyList[i]
-         let name = String.fromCString(property_getName(property))!
-         
-         let (type, literal, _) = analyzeProperty(clazz, name: name);
-         
-         let prop: PropertyDescriptor = literal ?
-         AttributeDescriptor(bean: self, name: name, index: i, overallIndex: i + startIndex, type: type) :
-         RelationDescriptor(bean: self, name: name, index: i, overallIndex: i + StartIndex, type: type);
-         
-         ownProperties.append(prop)
-         allProperties.append(prop)
-         
-         properties[prop.name] = prop;
-         } // for
-         
-         free(propertyList)
-         */
     }
     
     // public
