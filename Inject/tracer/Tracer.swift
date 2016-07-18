@@ -32,7 +32,7 @@ func >(lhs: Tracer.Level, rhs: Tracer.Level) -> Bool {
 public class Tracer {
     // -D DEBUG !
     #if DEBUG
-    static var ENABLED = false
+    static var ENABLED = true
     #else
     static var ENABLED = false
     #endif
