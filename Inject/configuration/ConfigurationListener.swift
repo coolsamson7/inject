@@ -7,5 +7,5 @@
 //
 
 protocol ConfigurationListener {
-    func onItemChanged(namespace : String, key : String, value : AnyObject) -> Void
+    func onItemChanged(namespace : String, key : String, value : Any) -> Void
 }

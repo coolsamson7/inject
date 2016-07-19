@@ -7,7 +7,7 @@
 //
 public enum ConversionErrors : ErrorType, CustomStringConvertible {
     case UnknownConversion(sourceType: Any.Type, targetType: Any.Type)
-    case ConversionException(value: AnyObject, targetType: Any.Type, context : String?)
+    case ConversionException(value: Any, targetType: Any.Type, context : String?)
     //case Exception(message: String)
     
     // CustomStringConvertible

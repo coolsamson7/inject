@@ -44,7 +44,7 @@ public class StandardConversionFactory : ConversionFactory {
     init() {
         // String
         
-        register(String.self, targetType: String.self, conversion: {$0!})
+        register(String.self, targetType: String.self, conversion: {$0})
         
         register(String.self, targetType: Bool.self, conversion: {$0 as! String == "true"})
         
@@ -53,7 +53,7 @@ public class StandardConversionFactory : ConversionFactory {
                 return result
             }
             else {
-                throw ConversionErrors.ConversionException(value: $0!, targetType: Int.self, context: nil)
+                throw ConversionErrors.ConversionException(value: $0, targetType: Int.self, context: nil)
             }
         })
         
@@ -62,7 +62,7 @@ public class StandardConversionFactory : ConversionFactory {
                 return result
             }
             else {
-                throw ConversionErrors.ConversionException(value: $0!, targetType: Float.self, context: nil)
+                throw ConversionErrors.ConversionException(value: $0, targetType: Float.self, context: nil)
             }
         })
         
@@ -71,7 +71,7 @@ public class StandardConversionFactory : ConversionFactory {
                 return result
             }
             else {
-                throw ConversionErrors.ConversionException(value: $0!, targetType: Double.self, context: nil)
+                throw ConversionErrors.ConversionException(value: $0, targetType: Double.self, context: nil)
             }
         })
         

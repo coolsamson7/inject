@@ -14,7 +14,7 @@ public class BeanInjection : Injection {
     
     // implement
     
-    override func computeValue(inject : Inject, property: BeanDescriptor.PropertyDescriptor, context : ApplicationContext) throws -> AnyObject {
+    override func computeValue(inject : Inject, property: BeanDescriptor.PropertyDescriptor, context : ApplicationContext) throws -> Any {
         if let beanInject = inject as? InjectBean {
             if beanInject.id != nil {
                 return try context.getBean(byId: beanInject.id!);

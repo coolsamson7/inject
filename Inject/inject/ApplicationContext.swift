@@ -164,20 +164,17 @@ public class ApplicationContext : BeanFactory {
                 // for some reason string will be converted in a NSContiguousString, or whatever...
                 
                 if resolved != nil {
-                    let type = Types.normalizedType(resolved!)
-                    
+                    let type = resolved!.dynamicType // Types.normalizedType(resolved!)
                     
                     if beanProperty.getPropertyType() != type {
-                       try beanProperty.set(result, value: resolved!) // TODO!
-                        
-                        //throw ApplicationContextErrors.TypeMismatch(message: " property \(Classes.className(clazz!.clazz)).\(beanProperty.getName()) expected a \(beanProperty.getPropertyType()) got \(type)")
+                       throw ApplicationContextErrors.TypeMismatch(message: " property \(Classes.className(clazz!.clazz)).\(beanProperty.getName()) expected a \(beanProperty.getPropertyType()) got \(type)")
                     }
                     else {
                         if (Tracer.ENABLED) {
-                            Tracer.trace("loader", level: .HIGH, message: "set \(resolved) as property \(clazz).\(beanProperty.getName())")
+                            Tracer.trace("loader", level: .HIGH, message: "set \(resolved!) as property \(clazz).\(beanProperty.getName())")
                         }
                         
-                        try beanProperty.set(result, value: resolved!)
+                        try beanProperty.set(result, value: resolved! as! AnyObject)
                     }
                 }
             }
@@ -219,7 +216,7 @@ public class ApplicationContext : BeanFactory {
         // instance data
         
         var name  : String = ""
-        var value : AnyObject?
+        var value : Any?
         var ref   : BeanDeclaration?
         var declaration : BeanDeclaration?
         var property : BeanDescriptor.PropertyDescriptor?
@@ -280,7 +277,7 @@ public class ApplicationContext : BeanFactory {
             }
         }
         
-        func resolve(context : ApplicationContext) throws -> AnyObject? {
+        func resolve(context : ApplicationContext) throws -> Any? {
             if ref != nil {
                 return ref
             }

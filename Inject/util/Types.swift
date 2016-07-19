@@ -22,7 +22,7 @@ public class Types {
         return name;
     }
     
-    public class func normalizedType(object : AnyObject) -> Any.Type {
+    public class func normalizedType(object : Any) -> Any.Type {
         var type : Any.Type = object.dynamicType
         
         if object is String {

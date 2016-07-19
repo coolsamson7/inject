@@ -114,7 +114,7 @@ class ConfigurationManager : NSObject, ConfigurationAdministration, Configuratio
         return resultItem === ConfigurationManager.NOT_FOUND ? nil : resultItem;
     }
     
-    func maybeConvert(type : Any.Type, value : AnyObject) throws -> AnyObject? {
+    func maybeConvert(type : Any.Type, value : Any) throws -> Any {
         var valueType : Any.Type = value.dynamicType
         
         if type != valueType {
@@ -171,7 +171,7 @@ class ConfigurationManager : NSObject, ConfigurationAdministration, Configuratio
         let listenerData = listeners[item.fqn]
         if listenerData != nil {
             for configurationListenerData in listenerData! {
-                configurationListenerData.configurationListener.onItemChanged(item.fqn.namespace, key: item.fqn.key, value: try maybeConvert(configurationListenerData.type, value: item.value)!);
+                configurationListenerData.configurationListener.onItemChanged(item.fqn.namespace, key: item.fqn.key, value: try maybeConvert(configurationListenerData.type, value: item.value));
             }
         }
         
@@ -195,7 +195,7 @@ class ConfigurationManager : NSObject, ConfigurationAdministration, Configuratio
         return items[ScopeAndName(scope : scope, fqn: FQN(namespace: namespace, key: key))]
     }
     
-    func getValue(type : Any.Type, namespace : String, key : String, defaultValue: AnyObject? = nil, scope : Scope? = nil) throws -> AnyObject? {
+    func getValue(type : Any.Type, namespace : String, key : String, defaultValue: AnyObject? = nil, scope : Scope? = nil) throws -> Any {
         let resultItem = getEffectiveConfigurationItem(scope != nil ? scope! : self.scope, fqn: FQN(namespace: namespace, key: key));
         
         if resultItem == nil {

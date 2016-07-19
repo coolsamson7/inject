@@ -102,9 +102,9 @@ public class BeanDescriptor : CustomStringConvertible {
             if value != nil {
                 var val = value!
                 
-                if type != object.dynamicType {
+                if type != val.dynamicType {
                     // holly shit!
-                    
+
                     if val is String {
                         val = val as! String
                     }
@@ -117,15 +117,18 @@ public class BeanDescriptor : CustomStringConvertible {
                     else if val is Double {
                         val = val as! Double
                     }
-                    
+
                     // next try
-                    
+
                     //if type == val.dynamicType {
                     object.setValue(val, forKey: name)
                     //}
                     //else {
                     //    throw BeanDescriptorErrors.TypeMismatch(message: "\(val) does not match property type of \(self.name) = \(type)")
                     //}
+                }
+                else {
+                    object.setValue(val, forKey: name)
                 }
             }
             else {
@@ -243,7 +246,7 @@ public class BeanDescriptor : CustomStringConvertible {
         
         var startIndex = properties.count
 
-        // creata a sample instance
+        // create a sample instance
 
         let instance  = create();
 
@@ -275,6 +278,8 @@ public class BeanDescriptor : CustomStringConvertible {
         if let classInitializer = instance as? ClassInitializer {
             classInitializer.initializeClass()
         }
+
+        //print(self)
     }
     
     // public
@@ -334,7 +339,11 @@ public class BeanDescriptor : CustomStringConvertible {
             builder.append("bean(\(clazz)) {\n")
             
             for (name,property) in properties {
-                builder.append("\t").append(name).append(": \(property.type)\n")
+                builder.append("\t").append(name).append(": \(property.type)")
+                if property.optional {
+                    builder.append("?")
+                }
+                builder.append("\n")
             }
             
             builder.append("}")

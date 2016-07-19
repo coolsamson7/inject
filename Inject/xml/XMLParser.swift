@@ -36,12 +36,12 @@ public class XMLParser: NSObject {
             // internal
             
             func set(object : AnyObject, value : String) throws -> Void {
-                var val : AnyObject = value;
+                var val : Any = value;
                 if conversion != nil {
-                    val = try conversion!(object: val)
+                    val = try conversion!(object: val as! AnyObject)
                 }
                 
-                try property.set(object, value: val)
+                try property.set(object, value: val as! AnyObject)
             }
         }
         

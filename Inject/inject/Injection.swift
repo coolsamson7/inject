@@ -25,7 +25,7 @@ public class Injection : NSObject, Bean, ClassInitializer {
     
     // public
     
-    func computeValue(inject : Inject, property: BeanDescriptor.PropertyDescriptor, context : ApplicationContext) throws -> AnyObject {
+    func computeValue(inject : Inject, property: BeanDescriptor.PropertyDescriptor, context : ApplicationContext) throws -> Any {
         return self// implement!
     }
     

@@ -28,7 +28,7 @@ public class Injector : NSObject {
                     Tracer.trace("loader", level: .HIGH, message: "inject \(value) in property \(target.dynamicType).\(property.getName())")
                 }
                 
-                try property.set(target, value: value)
+                try property.set(target, value: value as! AnyObject)
             }
         }
         
