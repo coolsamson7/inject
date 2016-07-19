@@ -213,41 +213,9 @@ public class BeanDescriptor : CustomStringConvertible {
         var optional = false
         
         // what the hell?
-        
-        if (type == AnyObject?.self) {
-            type = AnyObject.self
-            optional = true
-        }
-        else if (type == String?.self) {
-            type = String.self
-            optional = true
-        }
-        else if (type == Int?.self) {
-            type = Int.self
-            optional = true
-        }
-        else if (type == Int8?.self) {
-            type = Int8.self
-            optional = true
-        }
-        else if (type == Int16?.self) {
-            type = Int16.self
-            optional = true
-        }
-        else if (type == Int32?.self) {
-            type = Int32.self
-            optional = true
-        }
-        else if (type == Int64?.self) {
-            type = Int64.self
-            optional = true
-        }
-        else if (type == Float?.self) {
-            type = Float.self
-            optional = true
-        }
-        else if (type == Double?.self) {
-            type = Double.self
+
+        if let optionalType = value as? OptionalType {
+            type = optionalType.wrappedType()
             optional = true
         }
         
