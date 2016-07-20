@@ -23,8 +23,7 @@ class BeanDescriptorTests: XCTestCase {
         var float : Float = 0.0
         var double : Double = 0.0
     }
-    
-       
+
     func testProperties() {
         let bean = BeanDescriptor.forClass(Foo.self)
         
@@ -34,6 +33,9 @@ class BeanDescriptorTests: XCTestCase {
         try! bean["int"].set(foo, value: 1)
         try! bean["float"].set(foo, value: 1.0)
         try! bean["double"].set(foo, value: 1.0)
+
+        XCTAssert(bean["string"].get(foo) as! String == "hello")
+
 
         XCTAssert(foo.string == "hello")
         XCTAssert(foo.int == 1)

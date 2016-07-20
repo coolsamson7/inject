@@ -32,7 +32,11 @@
         <!--property name="character" value="b0"/-->
     </bean>
     
-    <bean parent="bar">
+    <!--bean parent="bar">
         <property name="age" value="4711"/>
+    </bean-->
+
+    <bean class="BarFactory" target="Bar">
+        <!--property name="age" value="4711"/-->
     </bean>
 </beans>

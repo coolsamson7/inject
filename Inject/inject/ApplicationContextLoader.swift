@@ -63,6 +63,7 @@ public class ApplicationContextLoader: XMLParser {
         var id : String?
         var dependsOn : String?
         var clazz : String?
+        var target : String?
         var properties = [Property]()
         
         // init
@@ -84,7 +85,8 @@ public class ApplicationContextLoader: XMLParser {
             bean.parent = parent != nil ? ApplicationContext.BeanDeclaration(id: parent!) : nil
             bean.id = id
             bean.dependsOn = dependsOn != nil ? ApplicationContext.BeanDeclaration(id: dependsOn!) : nil
-            bean.clazz = clazz != nil ? BeanDescriptor.forClass(clazz!) : nil
+            bean.bean = clazz != nil ? BeanDescriptor.forClass(clazz!) : nil
+            bean.target =  target != nil ? BeanDescriptor.forClass(target!) : nil
             
             
             for property in properties {
@@ -284,7 +286,8 @@ public class ApplicationContextLoader: XMLParser {
                 .property("scope")
                 .property("id")
                 .property("dependsOn", xml: "depends-on")
-                .property("clazz", xml: "class"),
+                .property("clazz", xml: "class")
+                .property("target"),
             
             ClassDefinition(clazz: Property.self, element: "property")
                 .property("name")

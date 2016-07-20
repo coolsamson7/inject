@@ -36,7 +36,8 @@ public class ApplicationContext : BeanFactory {
         var singleton : AnyObject?
         var id : String?
         var dependsOn : BeanDeclaration?
-        var clazz : BeanDescriptor?
+        var bean: BeanDescriptor?
+        var target: BeanDescriptor?
         var properties = [PropertyDeclaration]()
         
         // init
@@ -47,7 +48,7 @@ public class ApplicationContext : BeanFactory {
         
         init(instance : AnyObject) {
             self.singleton = instance
-            self.clazz = BeanDescriptor.forClass(instance.dynamicType)
+            self.bean = BeanDescriptor.forClass(instance.dynamicType)
         }
         
         override init() {
@@ -66,11 +67,10 @@ public class ApplicationContext : BeanFactory {
         
         func inheritFrom(parent : BeanDeclaration, loader: ApplicationContextLoader) throws -> Void  {
             var resolveProperties = false
-            if clazz == nil {
-                clazz = parent.clazz
+            if bean == nil {
+                bean = parent.bean
                 
                 resolveProperties = true
-                
                 
                 if !abstract {
                     try loader.context.rememberType(self)
@@ -127,7 +127,7 @@ public class ApplicationContext : BeanFactory {
             
             // injections
             
-            for beanProperty in clazz!.getAllProperties() {
+            for beanProperty in bean!.getAllProperties() {
                 if beanProperty.autowired {
                     let declaration = try loader.context.getCandidate(beanProperty.getPropertyType())
                     
@@ -148,10 +148,10 @@ public class ApplicationContext : BeanFactory {
         
         func create(context : ApplicationContext) throws -> AnyObject {
             if (Tracer.ENABLED) {
-                Tracer.trace("loader", level: .HIGH, message: "create \(clazz!.clazz) instance")
+                Tracer.trace("loader", level: .HIGH, message: "create \(bean!.clazz) instance")
             }
             
-            let result =  clazz!.create()
+            let result =  bean!.create()
             
             // set properties
             
@@ -164,11 +164,11 @@ public class ApplicationContext : BeanFactory {
                     let type = resolved!.dynamicType
                     
                     if beanProperty.getPropertyType() != type {
-                       throw ApplicationContextErrors.TypeMismatch(message: " property \(Classes.className(clazz!.clazz)).\(beanProperty.getName()) expected a \(beanProperty.getPropertyType()) got \(type)")
+                       throw ApplicationContextErrors.TypeMismatch(message: " property \(Classes.className(bean!.clazz)).\(beanProperty.getName()) expected a \(beanProperty.getPropertyType()) got \(type)")
                     }
                     else {
                         if (Tracer.ENABLED) {
-                            Tracer.trace("loader", level: .HIGH, message: "set \(resolved!) as property \(clazz).\(beanProperty.getName())")
+                            Tracer.trace("loader", level: .HIGH, message: "set \(resolved!) as property \(bean).\(beanProperty.getName())")
                         }
                         
                         try beanProperty.set(result, value: resolved)
@@ -194,7 +194,7 @@ public class ApplicationContext : BeanFactory {
         override public var description: String {
             let builder = StringBuilder();
             
-            builder.append("bean(class: \(clazz)")
+            builder.append("bean(class: \(bean)")
             if id != nil {
                 builder.append(", id: \"\(id!)\"")
             }
@@ -221,7 +221,7 @@ public class ApplicationContext : BeanFactory {
         // functions
         
         func resolveProperty(beanDeclaration : BeanDeclaration, loader: ApplicationContextLoader) throws -> Void  {
-            property = beanDeclaration.clazz!.findProperty(name)
+            property = beanDeclaration.bean!.findProperty(name)
             
             if property == nil {
                 throw ApplicationContextErrors.UnknownProperty(property: name, bean: beanDeclaration)
@@ -252,7 +252,7 @@ public class ApplicationContext : BeanFactory {
         }
         
         func collect(beanDeclaration : BeanDeclaration, context : ApplicationContext, loader: ApplicationContextLoader) throws -> Void {
-            if beanDeclaration.clazz != nil { // abstract classes
+            if beanDeclaration.bean != nil { // abstract classes
                 try resolveProperty(beanDeclaration, loader: loader)
             }
             
@@ -345,6 +345,44 @@ public class ApplicationContext : BeanFactory {
         }
     }
 
+    class BeanFactoryScope : BeanScope {
+        // instance data
+
+        let declaration : ApplicationContext.BeanDeclaration
+        let context: ApplicationContext
+
+        // init
+
+        init(declaration : ApplicationContext.BeanDeclaration, context: ApplicationContext) {
+            self.declaration = declaration
+            self.context = context
+        }
+
+        // BeanScope
+
+        var name : String {
+            get {
+                return "does not matter"
+            }
+        }
+
+        func prepare(bean : ApplicationContext.BeanDeclaration, factory : BeanFactory) throws {
+            // noop
+        }
+
+        func get(bean : ApplicationContext.BeanDeclaration, factory : BeanFactory) throws -> AnyObject {
+            if let factoryBean = try declaration.getInstance(context) as? FactoryBean {
+                return try factoryBean.create()
+            }
+
+            fatalError("cannot happen")
+        }
+
+        func finish() {
+            // noop
+        }
+    }
+
     // instance data
     
     var parent : ApplicationContext? = nil
@@ -424,7 +462,7 @@ public class ApplicationContext : BeanFactory {
             }
         }
     }
-    
+
     func rememberType(declaration : ApplicationContext.BeanDeclaration) throws -> Void {
         // remember by type for injections
         
@@ -433,8 +471,29 @@ public class ApplicationContext : BeanFactory {
             clazz = declaration.singleton!.dynamicType
         }
         else {
-            clazz = declaration.clazz?.clazz // may be nil in case of a inherited bean!
+            clazz = declaration.bean?.clazz // may be nil in case of a inherited bean!
         }
+
+        // is that a factory bean?
+
+        if clazz is FactoryBean.Type {
+            let target = declaration.target
+            if target == nil {
+                fatalError("missing target");
+            }
+
+            // include artificial bean declaration with special scope
+
+            let bean = BeanDeclaration()
+
+            bean.scope = BeanFactoryScope(declaration : declaration, context: self)
+            bean.dependsOn = declaration
+            bean.bean = target
+
+            // remember
+
+            try rememberType(bean)
+        } // if
         
         if clazz != nil && !declaration.abstract {
             let declarations = byType[clazz!];

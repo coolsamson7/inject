@@ -39,7 +39,7 @@ public class NamespaceHandler {
             result.id = id
         }
         
-        result.clazz = BeanDescriptor.forClass(clazz)
+        result.bean = BeanDescriptor.forClass(clazz)
         
         return result
     }

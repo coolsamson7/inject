@@ -11,8 +11,21 @@ import Foundation
 
 @testable import Inject
 
+
 class BeanFactoryTests: XCTestCase {
     // MARK: local classes
+
+    @objc(BarFactory)
+    class BarFactory : NSObject, FactoryBean {
+        func create() throws -> AnyObject {
+            let result = Bar()
+
+            result.name = "factory"
+            result.age = 4711
+
+            return result
+        }
+    }
     
     @objc(Bar)
     class Bar : NSObject {
@@ -89,22 +102,21 @@ class BeanFactoryTests: XCTestCase {
     
     func testBeans() {
         // load parent xml
-        
-        var data = NSData(contentsOfURL: NSBundle(forClass: BeanFactoryTests.self).URLForResource("parent", withExtension: "xml")!)!
-    
+
+        var parentData = NSData(contentsOfURL: NSBundle(forClass: BeanFactoryTests.self).URLForResource("parent", withExtension: "xml")!)!
+        var childData  = NSData(contentsOfURL: NSBundle(forClass: BeanFactoryTests.self).URLForResource("application", withExtension: "xml")!)!
+
         var context = try! ApplicationContext(
-            parent: nil,
-            data: data,
-            namespaceHandlers: [ConfigurationNamespaceHandler(namespace: "configuration")]
-        )
+                parent: nil,
+                data: parentData,
+                namespaceHandlers: [ConfigurationNamespaceHandler(namespace: "configuration")]
+                )
         
         // load child
-        
-        data = NSData(contentsOfURL: NSBundle(forClass: BeanFactoryTests.self).URLForResource("application", withExtension: "xml")!)!
-        
+
         context = try! ApplicationContext(
             parent: context,
-            data: data
+            data: childData
         )
         
         // check
@@ -126,5 +138,25 @@ class BeanFactoryTests: XCTestCase {
         let bar = try! context.getBean(byType: Bar.self) as! Bar
         
         XCTAssert(bar.age == 4711)
+
+        // Measure
+
+        try! Timer.measure({
+            var context = try! ApplicationContext(
+                    parent: nil,
+                    data: parentData,
+                    namespaceHandlers: [ConfigurationNamespaceHandler(namespace: "configuration")]
+                    )
+
+            // load child
+
+            context = try! ApplicationContext(
+                    parent: context,
+                    data: childData
+                    )
+
+            return true
+        }, times: 1000)
+
     }
 }
