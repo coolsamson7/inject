@@ -15,6 +15,7 @@ import Foundation
 ///    - lockToken: An Objective-C object to protect the critical section of code
 ///    - action: The critical section of code to be protected
 /// - Returns: Result of `action()`
+
 public func synchronized<ReturnType>(lockToken: AnyObject, @noescape action: () -> ReturnType) -> ReturnType {
     return synchronized(lockToken, action: action())
 }
@@ -26,6 +27,7 @@ public func synchronized<ReturnType>(lockToken: AnyObject, @noescape action: () 
 ///    - lockToken: An Objective-C object to protect the critical section of code
 ///    - action: The critical section of code to be protected
 /// - Returns: Result of `action()`
+
 public func synchronized<ReturnType>(lockToken: AnyObject, @autoclosure action: () -> ReturnType) -> ReturnType {
     defer { objc_sync_exit(lockToken) }
 
