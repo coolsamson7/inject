@@ -1,5 +1,5 @@
 //
-//  String.swift
+//  Optional.extension.swift
 //  Inject
 //
 //  Created by Andreas Ernst on 18.07.16.
