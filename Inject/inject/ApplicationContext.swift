@@ -98,7 +98,6 @@ public class ApplicationContext : BeanFactory {
             }
         }
         
-        
         func collect(context : ApplicationContext, loader: ApplicationContextLoader) throws -> Void {
             try loader.addDeclaration(self)
             
@@ -160,11 +159,9 @@ public class ApplicationContext : BeanFactory {
                 let beanProperty = property.property!
                 
                 let resolved = try property.resolve(context)
-                
-                // for some reason string will be converted in a NSContiguousString, or whatever...
-                
+
                 if resolved != nil {
-                    let type = resolved!.dynamicType // Types.normalizedType(resolved!)
+                    let type = resolved!.dynamicType
                     
                     if beanProperty.getPropertyType() != type {
                        throw ApplicationContextErrors.TypeMismatch(message: " property \(Classes.className(clazz!.clazz)).\(beanProperty.getName()) expected a \(beanProperty.getPropertyType()) got \(type)")
@@ -174,7 +171,7 @@ public class ApplicationContext : BeanFactory {
                             Tracer.trace("loader", level: .HIGH, message: "set \(resolved!) as property \(clazz).\(beanProperty.getName())")
                         }
                         
-                        try beanProperty.set(result, value: resolved! as! AnyObject)
+                        try beanProperty.set(result, value: resolved)
                     }
                 }
             }
@@ -297,7 +294,57 @@ public class ApplicationContext : BeanFactory {
             }
         }
     }
-    
+
+    public class PrototypeScope : BeanScope {
+        // Scope
+
+        var name : String {
+            get {
+                return "prototype"
+            }
+        }
+
+        func prepare(bean : ApplicationContext.BeanDeclaration, factory : BeanFactory) throws {
+            // noop
+        }
+
+        func get(bean : ApplicationContext.BeanDeclaration, factory : BeanFactory) throws -> AnyObject {
+            return try factory.create(bean)
+        }
+
+        func finish() {
+            // noop
+        }
+    }
+
+    public class SingletonScope : BeanScope {
+        // Scope
+
+        var name : String {
+            get {
+                return "singleton"
+            }
+        }
+
+        func prepare(bean : ApplicationContext.BeanDeclaration, factory : BeanFactory) throws {
+            if !bean.lazy {
+                try get(bean, factory: factory)
+            }
+        }
+
+        func get(bean : ApplicationContext.BeanDeclaration, factory : BeanFactory) throws -> AnyObject {
+            if bean.singleton == nil {
+                bean.singleton = try factory.create(bean)
+            }
+
+            return bean.singleton!
+        }
+
+        func finish() {
+            // noop
+        }
+    }
+
     // instance data
     
     var parent : ApplicationContext? = nil
@@ -344,7 +391,7 @@ public class ApplicationContext : BeanFactory {
         scopes[scope.name] = scope
     }
     
-    func getScope(name : String) throws -> BeanScope{
+    func getScope(name : String) throws -> BeanScope {
         let scope = scopes[name]
         if scope == nil {
             throw ApplicationContextErrors.UnknownScope(scope: name, context: "")
@@ -464,6 +511,7 @@ public class ApplicationContext : BeanFactory {
         }
         
         // remember post processors
+        // TODO: must be done only once!
         
         if let postProcessor = instance as? BeanPostProcessor {
             postProcessors.append(postProcessor)

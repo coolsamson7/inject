@@ -201,9 +201,9 @@ public class ApplicationContextLoader: XMLParser {
             }
         }
         
-        try! setupParser()
+        try setupParser()
         
-        try! setup()
+        try setup()
         
         try parse(data)
     }

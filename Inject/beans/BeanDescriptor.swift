@@ -94,46 +94,17 @@ public class BeanDescriptor : CustomStringConvertible {
             return true;
         }
         
-        public func get(object: NSObject!) -> AnyObject? {
+        public func get(object: AnyObject!) -> AnyObject? {
             return object.valueForKey(name)
         }
         
-        public func set(object: AnyObject, value: AnyObject?) throws -> Void {
+        public func set(object: AnyObject, value: Any?) throws -> Void {
             if value != nil {
-                var val = value!
-                
-                if type != val.dynamicType {
-                    // holly shit!
-
-                    if val is String {
-                        val = val as! String
-                    }
-                    else if val is Int {
-                        val = val as! Int
-                    }
-                    else if val is Float {
-                        val = val as! Float
-                    }
-                    else if val is Double {
-                        val = val as! Double
-                    }
-
-                    // next try
-
-                    //if type == val.dynamicType {
-                    object.setValue(val, forKey: name)
-                    //}
-                    //else {
-                    //    throw BeanDescriptorErrors.TypeMismatch(message: "\(val) does not match property type of \(self.name) = \(type)")
-                    //}
-                }
-                else {
-                    object.setValue(val, forKey: name)
-                }
+                object.setValue(value as? AnyObject, forKey: name)
             }
             else {
                 if optional {
-                    object.setValue(value, forKey: name)
+                    object.setValue(value as? AnyObject, forKey: name)
                 }
                 else {
                     throw BeanDescriptorErrors.CannotSetNil(message: "nil not allowed for property \(self.name)")
@@ -330,7 +301,7 @@ public class BeanDescriptor : CustomStringConvertible {
         return try getProperty(property).get(object);
     }
     
-    func set(object: NSObject!, property: String, value: AnyObject?) throws -> Void {
+    func set(object: NSObject!, property: String, value: Any?) throws -> Void {
         try getProperty(property).set(object, value: value);
     }
     

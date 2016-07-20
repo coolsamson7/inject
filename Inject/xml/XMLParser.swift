@@ -38,10 +38,10 @@ public class XMLParser: NSObject {
             func set(object : AnyObject, value : String) throws -> Void {
                 var val : Any = value;
                 if conversion != nil {
-                    val = try conversion!(object: val as! AnyObject)
+                    val = try conversion!(object: val)
                 }
                 
-                try property.set(object, value: val as! AnyObject)
+                try property.set(object, value: val)
             }
         }
         
@@ -69,14 +69,6 @@ public class XMLParser: NSObject {
             
             return self
         }
-        
-        /*func property(property : String, xml : String, conversion : Conversion) throws -> ClassDefinition {
-         let definition = try PropertyDefinition(bean: clazz, propertyName: property, xml: xml, conversion: conversion)
-         
-         properties[definition.xml] = definition
-         
-         return self
-         }*/
     }
     
     // internal
