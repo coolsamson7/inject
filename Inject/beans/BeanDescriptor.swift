@@ -221,6 +221,10 @@ public class BeanDescriptor : CustomStringConvertible {
             type = optionalType.wrappedType()
             optional = true
         }
+
+        //if let array = value as? ArrayType {
+        //    print(array.elementType())
+        //}
         
         return AttributeDescriptor(bean: self, name: name, index: index, overallIndex: overallIndex, type: type, optional: optional)
     }
