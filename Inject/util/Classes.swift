@@ -8,24 +8,71 @@
 
 import Foundation
 
+public enum ClassesErrors : ErrorType, CustomStringConvertible {
+    case Exception(message: String)
+
+    // CustomStringConvertible
+
+    public var description: String {
+        let builder = StringBuilder();
+
+        switch self {
+            case .Exception(let message):
+                builder.append("\(self.dynamicType).Exception: ").append(message);
+        } // switch
+
+        return builder.toString()
+    }
+}
+
 public class Classes {
+    // private
+
+    private class func bundleName(bundle : NSBundle) -> String {
+        return bundle.infoDictionary?["CFBundleName"] as? String ?? ""
+    }
+
+    public class func setDefaultBundle(bundle : NSBundle) {
+        mainBundleName = bundleName(bundle)
+    }
+
+    public class func setDefaultBundle(clazz : AnyClass) {
+        mainBundleName = bundleName(NSBundle(forClass: clazz))
+    }
+
+    // data
+
+    static var mainBundleName = Classes.bundleName(NSBundle.mainBundle())
+
     // MARK: class funcs
     
-    /// Bla 
-    class func class4Name(className : String) -> AnyClass {
-        //if  var appName: String = NSBundle.mainBundle().objectForInfoDictionaryKey("CFBundleExecutable") as! String {
-        //    let qualifiedName = "\(appName).\(className)"
-        //}
-        
-        return NSClassFromString(className)!
+    /// return a class instance given a class name
+    public class func class4Name(className : String) throws -> AnyClass {
+        var result = NSClassFromString(className)
+
+        if result != nil {
+            return result!
+        }
+        else {
+            if !className.containsString(".") {
+                result = NSClassFromString("\(mainBundleName).\(className)")
+                if result != nil {
+                    return result!
+                }
+            }
+        } // else
+
+        // darn
+
+        throw ClassesErrors.Exception(message: "no class named \"\(className)\"")
     }
-    
-    class func className(clazz : AnyClass) -> String {
-        return "\(clazz)"
+
+    public class func className(clazz : AnyClass) -> String {
+        return "\(clazz)" // TODO bundle?
     }
-    
-    class func unwrapOptional(type : Any.Type) -> AnyClass {
-        return class4Name(Types.unwrapOptionalType(type))
+
+    public class func unwrapOptional(type : Any.Type) throws -> AnyClass {
+        return try class4Name(Types.unwrapOptionalType(type))
     }
     
     // prevent

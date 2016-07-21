@@ -556,7 +556,7 @@ public class ApplicationContext : BeanFactory {
     }
     
     func getCandidate(type : Any.Type) throws -> ApplicationContext.BeanDeclaration {
-        let clazz : AnyClass = Classes.unwrapOptional(type)
+        let clazz : AnyClass = try Classes.unwrapOptional(type)
         
         let candidates = findByType(BeanDescriptor.forClass(clazz))
         

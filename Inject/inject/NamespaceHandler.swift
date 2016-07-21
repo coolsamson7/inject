@@ -36,14 +36,14 @@ public class NamespaceHandler {
         return result
     }
     
-    public func beanDeclaration(clazz : String, id : String? = nil) -> ApplicationContext.BeanDeclaration {
+    public func beanDeclaration(clazz : String, id : String? = nil) throws -> ApplicationContext.BeanDeclaration {
         let result = ApplicationContext.BeanDeclaration()
         
         if id != nil {
             result.id = id
         }
         
-        result.bean = BeanDescriptor.forClass(clazz)
+        result.bean = try BeanDescriptor.forClass(clazz)
         
         return result
     }

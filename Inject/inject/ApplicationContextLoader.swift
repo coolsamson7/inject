@@ -85,8 +85,8 @@ public class ApplicationContextLoader: XMLParser {
             bean.parent = parent != nil ? ApplicationContext.BeanDeclaration(id: parent!) : nil
             bean.id = id
             bean.dependsOn = dependsOn != nil ? ApplicationContext.BeanDeclaration(id: dependsOn!) : nil
-            bean.bean = clazz != nil ? BeanDescriptor.forClass(clazz!) : nil
-            bean.target =  target != nil ? BeanDescriptor.forClass(target!) : nil
+            bean.bean = clazz != nil ? try BeanDescriptor.forClass(clazz!) : nil
+            bean.target =  target != nil ? try BeanDescriptor.forClass(target!) : nil
             
             
             for property in properties {

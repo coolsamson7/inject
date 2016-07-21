@@ -38,8 +38,8 @@ public class BeanDescriptor : CustomStringConvertible {
         }
     }
     
-    public class func forClass(clazz: String) -> BeanDescriptor {
-        return forClass(Classes.class4Name(clazz))
+    public class func forClass(clazz: String) throws -> BeanDescriptor {
+        return forClass(try Classes.class4Name(clazz))
     }
     
     // inner classes
