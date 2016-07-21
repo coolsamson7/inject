@@ -11,96 +11,90 @@ import Foundation
 
 @testable import Inject
 
+class BarFactory : NSObject, FactoryBean {
+    func create() throws -> AnyObject {
+        let result = Bar()
+
+        result.name = "factory"
+        result.age = 4711
+
+        return result
+    }
+}
+
+class Bar : NSObject {
+    var name : String = "andi"
+    var age : Int = 51
+    var weight : Int = 87
+}
+
+class Data : NSObject , Bean, ClassInitializer {
+    // instance data
+
+    var string : String = ""
+    var int : Int = 0
+    var float : Float = 0.0
+    var double : Double = 0.0
+    var character : Character = Character(" ")
+
+    var foo  : FooBase?
+
+    // ClassInitializer
+
+    func initializeClass() {
+        try! BeanDescriptor.forClass(Data.self).getProperty("foo").inject(InjectBean())
+    }
+
+    // Bean
+
+    func postConstruct() -> Void {
+        //print("post construct \(self)");
+    }
+
+    // CustomStringConvertible
+
+    override var description : String {
+        return "data[string: \(string) foo: \(foo)]"
+    }
+}
+
+class FooBase : NSObject, Bean {
+    // Bean
+
+    func postConstruct() -> Void {
+        //print("post construct \(self)");
+    }
+
+    // CustomStringConvertible
+
+    override var description : String {
+        return "foobase[]"
+    }
+}
+
+class Foo : FooBase {
+    var name : String?
+    var age : Int = 0
+
+    // Bean
+
+    override func postConstruct() -> Void {
+        //print("post construct \(self)");.auto
+    }
+
+    // CustomStringConvertible
+
+    override var description : String {
+        return "foo[name: \(name) age: \(age)]"
+    }
+}
 
 class BeanFactoryTests: XCTestCase {
-    // MARK: local classes
-
-    @objc(BarFactory)
-    class BarFactory : NSObject, FactoryBean {
-        func create() throws -> AnyObject {
-            let result = Bar()
-
-            result.name = "factory"
-            result.age = 4711
-
-            return result
-        }
-    }
-    
-    @objc(Bar)
-    class Bar : NSObject {
-        var name : String = "andi"
-        var age : Int = 51
-        var weight : Int = 87
-    }
-    
-    @objc(Data)
-    class Data : NSObject , Bean, ClassInitializer {
-        // instance data
-        
-        var string : String = ""
-        var int : Int = 0
-        var float : Float = 0.0
-        var double : Double = 0.0
-        var character : Character = Character(" ")
-        
-        var foo  : FooBase?
-        
-        // ClassInitializer
-        
-        func initializeClass() {
-            try! BeanDescriptor.forClass(Data.self).getProperty("foo").inject(InjectBean())
-        }
-        
-        // Bean
-        
-        func postConstruct() -> Void {
-            //print("post construct \(self)");
-        }
-        
-        // CustomStringConvertible
-        
-        override var description : String {
-            return "data[string: \(string) foo: \(foo)]"
-        }
-    }
-    
-    @objc(FooBase)
-    class FooBase : NSObject, Bean {
-        // Bean
-        
-        func postConstruct() -> Void {
-            //print("post construct \(self)");
-        }
-        
-        // CustomStringConvertible
-        
-        override var description : String {
-            return "foobase[]"
-        }
-    }
-    
-    @objc(Foo)
-    class Foo : FooBase {
-        var name : String?
-        var age : Int = 0
-        
-        // Bean
-        
-        override func postConstruct() -> Void {
-            //print("post construct \(self)");.auto
-        }
-        
-        // CustomStringConvertible
-        
-        override var description : String {
-            return "foo[name: \(name) age: \(age)]"
-        }
-    }
-    
     // tests
     
     func testBeans() {
+        Classes.setDefaultBundle(self.dynamicType)
+
         // load parent xml
 
         let parentData = NSData(contentsOfURL: NSBundle(forClass: BeanFactoryTests.self).URLForResource("parent", withExtension: "xml")!)!

@@ -18,6 +18,7 @@
 		28D35B32992669F931AA5F25 /* Mutex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D3575E22AAD939D050ACAE /* Mutex.swift */; };
 		28D35C7540DA6069D4696114 /* Optional.extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D3559793F614E3502B5A0F /* Optional.extension.swift */; };
 		28D35CCF8BA4308CCFCD5FAE /* Future.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D35EA05D3041A74BA7B450 /* Future.swift */; };
+		B03F0FCC1D3F90210037DB1D /* ConfigurationTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D353F6EBA43DDB0EC12AFB /* ConfigurationTest.swift */; };
 		B092332E1D3CEF8A008267A2 /* BeanDescriptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B092332D1D3CEF8A008267A2 /* BeanDescriptor.swift */; };
 		B09233311D3CEFC1008267A2 /* IdentityMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = B09233301D3CEFC1008267A2 /* IdentityMap.swift */; };
 		B09233361D3CF0DF008267A2 /* Tracer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B09233351D3CF0DF008267A2 /* Tracer.swift */; };
@@ -67,12 +68,13 @@
 		B09233951D3D06D9008267A2 /* application.xml in Resources */ = {isa = PBXBuildFile; fileRef = B09233931D3D06D9008267A2 /* application.xml */; };
 		B09233961D3D06D9008267A2 /* parent.xml in Resources */ = {isa = PBXBuildFile; fileRef = B09233941D3D06D9008267A2 /* parent.xml */; };
 		B09233991D3D07D7008267A2 /* ConfigurationNamespaceHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = B09233981D3D07D7008267A2 /* ConfigurationNamespaceHandler.swift */; };
+		B0AE78051D40D76A00D7A9B2 /* ClassesTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D35342BEEED3D1938A2349 /* ClassesTest.swift */; };
 		B0CB43101D3CEE170038DF3B /* Classes.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0CB430E1D3CEE170038DF3B /* Classes.swift */; };
-		B0CB43111D3CEE170038DF3B /* Types.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0CB430F1D3CEE170038DF3B /* Types.swift */; };
 		B0CB43161D3CEEC20038DF3B /* String.extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0CB43151D3CEEC20038DF3B /* String.extension.swift */; };
 		B0E8D7361D3CE01D000CCE0C /* Inject.h in Headers */ = {isa = PBXBuildFile; fileRef = B0E8D7351D3CE01D000CCE0C /* Inject.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		B0E8D73D1D3CE01D000CCE0C /* Inject.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B0E8D7321D3CE01D000CCE0C /* Inject.framework */; };
 		B0E8D7421D3CE01D000CCE0C /* BeanDescriptorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0E8D7411D3CE01D000CCE0C /* BeanDescriptorTests.swift */; };
+		B0FD56531D3F91D200452F5B /* configuration.xml in Resources */ = {isa = PBXBuildFile; fileRef = 28D358F23D2B0EF936A7EAF0 /* configuration.xml */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -88,11 +90,14 @@
 /* Begin PBXFileReference section */
 		28D3505FF58457132C2B82C5 /* TODO.TXT */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = TODO.TXT; sourceTree = "<group>"; };
 		28D352ECA30CE5AB92157F31 /* Condition.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Condition.swift; sourceTree = "<group>"; };
+		28D35342BEEED3D1938A2349 /* ClassesTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClassesTest.swift; sourceTree = "<group>"; };
+		28D353F6EBA43DDB0EC12AFB /* ConfigurationTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConfigurationTest.swift; sourceTree = "<group>"; };
 		28D3559793F614E3502B5A0F /* Optional.extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Optional.extension.swift; sourceTree = "<group>"; };
 		28D356CE5B72AE61DACA2634 /* FactoryBean.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FactoryBean.swift; sourceTree = "<group>"; };
 		28D3575B01494DF267926589 /* Synchronized.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Synchronized.swift; sourceTree = "<group>"; };
 		28D3575E22AAD939D050ACAE /* Mutex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Mutex.swift; sourceTree = "<group>"; };
 		28D358B5936379ACEE78AE9B /* Lock.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Lock.swift; sourceTree = "<group>"; };
+		28D358F23D2B0EF936A7EAF0 /* configuration.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = configuration.xml; sourceTree = "<group>"; };
 		28D35CA5F6CA55C378348E63 /* Timer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Timer.swift; sourceTree = "<group>"; };
 		28D35D492457692B206D2C34 /* Semaphore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Semaphore.swift; sourceTree = "<group>"; };
 		28D35EA05D3041A74BA7B450 /* Future.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Future.swift; sourceTree = "<group>"; };
@@ -147,7 +152,6 @@
 		B09233941D3D06D9008267A2 /* parent.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = parent.xml; sourceTree = "<group>"; };
 		B09233981D3D07D7008267A2 /* ConfigurationNamespaceHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConfigurationNamespaceHandler.swift; sourceTree = "<group>"; };
 		B0CB430E1D3CEE170038DF3B /* Classes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Classes.swift; sourceTree = "<group>"; };
-		B0CB430F1D3CEE170038DF3B /* Types.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Types.swift; sourceTree = "<group>"; };
 		B0CB43151D3CEEC20038DF3B /* String.extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = String.extension.swift; sourceTree = "<group>"; };
 		B0E8D7321D3CE01D000CCE0C /* Inject.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Inject.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B0E8D7351D3CE01D000CCE0C /* Inject.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Inject.h; sourceTree = "<group>"; };
@@ -305,7 +309,6 @@
 				B09233421D3CFC41008267A2 /* Box.swift */,
 				B092333F1D3CF15E008267A2 /* StringBuilder.swift */,
 				B0CB430E1D3CEE170038DF3B /* Classes.swift */,
-				B0CB430F1D3CEE170038DF3B /* Types.swift */,
 				28D35CA5F6CA55C378348E63 /* Timer.swift */,
 			);
 			path = util;
@@ -367,6 +370,9 @@
 				B0E8D7411D3CE01D000CCE0C /* BeanDescriptorTests.swift */,
 				B0E8D7431D3CE01D000CCE0C /* Info.plist */,
 				B09233911D3D04AF008267A2 /* BeanFactoryTest.swift */,
+				28D353F6EBA43DDB0EC12AFB /* ConfigurationTest.swift */,
+				28D358F23D2B0EF936A7EAF0 /* configuration.xml */,
+				28D35342BEEED3D1938A2349 /* ClassesTest.swift */,
 			);
 			path = InjectTests;
 			sourceTree = "<group>";
@@ -472,6 +478,7 @@
 			files = (
 				B09233951D3D06D9008267A2 /* application.xml in Resources */,
 				B09233961D3D06D9008267A2 /* parent.xml in Resources */,
+				B0FD56531D3F91D200452F5B /* configuration.xml in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -495,7 +502,6 @@
 				B09233871D3D01D5008267A2 /* StandardConversionFactory.swift in Sources */,
 				B092335A1D3CFCCA008267A2 /* NamespaceHandler.swift in Sources */,
 				B09233591D3CFCCA008267A2 /* ContextAware.swift in Sources */,
-				B0CB43111D3CEE170038DF3B /* Types.swift in Sources */,
 				B092337E1D3D00D9008267A2 /* XMLParserErrors.swift in Sources */,
 				B092333D1D3CF132008267A2 /* Inject.swift in Sources */,
 				B09233841D3D01D5008267A2 /* Conversion.swift in Sources */,
@@ -548,7 +554,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B03F0FCC1D3F90210037DB1D /* ConfigurationTest.swift in Sources */,
 				B09233921D3D04AF008267A2 /* BeanFactoryTest.swift in Sources */,
+				B0AE78051D40D76A00D7A9B2 /* ClassesTest.swift in Sources */,
 				B0E8D7421D3CE01D000CCE0C /* BeanDescriptorTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -160,7 +160,7 @@ public class ApplicationContext : BeanFactory {
             
             for beanProperty in bean!.getAllProperties() {
                 if beanProperty.autowired {
-                    let declaration = try loader.context.getCandidate(beanProperty.getPropertyType())
+                    let declaration = try loader.context.getCandidate(beanProperty.getPropertyType() as! AnyClass)
                     
                     loader.dependency(declaration, before: self)
                 }
@@ -307,7 +307,7 @@ public class ApplicationContext : BeanFactory {
         
         func resolve(context : ApplicationContext) throws -> Any? {
             if ref != nil {
-                return ref // todo? getInstance
+                return try ref!.getInstance(context)
             }
             else if declaration != nil {
                 return try declaration!.getInstance(context)
@@ -403,7 +403,7 @@ public class ApplicationContext : BeanFactory {
 
         func get(bean : ApplicationContext.BeanDeclaration, factory : BeanFactory) throws -> AnyObject {
             if let factoryBean = try declaration.getInstance(context) as? FactoryBean {
-                return try factoryBean.create() // TODO CACHING besser factory bean hat properties scope target, etc.
+                return try factoryBean.create()
             }
 
             fatalError("cannot happen")
@@ -555,10 +555,10 @@ public class ApplicationContext : BeanFactory {
         return declaration
     }
     
-    func getCandidate(type : Any.Type) throws -> ApplicationContext.BeanDeclaration {
-        let clazz : AnyClass = try Classes.unwrapOptional(type)
+    func getCandidate(clazz : AnyClass) throws -> ApplicationContext.BeanDeclaration {
+        //let clazz : AnyClass = try Classes.unwrapOptional(type)
         
-        let candidates = findByType(BeanDescriptor.forClass(clazz))
+        let candidates = findByType(try BeanDescriptor.forClass(clazz))
         
         if candidates.count == 0 {
             throw ApplicationContextErrors.NoCandidateForType(type: clazz)

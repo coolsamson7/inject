@@ -70,10 +70,6 @@ public class Classes {
     public class func className(clazz : AnyClass) -> String {
         return "\(clazz)" // TODO bundle?
     }
-
-    public class func unwrapOptional(type : Any.Type) throws -> AnyClass {
-        return try class4Name(Types.unwrapOptionalType(type))
-    }
     
     // prevent
     
