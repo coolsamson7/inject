@@ -61,7 +61,7 @@ What is still missing ( mainly due to the crappy Swift support for reflection )
 * let me think...hmmm
 
 And there are also limitations ( darn )
-* all objects need to derive from `NSObject` and include a `@objc` annotation
+* all objects need to derive from `NSObject`
 * all objects need to have a default `init` function
 * all properties that are injected cannot be optional! ( Woooo.. )
 
