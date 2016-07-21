@@ -10,7 +10,8 @@ public class NamespaceHandler {
     // instance data
     
     var namespace : String
-    
+    var context : ApplicationContext? = nil
+
     // init
     
     init(namespace : String) {
@@ -18,16 +19,19 @@ public class NamespaceHandler {
     }
     
     // fluent stuff
+
+    func scope(scope : String) throws -> BeanScope {
+        return try context!.getScope(scope)
+    }
     
-    public func beanDeclaration(instance : AnyObject, id : String? = nil) -> ApplicationContext.BeanDeclaration {
+    public func beanDeclaration(instance : AnyObject, id : String? = nil, scope :  String = "singleton") throws -> ApplicationContext.BeanDeclaration {
         let result = ApplicationContext.BeanDeclaration(instance: instance)
         
         if id != nil {
             result.id = id
         }
         
-        result.scope = nil // todo
-        result.singleton = instance
+        result.scope = try self.scope(scope)
         
         return result
     }
@@ -64,8 +68,8 @@ public class NamespaceHandler {
     
     // abstract
     
-    func register(parser : ApplicationContextLoader) throws {
-        // noop
+    func register(loader : ApplicationContextLoader) throws {
+        self.context = loader.context
     }
     
     func process(namespaceAware : NamespaceAware, inout beans : [ApplicationContext.BeanDeclaration]) throws -> Void {

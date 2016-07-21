@@ -104,8 +104,10 @@ public class ConfigurationNamespaceHandler : NamespaceHandler {
     
     // override
     
-    override func register(parser : ApplicationContextLoader) throws {
-        try parser.register(
+    override func register(loader : ApplicationContextLoader) throws {
+        try super.register(loader)
+
+        try loader.register(
             mapping(Configuration.self, element: "configuration:configuration")
                 .property("configurationNamespace", xml: "namespace"),
             
@@ -166,7 +168,7 @@ public class ConfigurationNamespaceHandler : NamespaceHandler {
             
             // add bean
             
-            beans.append(beanDeclaration(ConfigurationNamespaceHandlerSource(name: url, items: items)))
+            beans.append(try beanDeclaration(ConfigurationNamespaceHandlerSource(name: url, items: items)))
         }
     }
 }

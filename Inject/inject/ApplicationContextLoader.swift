@@ -31,12 +31,12 @@ public class ApplicationContextLoader: XMLParser {
     class Beans : Declaration, Ancestor, AttributeContainer {
         // instance data
         
-        var declarations : [Declaration] = []
+        var declarations : [OriginAware] = []
         
         // Ancestor
         
         func addChild(child : AnyObject) -> Void {
-            if let declaration = child as? Declaration {
+            if let declaration = child as? OriginAware {
                 declarations.append(declaration)
             }
         }
@@ -259,7 +259,13 @@ public class ApplicationContextLoader: XMLParser {
         
         func resolveConfiguration(key: String) throws -> String? {
             let fqn = FQN.fromString(key)
-            return try context.configurationManager.getValue(String.self, namespace: fqn.namespace, key: fqn.key) as? String
+
+            if context.configurationManager.hasValue(fqn.namespace, key: fqn.key) {
+                return try context.configurationManager.getValue(String.self, namespace: fqn.namespace, key: fqn.key) as? String
+            }
+            else {
+                return nil
+            }
         }
         
         resolver =  resolveConfiguration

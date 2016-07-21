@@ -6,6 +6,6 @@
 //  Copyright © 2016 Andreas Ernst. All rights reserved.
 //
 
-protocol ConfigurationListener {
+public  protocol ConfigurationListener {
     func onItemChanged(namespace : String, key : String, value : Any) -> Void
 }

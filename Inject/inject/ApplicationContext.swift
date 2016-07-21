@@ -8,6 +8,36 @@
 
 public class ApplicationContext : BeanFactory {
     // local classes
+
+    class DefaultConstructorFactory : BeanFactory {
+        // static data
+
+        static var instance = DefaultConstructorFactory()
+
+        // BeanFactory
+
+        func create(declaration: BeanDeclaration) throws -> AnyObject {
+            return declaration.bean!.create()
+        }
+    }
+
+    class ValueFactory : BeanFactory {
+        // instance data
+
+        var object : AnyObject
+
+        // init
+
+        init(object : AnyObject) {
+            self.object = object
+        }
+
+        // BeanFactory
+
+        func create(bean : BeanDeclaration) throws -> AnyObject {
+            return object
+        }
+    }
     
     public class Declaration : NSObject, OriginAware {
         // instance data
@@ -33,12 +63,13 @@ public class ApplicationContext : BeanFactory {
         var lazy = false
         var abstract = false
         var parent: BeanDeclaration? = nil
-        var singleton : AnyObject?
+        var singleton : AnyObject? = nil
         var id : String?
         var dependsOn : BeanDeclaration?
         var bean: BeanDescriptor?
         var target: BeanDescriptor?
         var properties = [PropertyDeclaration]()
+        var factory : BeanFactory = DefaultConstructorFactory.instance
         
         // init
         
@@ -47,7 +78,7 @@ public class ApplicationContext : BeanFactory {
         }
         
         init(instance : AnyObject) {
-            self.singleton = instance
+            self.factory = ValueFactory(object: instance)
             self.bean = BeanDescriptor.forClass(instance.dynamicType)
         }
         
@@ -151,7 +182,7 @@ public class ApplicationContext : BeanFactory {
                 Tracer.trace("loader", level: .HIGH, message: "create \(bean!.clazz) instance")
             }
             
-            let result =  bean!.create()
+            let result = try factory.create(self) // constructor, value, etc
             
             // set properties
             
@@ -276,7 +307,7 @@ public class ApplicationContext : BeanFactory {
         
         func resolve(context : ApplicationContext) throws -> Any? {
             if ref != nil {
-                return ref
+                return ref // todo? getInstance
             }
             else if declaration != nil {
                 return try declaration!.getInstance(context)
@@ -372,7 +403,7 @@ public class ApplicationContext : BeanFactory {
 
         func get(bean : ApplicationContext.BeanDeclaration, factory : BeanFactory) throws -> AnyObject {
             if let factoryBean = try declaration.getInstance(context) as? FactoryBean {
-                return try factoryBean.create()
+                return try factoryBean.create() // TODO CACHING besser factory bean hat properties scope target, etc.
             }
 
             fatalError("cannot happen")
@@ -467,8 +498,8 @@ public class ApplicationContext : BeanFactory {
         // remember by type for injections
         
         var clazz : AnyClass?;
-        if declaration.singleton != nil {
-            clazz = declaration.singleton!.dynamicType
+        if let valueFactory = declaration.factory as? ValueFactory {
+            clazz = valueFactory.object.dynamicType
         }
         else {
             clazz = declaration.bean?.clazz // may be nil in case of a inherited bean!
@@ -644,6 +675,10 @@ public class ApplicationContext : BeanFactory {
     
     public func inject(object : AnyObject) throws -> Void {
         try injector.inject(object, context: self)
+    }
+    
+    public func getConfigurationManager() -> ConfigurationManager {
+        return configurationManager
     }
     
     // BeanFactory

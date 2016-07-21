@@ -7,7 +7,7 @@
 //
 
 @objc(ConfigurationManager)
-class ConfigurationManager : NSObject, ConfigurationAdministration, ConfigurationProvider {
+public class ConfigurationManager : NSObject, ConfigurationAdministration, ConfigurationProvider {
     // local class
     
     class ScopeAndName : Hashable {
@@ -180,7 +180,7 @@ class ConfigurationManager : NSObject, ConfigurationAdministration, Configuratio
     
     // ConfigurationProvider
     
-    func addListener(namespace : String, key : String,  listener : ConfigurationListener , expectedType : AnyClass, scope : Scope = Scope.WILDCARD) -> Void {
+    public func addListener(namespace : String, key : String,  listener : ConfigurationListener , expectedType : AnyClass, scope : Scope = Scope.WILDCARD) -> Void {
         let fqn = FQN(namespace: namespace, key: key)
         
         if listeners[fqn] == nil {
@@ -194,8 +194,12 @@ class ConfigurationManager : NSObject, ConfigurationAdministration, Configuratio
     func getConfigurationItem(namespace : String, key : String) -> ConfigurationItem? {
         return items[ScopeAndName(scope : scope, fqn: FQN(namespace: namespace, key: key))]
     }
-    
-    func getValue(type : Any.Type, namespace : String, key : String, defaultValue: AnyObject? = nil, scope : Scope? = nil) throws -> Any {
+
+    func hasValue(namespace : String, key : String, scope : Scope? = nil) -> Bool {
+        return getEffectiveConfigurationItem(scope != nil ? scope! : self.scope, fqn: FQN(namespace: namespace, key: key)) != nil
+    }
+
+    public func getValue(type : Any.Type, namespace : String, key : String, defaultValue: AnyObject? = nil, scope : Scope? = nil) throws -> Any {
         let resultItem = getEffectiveConfigurationItem(scope != nil ? scope! : self.scope, fqn: FQN(namespace: namespace, key: key));
         
         if resultItem == nil {
@@ -207,7 +211,7 @@ class ConfigurationManager : NSObject, ConfigurationAdministration, Configuratio
                 return try maybeConvert(type, value: defaultValue!)
             }
             else {
-                return defaultValue
+                throw ConfigurationErrors.Exception(message: "neither configuration value\(namespace):\(key) nor default found");//return defaultValue
             }
         }
         else {
