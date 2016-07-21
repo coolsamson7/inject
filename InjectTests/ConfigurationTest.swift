@@ -17,10 +17,11 @@ class ConfigurationTest: XCTestCase {
         Tracer.setTraceLevel("loader", level: .FULL)
         let parentData = NSData(contentsOfURL: NSBundle(forClass: ConfigurationTest.self).URLForResource("configuration", withExtension: "xml")!)!
 
+        ConfigurationNamespaceHandler(namespace: "configuration")
+
         let context = try! ApplicationContext(
                 parent: nil,
-                data: parentData,
-                namespaceHandlers: [ConfigurationNamespaceHandler(namespace: "configuration")]
+                data: parentData
                 )
 
         let configurationManager = context.getConfigurationManager()

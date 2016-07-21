@@ -7,6 +7,23 @@
 //
 
 public class NamespaceHandler {
+    // static data
+
+    static var handlers = [String:NamespaceHandler]()
+
+    // class func name
+
+    class func byNamespace(namespace : String) -> NamespaceHandler {
+        let handler = NamespaceHandler.handlers[namespace]
+
+        if handler != nil {
+            return handler!
+        }
+        else {
+            fatalError("no namespace hander for \(namespace)")
+        }
+    }
+
     // instance data
     
     var namespace : String
@@ -16,6 +33,8 @@ public class NamespaceHandler {
     
     init(namespace : String) {
         self.namespace = namespace
+
+        NamespaceHandler.handlers[namespace] = self
     }
     
     // fluent stuff

@@ -95,6 +95,8 @@ class BeanFactoryTests: XCTestCase {
     func testBeans() {
         Classes.setDefaultBundle(self.dynamicType)
 
+        ConfigurationNamespaceHandler(namespace: "configuration")
+
         // load parent xml
 
         let parentData = NSData(contentsOfURL: NSBundle(forClass: BeanFactoryTests.self).URLForResource("parent", withExtension: "xml")!)!
@@ -102,8 +104,7 @@ class BeanFactoryTests: XCTestCase {
 
         var context = try! ApplicationContext(
                 parent: nil,
-                data: parentData,
-                namespaceHandlers: [ConfigurationNamespaceHandler(namespace: "configuration")]
+                data: parentData
                 )
         
         // load child
@@ -138,8 +139,7 @@ class BeanFactoryTests: XCTestCase {
         try! Timer.measure({
             var context = try! ApplicationContext(
                     parent: nil,
-                    data: parentData,
-                    namespaceHandlers: [ConfigurationNamespaceHandler(namespace: "configuration")]
+                    data: parentData
                     )
 
             // load child

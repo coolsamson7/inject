@@ -184,7 +184,6 @@ public class ApplicationContextLoader: XMLParser {
     // instance data
     
     var context: ApplicationContext
-    var handlers = [String:NamespaceHandler]()
     var beans : [ApplicationContext.BeanDeclaration] = []
     var dependencyList : [Dependency] = []
     var dependencies = IdentityMap<ApplicationContext.BeanDeclaration, Dependency>()
@@ -192,16 +191,10 @@ public class ApplicationContextLoader: XMLParser {
     
     // init
     
-    init(context: ApplicationContext, data : NSData, namespaceHandlers: [NamespaceHandler]?) throws {
+    init(context: ApplicationContext, data : NSData) throws {
         self.context = context
         
         super.init()
-        
-        if namespaceHandlers != nil {
-            for namespaceHandler in namespaceHandlers! {
-                try addNamespaceHandler(namespaceHandler)
-            }
-        }
         
         try setupParser()
         
@@ -300,6 +293,12 @@ public class ApplicationContextLoader: XMLParser {
                 .property("value")
                 .property("ref")
         )
+
+        // and all namespace handlers
+
+        for (namespace, handler) in NamespaceHandler.handlers {
+            try handler.register(self)
+        }
     }
     
     func convert(beans : Beans) throws -> [ApplicationContext.BeanDeclaration] {
@@ -312,19 +311,15 @@ public class ApplicationContextLoader: XMLParser {
             else if let namespaceAware = declaration as? NamespaceAware {
                 let namespace = namespaceAware.namespace
                 
-                let handler = handlers[namespace!]
+                let handler = NamespaceHandler.byNamespace(namespace!)
+
+                //try handler.register(self)
                 
-                try handler!.process(namespaceAware, beans: &beanDeclarations)
+                try handler.process(namespaceAware, beans: &beanDeclarations)
             }
         }
         
         return beanDeclarations
-    }
-    
-    func addNamespaceHandler(handler : NamespaceHandler) throws  {
-        handlers[handler.namespace] = handler
-        
-        try handler.register(self)
     }
     
     // internal

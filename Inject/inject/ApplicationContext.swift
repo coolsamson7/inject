@@ -426,7 +426,7 @@ public class ApplicationContext : BeanFactory {
     
     // init
     
-    init(parent : ApplicationContext?, data : NSData, namespaceHandlers: [NamespaceHandler]? = nil ) throws {
+    init(parent : ApplicationContext?, data : NSData) throws {
         if parent != nil {
             self.parent = parent
             
@@ -451,7 +451,7 @@ public class ApplicationContext : BeanFactory {
             registerScope(SingletonScope())
         }
         
-        try ApplicationContextLoader(context: self, data: data, namespaceHandlers: namespaceHandlers)
+        try ApplicationContextLoader(context: self, data: data)
     }
     
     // internal
