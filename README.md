@@ -50,6 +50,7 @@ Here is a brief summary of the supported features
 * support for bean templates ( e.g. `parent="<id>"` )
 * lifecycle methods ( e.g. `postConstruct` )
 * `BeanPostProcessor`'s
+* `FactoryBean`'s
 * support for hierarchical containers, inheriting all aspects
 * support for placeholder resolution in xml files ( e.g. `${property=<default>}`) referencing possible configuration values that are retrieved by different providers ( e.g. process info, plists, etc. )
 * support for custom namespace handlers that are much more easy to handle than in the spring world
@@ -57,13 +58,13 @@ Here is a brief summary of the supported features
 What is still missing ( mainly due to the crappy Swift support for reflection )
 * method injection
 * constructor injection
-* `FactoryBean`'s
 * let me think...hmmm
 
 And there are also limitations ( darn )
-* all objects need to derive from `NSObject` and include a `@objc` annotation
+* all objects need to derive from `NSObject`
 * all objects need to have a default `init` function
 * all properties that are injected cannot be optional! ( Woooo.. )
 
 Roadmap
 * support the different package managers
+* wait for replies :-)
