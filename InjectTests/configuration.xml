@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+        xmlns:configuration="http://www.springframework.org/schema/configuration"
+        xmlns="http://www.springframework.org/schema/beans"
+        xsi:schemaLocation="
+    http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+    http://www.springframework.org/schema/configuration http://www.springframework.org/schema/util/spring-util.xsd">
+
+
+    <!-- some configuration sources -->
+
+    <!--bean id="x" class="PlistConfigurationSource">
+        <property name="name" value="Info"/>
+    </bean-->
+
+    <!--bean class="ProcessInfoConfigurationSource"/-->
+
+    <!--test configuration values -->
+
+    <configuration:configuration namespace="com.foo">
+        <configuration:define key="string" type="String" value="hello"/>
+        <configuration:define key="int" type="Int" value="1"/>
+        <configuration:define key="bool" type="Bool" value="true"/>
+    </configuration:configuration>
+</beans>
