@@ -108,9 +108,7 @@ class BeanFactoryTests: XCTestCase {
         
         // load child
 
-        context = try! ApplicationContext(
-            parent: context
-        )
+        context = try! ApplicationContext(parent: context)
 
         try! context.loadXML(childData)
         
@@ -158,21 +156,21 @@ class BeanFactoryTests: XCTestCase {
         let parent = try! ApplicationContext(parent: nil)
 
         try! parent
-           .define(parent.bean("ProcessInfoConfigurationSource")
+           .define(parent.bean(ProcessInfoConfigurationSource.self)
               .id("x1"))
 
-           .define(parent.bean("Data")
+           .define(parent.bean(Data.self)
               .id("b0")
               .property("string", value: "b0")
               .property("int", value: "1")
               .property("float", value: "-1.1")
               .property("double", value: "-2.2"))
 
-           .define(parent.bean("Foo")
+           .define(parent.bean(Foo.self)
                .property("name", value: "${andi=Andreas?}")
                .property("age", value: "${SIMULATOR_MAINSCREEN_HEIGHT=51}")) // TODO
 
-           .define(parent.bean("Bar")
+           .define(parent.bean(Bar.self)
                .id("bar")
                .abstract()
                .property("name", value: "${andi=Andreas?}"))
@@ -182,7 +180,7 @@ class BeanFactoryTests: XCTestCase {
         let child = try! ApplicationContext(parent: parent)
 
         try! child
-            .define(child.bean("Data")
+            .define(child.bean(Data.self)
                 .id("b1")
                 .dependsOn("b0")
                 .property("string", value: "b1")
@@ -190,7 +188,7 @@ class BeanFactoryTests: XCTestCase {
                 .property("float", value: "1.1")
                 .property("double", value: "2.2"))
 
-            .define(child.bean("Data")
+            .define(child.bean(Data.self)
                 .id("lazy")
                 .lazy()
                 .property("string", value: "lazy")
@@ -198,17 +196,16 @@ class BeanFactoryTests: XCTestCase {
                 .property("float", value: "1.1")
                 .property("double", value: "2.2"))
 
-            .define(child.bean("Data")
+            .define(child.bean(Data.self)
                 .id("prototype")
-                //.scope("prototype") // TODO FOO
+                .scope(child.scope("prototype"))
                 .property("string", value: "b1")
                 .property("int", value: "1")
                 .property("float", value: "1.1")
                 .property("double", value: "2.2"))
 
-            //.define(fluentChild.bean("BarFactory")
-                //TODO.target("Bar")
-                //)
+             .define(child.bean(BarFactory.self)
+                .target("Bar"))
 
         // check
 
@@ -216,18 +213,21 @@ class BeanFactoryTests: XCTestCase {
 
         XCTAssert(bean.string == "b1")
 
-        //let lazy = try! child.getBean(Data.self, byId: "lazy")
+        let lazy = try! child.getBean(Data.self, byId: "lazy")
 
-        //XCTAssert(lazy.string == "lazy")
+        XCTAssert(lazy.string == "lazy")
 
-        //let proto1 = try! child.getBean(Data.self, byId: "prototype")
-        //let proto2 = try! child.getBean(Data.self, byId: "prototype")
+        let proto1 = try! child.getBean(Data.self, byId: "prototype")
+        let proto2 = try! child.getBean(Data.self, byId: "prototype")
 
-        //XCTAssert(proto1 !== proto2)
+        XCTAssert(proto1 !== proto2)
 
-        //let bar = try! child.getBean(Bar.self)
+        let bar = try! child.getBean(Bar.self)
 
-        //XCTAssert(bar.age == 4711)
+        XCTAssert(bar.age == 4711)
 
+        let foo = try! child.getBean(Foo.self)
+
+        XCTAssert(bar.age == 4711)
     }
 }

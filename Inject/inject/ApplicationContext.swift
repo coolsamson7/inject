@@ -6,6 +6,9 @@
 //  Copyright © 2016 Andreas Ernst. All rights reserved.
 //
 
+public typealias Resolver = (key : String) throws -> String?
+
+
 public class ApplicationContext : BeanFactory {
     // local classes
 
@@ -115,6 +118,12 @@ public class ApplicationContext : BeanFactory {
             return self
         }
 
+        public func scope(scope : BeanScope) -> BeanDeclaration {
+            self.scope = scope
+
+            return self
+        }
+
         public func dependsOn(depends : String) -> BeanDeclaration {
             self.dependsOn = BeanDeclaration(id: depends)
 
@@ -135,6 +144,12 @@ public class ApplicationContext : BeanFactory {
 
             properties.append(property)
             
+            return self
+        }
+
+        public func target(target : String) throws -> BeanDeclaration {
+            self.target = try BeanDescriptor.forClass(target)
+
             return self
         }
 
@@ -732,10 +747,6 @@ public class ApplicationContext : BeanFactory {
     var scopes = [String:BeanScope]()
     
     // init
-
-    //convenience init() throws {
-    //    try self.init(parent: nil)
-    //}
     
     init(parent : ApplicationContext? = nil) throws {
         if parent != nil {
@@ -940,6 +951,9 @@ public class ApplicationContext : BeanFactory {
 
         if loader != nil {
             try loader!.addDeclaration(declaration)
+        }
+        else {
+            fatalError("context is frozen")
         }
 
         // remember id
