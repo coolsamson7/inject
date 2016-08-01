@@ -24,9 +24,9 @@ class BeanDescriptorTests: XCTestCase {
         var double : Double = 0.0
     }
 
-    func testProperties() {
-        let bean = BeanDescriptor.forClass(Foo.self)
-        
+    func testProperties() throws {
+        let bean = try BeanDescriptor.forClass(Foo.self)
+
         let foo = Foo()
         
         try! bean["string"].set(foo, value: "hello")

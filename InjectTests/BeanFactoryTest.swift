@@ -116,21 +116,21 @@ class BeanFactoryTests: XCTestCase {
         
         // check
         
-        let bean = try! context.getBean(byId: "b1") as! Data
+        let bean : Data = try! context.getBean(Data.self, byId: "b1")
         
         XCTAssert(bean.string == "b1")
         
-        let lazy = try! context.getBean(byId: "lazy") as! Data
+        let lazy = try! context.getBean(Data.self, byId: "lazy")
         
         XCTAssert(lazy.string == "lazy")
         
-        let proto1 = try! context.getBean(byId: "prototype")
-        let proto2 = try! context.getBean(byId: "prototype")
+        let proto1 = try! context.getBean(Data.self, byId: "prototype")
+        let proto2 = try! context.getBean(Data.self, byId: "prototype")
         
         XCTAssert(proto1 !== proto2)
 
         
-        let bar = try! context.getBean(byType: Bar.self) as! Bar
+        let bar = try! context.getBean(Bar.self)
         
         XCTAssert(bar.age == 4711)
 

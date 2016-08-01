@@ -17,10 +17,12 @@ public class BeanInjection : Injection {
     override func computeValue(inject : Inject, property: BeanDescriptor.PropertyDescriptor, context : ApplicationContext) throws -> Any {
         if let beanInject = inject as? InjectBean {
             if beanInject.id != nil {
-                return try context.getBean(byId: beanInject.id!);
+                return try context.getBean(AnyObject.self, byId: beanInject.id!);
             }
             else {
-                return try context.getBean(byType: property.getPropertyType() as! AnyClass)
+                let clazz : AnyClass = property.getPropertyType() as! AnyClass // = AnyObject.type
+
+                return try context.getBean(clazz)
             }
         } // if
         

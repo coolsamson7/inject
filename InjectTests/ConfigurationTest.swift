@@ -26,9 +26,9 @@ class ConfigurationTest: XCTestCase {
 
         let configurationManager = context.getConfigurationManager()
 
-        let string = try! configurationManager.getValue(String.self, namespace: "com.foo", key: "string") as? String
-        let int    = try! configurationManager.getValue(Int.self, namespace: "com.foo", key: "int") as? Int
-        let bool   = try! configurationManager.getValue(Bool.self, namespace: "com.foo", key: "bool") as? Bool
+        let string = try! configurationManager.getValue(String.self, namespace: "com.foo", key: "string")
+        let int    = try! configurationManager.getValue(Int.self, namespace: "com.foo", key: "int")
+        let bool   = try! configurationManager.getValue(Bool.self, namespace: "com.foo", key: "bool")
 
         XCTAssert(string == "hello")
         XCTAssert(int == 1)

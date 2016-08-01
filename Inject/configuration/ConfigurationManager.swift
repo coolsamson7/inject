@@ -198,7 +198,7 @@ public class ConfigurationManager : NSObject, ConfigurationAdministration, Confi
     func hasValue(namespace : String, key : String, scope : Scope? = nil) -> Bool {
         return getEffectiveConfigurationItem(scope != nil ? scope! : self.scope, fqn: FQN(namespace: namespace, key: key)) != nil
     }
-
+    
     public func getValue(type : Any.Type, namespace : String, key : String, defaultValue: AnyObject? = nil, scope : Scope? = nil) throws -> Any {
         let resultItem = getEffectiveConfigurationItem(scope != nil ? scope! : self.scope, fqn: FQN(namespace: namespace, key: key));
         
@@ -223,7 +223,36 @@ public class ConfigurationManager : NSObject, ConfigurationAdministration, Confi
                 throw ConfigurationErrors.Exception(message: "the dynamic configuration value\(namespace):\(key) cannot be fetched via getValue");
             }
             
-            return try maybeConvert(type, value: resultItem!.value);
+            return try maybeConvert(type, value: resultItem!.value)
+        }
+    }
+
+
+    public func getValue<T>(type : T.Type, namespace : String, key : String, defaultValue: AnyObject? = nil, scope : Scope? = nil) throws -> T {
+        let resultItem = getEffectiveConfigurationItem(scope != nil ? scope! : self.scope, fqn: FQN(namespace: namespace, key: key));
+        
+        if resultItem == nil {
+            if defaultValue != nil {
+                if (Tracer.ENABLED) {
+                    Tracer.trace("configuration", level: .HIGH, message: "\(namespace).\(key) = default value \(defaultValue)")
+                }
+                
+                return try maybeConvert(type, value: defaultValue!) as! T
+            }
+            else {
+                throw ConfigurationErrors.Exception(message: "neither configuration value\(namespace):\(key) nor default found");//return defaultValue
+            }
+        }
+        else {
+            if (Tracer.ENABLED) {
+                Tracer.trace("configuration", level: .HIGH, message: "\(namespace).\(key) = \(resultItem!.value)")
+            }
+            
+            if resultItem!.dynamic {
+                throw ConfigurationErrors.Exception(message: "the dynamic configuration value\(namespace):\(key) cannot be fetched via getValue");
+            }
+            
+            return try maybeConvert(type, value: resultItem!.value) as! T
         }
     }
 }

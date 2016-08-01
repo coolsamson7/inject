@@ -79,7 +79,7 @@ public class ApplicationContext : BeanFactory {
         
         init(instance : AnyObject) {
             self.factory = ValueFactory(object: instance)
-            self.bean = BeanDescriptor.forClass(instance.dynamicType)
+            self.bean = try! BeanDescriptor.forClass(instance.dynamicType)
         }
         
         override init() {
@@ -647,29 +647,55 @@ public class ApplicationContext : BeanFactory {
     }
     
     // public
-    
-    //  public func parser(parser: NSXMLParser, didStartElement elementName:
-    
-    public func getBean(byType type : AnyClass) throws -> AnyObject {
-        let result = findByType(BeanDescriptor.forClass(type))
-        
-        if result.count == 0 {
-            throw ApplicationContextErrors.UnknownBeanByType(type: type)
-        }
-        else if result.count > 1 {
-            throw ApplicationContextErrors.AmbiguousBeanByType(type: type)
+
+    public func getBean<T>(type : T.Type, byId id : String? = nil) throws -> T {
+        if id != nil {
+            if let bean = self.byId[id!] {
+                return try bean.getInstance(self) as! T
+            }
+            else {
+                throw ApplicationContextErrors.UnknownBeanById(id: id!, context: "")
+            }
         }
         else {
-            return try result[0].getInstance(self)
+            let result = findByType(BeanDescriptor.forClass(type as! AnyClass))
+            
+            if result.count == 0 {
+                throw ApplicationContextErrors.UnknownBeanByType(type: type as! AnyClass)
+            }
+            else if result.count > 1 {
+                throw ApplicationContextErrors.AmbiguousBeanByType(type: type as! AnyClass)
+            }
+            else {
+                return try result[0].getInstance(self) as! T
+            }
+
         }
     }
-    
-    public func getBean(byId id : String) throws -> AnyObject {
-        if let bean = byId[id] {
-            return try bean.getInstance(self)
+
+    // without generics...this sucks
+    public func getBean(type : AnyClass, byId id : String? = nil) throws -> AnyObject {
+        if id != nil {
+            if let bean = self.byId[id!] {
+                return try bean.getInstance(self) as! AnyObject
+            }
+            else {
+                throw ApplicationContextErrors.UnknownBeanById(id: id!, context: "")
+            }
         }
         else {
-            throw ApplicationContextErrors.UnknownBeanById(id: id, context: "")
+            let result = findByType(BeanDescriptor.forClass(type as! AnyClass))
+
+            if result.count == 0 {
+                throw ApplicationContextErrors.UnknownBeanByType(type: type as! AnyClass)
+            }
+            else if result.count > 1 {
+                throw ApplicationContextErrors.AmbiguousBeanByType(type: type as! AnyClass)
+            }
+            else {
+                return try result[0].getInstance(self) as! AnyObject
+            }
+
         }
     }
     
