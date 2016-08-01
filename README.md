@@ -30,14 +30,14 @@ Fetching Beans is done like this:
 ```swift
 var data = NSData(contentsOfURL: NSBundle(forClass: BeanFactoryTests.self).URLForResource("application", withExtension: "xml")!)!
     
-var context = try! ApplicationContext(
-   parent: nil,
-   data: data
-)
+var context = ApplicationContext()
+
+context.loadXML(data)
         
-let bean = try! context.getBean(byId: "data") as! Data
-// other possibility is
-let sameBean = try! context.getBean(byType: Data.self) as! Data
+// by id        
+let bean = try! context.getBean(Data.self, byId: "data")
+// assume there is one instane of the specified type
+let sameBean = try! context.getBean(Data.self)
 
 ```
 
@@ -63,7 +63,7 @@ What is still missing ( mainly due to the crappy Swift support for reflection )
 And there are also limitations ( darn )
 * all objects need to derive from `NSObject`
 * all objects need to have a default `init` function
-* all properties that are injected cannot be optional! ( Woooo.. )
+* properties cannot be optional
 
 Roadmap
 * support the different package managers
