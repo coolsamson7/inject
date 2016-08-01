@@ -104,7 +104,7 @@ public class ConfigurationNamespaceHandler : NamespaceHandler {
     
     // override
     
-    override func register(loader : ApplicationContextLoader) throws {
+    override func register(loader : XMLContextLoader) throws {
         try super.register(loader)
 
         try loader.register(

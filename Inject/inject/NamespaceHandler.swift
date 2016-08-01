@@ -87,7 +87,7 @@ public class NamespaceHandler {
     
     // abstract
     
-    func register(loader : ApplicationContextLoader) throws {
+    func register(loader : XMLContextLoader) throws {
         self.context = loader.context
     }
     

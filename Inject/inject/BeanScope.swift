@@ -6,7 +6,7 @@
 //  Copyright © 2016 Andreas Ernst. All rights reserved.
 //
 
-protocol BeanScope {
+public protocol BeanScope {
     var name : String {
         get
     }

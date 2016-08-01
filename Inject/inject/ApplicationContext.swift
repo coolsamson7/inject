@@ -63,13 +63,15 @@ public class ApplicationContext : BeanFactory {
         var lazy = false
         var abstract = false
         var parent: BeanDeclaration? = nil
-        var singleton : AnyObject? = nil
+
         var id : String?
         var dependsOn : BeanDeclaration?
         var bean: BeanDescriptor?
         var target: BeanDescriptor?
         var properties = [PropertyDeclaration]()
+
         var factory : BeanFactory = DefaultConstructorFactory.instance
+        var singleton : AnyObject? = nil
         
         // init
         
@@ -79,7 +81,7 @@ public class ApplicationContext : BeanFactory {
         
         init(instance : AnyObject) {
             self.factory = ValueFactory(object: instance)
-            self.bean = try! BeanDescriptor.forClass(instance.dynamicType)
+            self.bean = BeanDescriptor.forClass(instance.dynamicType)
         }
         
         override init() {
@@ -87,16 +89,64 @@ public class ApplicationContext : BeanFactory {
         }
         
         // fluent stuff
-        
-        func property(property: PropertyDeclaration) -> BeanDeclaration {
+
+        public func clazz(clazz : String) throws -> BeanDeclaration {
+            self.bean = try BeanDescriptor.forClass(clazz)
+
+            return self
+        }
+
+
+        public func id(id : String) -> BeanDeclaration {
+            self.id = id
+
+            return self
+        }
+
+        public func lazy(lazy : Bool = true) -> BeanDeclaration {
+            self.lazy = lazy
+
+            return self
+        }
+
+        public func abstract(abstract : Bool = true) -> BeanDeclaration {
+            self.abstract = abstract
+
+            return self
+        }
+
+        public func dependsOn(depends : String) -> BeanDeclaration {
+            self.dependsOn = BeanDeclaration(id: depends)
+
+            return self
+        }
+
+        public func parent(parent : BeanDeclaration) -> BeanDeclaration {
+            self.parent = parent // TODO string / Bean?
+
+            return self
+        }
+
+        public func property(name: String, value : String) -> BeanDeclaration {
+            let property = PropertyDeclaration()
+
+            property.name = name
+            property.value = value
+
             properties.append(property)
             
+            return self
+        }
+
+        public func property(property: PropertyDeclaration) -> BeanDeclaration {
+            properties.append(property)
+
             return self
         }
         
         // func
         
-        func inheritFrom(parent : BeanDeclaration, loader: ApplicationContextLoader) throws -> Void  {
+        func inheritFrom(parent : BeanDeclaration, loader: ApplicationContext.Loader) throws -> Void  {
             var resolveProperties = false
             if bean == nil {
                 bean = parent.bean
@@ -125,19 +175,16 @@ public class ApplicationContext : BeanFactory {
                 for property in properties {
                     try property.resolveProperty(self, loader: loader)
                 }
-                
             }
         }
         
-        func collect(context : ApplicationContext, loader: ApplicationContextLoader) throws -> Void {
-            try loader.addDeclaration(self)
-            
+        func collect(context : ApplicationContext, loader: ApplicationContext.Loader) throws -> Void {
             for property in properties {
                 try property.collect(self, context: context, loader: loader)
             }
         }
         
-        func connect(loader : ApplicationContextLoader) throws -> Void {
+        func connect(loader : ApplicationContext.Loader) throws -> Void {
             if dependsOn != nil {
                 dependsOn = try loader.context.getDeclarationById(dependsOn!.id!)
                 
@@ -167,7 +214,7 @@ public class ApplicationContext : BeanFactory {
             }
         }
         
-        func resolve(loader : ApplicationContextLoader) throws -> Void {
+        func resolve(loader : ApplicationContext.Loader) throws -> Void {
             // instantiate singletons, etc.
             
             try scope!.prepare(self, factory: loader.context)
@@ -251,7 +298,7 @@ public class ApplicationContext : BeanFactory {
         
         // functions
         
-        func resolveProperty(beanDeclaration : BeanDeclaration, loader: ApplicationContextLoader) throws -> Void  {
+        func resolveProperty(beanDeclaration : BeanDeclaration, loader: ApplicationContext.Loader) throws -> Void  {
             property = beanDeclaration.bean!.findProperty(name)
             
             if property == nil {
@@ -282,7 +329,7 @@ public class ApplicationContext : BeanFactory {
             } // if
         }
         
-        func collect(beanDeclaration : BeanDeclaration, context : ApplicationContext, loader: ApplicationContextLoader) throws -> Void {
+        func collect(beanDeclaration : BeanDeclaration, context : ApplicationContext, loader: ApplicationContext.Loader) throws -> Void {
             if beanDeclaration.bean != nil { // abstract classes
                 try resolveProperty(beanDeclaration, loader: loader)
             }
@@ -290,11 +337,11 @@ public class ApplicationContext : BeanFactory {
             // done
             
             if declaration != nil {
-                try loader.addDeclaration(declaration!)
+                try context.define(declaration!)
             }
         }
         
-        func connect(beanDeclaration : BeanDeclaration, loader : ApplicationContextLoader) throws -> Void {
+        func connect(beanDeclaration : BeanDeclaration, loader : ApplicationContext.Loader) throws -> Void {
             if declaration != nil {
                 loader.dependency(declaration!, before: beanDeclaration)
             }
@@ -329,21 +376,21 @@ public class ApplicationContext : BeanFactory {
     public class PrototypeScope : BeanScope {
         // Scope
 
-        var name : String {
+        public var name : String {
             get {
                 return "prototype"
             }
         }
 
-        func prepare(bean : ApplicationContext.BeanDeclaration, factory : BeanFactory) throws {
+        public func prepare(bean : ApplicationContext.BeanDeclaration, factory : BeanFactory) throws {
             // noop
         }
 
-        func get(bean : ApplicationContext.BeanDeclaration, factory : BeanFactory) throws -> AnyObject {
+        public func get(bean : ApplicationContext.BeanDeclaration, factory : BeanFactory) throws -> AnyObject {
             return try factory.create(bean)
         }
 
-        func finish() {
+        public func finish() {
             // noop
         }
     }
@@ -351,19 +398,19 @@ public class ApplicationContext : BeanFactory {
     public class SingletonScope : BeanScope {
         // Scope
 
-        var name : String {
+        public var name : String {
             get {
                 return "singleton"
             }
         }
 
-        func prepare(bean : ApplicationContext.BeanDeclaration, factory : BeanFactory) throws {
+        public func prepare(bean : ApplicationContext.BeanDeclaration, factory : BeanFactory) throws {
             if !bean.lazy {
                 try get(bean, factory: factory)
             }
         }
 
-        func get(bean : ApplicationContext.BeanDeclaration, factory : BeanFactory) throws -> AnyObject {
+        public func get(bean : ApplicationContext.BeanDeclaration, factory : BeanFactory) throws -> AnyObject {
             if bean.singleton == nil {
                 bean.singleton = try factory.create(bean)
             }
@@ -371,7 +418,7 @@ public class ApplicationContext : BeanFactory {
             return bean.singleton!
         }
 
-        func finish() {
+        public func finish() {
             // noop
         }
     }
@@ -414,8 +461,268 @@ public class ApplicationContext : BeanFactory {
         }
     }
 
+    public class Loader {
+        // local classes
+
+        class Dependency : Equatable {
+            // instance data
+
+            var declaration : ApplicationContext.BeanDeclaration
+            var successors : [Dependency] = []
+            var index : Int? = nil
+            var lowLink : Int = 0
+
+            // init
+
+            init(declaration : ApplicationContext.BeanDeclaration) {
+                self.declaration = declaration
+            }
+        }
+
+        // instance data
+
+        var context: ApplicationContext
+        var loading = false
+        var dependencyList : [Dependency] = []
+        var dependencies = IdentityMap<ApplicationContext.BeanDeclaration, Dependency>()
+        var resolver : Resolver? = nil
+
+        // init
+
+        init(context: ApplicationContext) {
+            self.context = context
+        }
+
+        // public
+
+        func resolve(string : String) throws -> String {
+            var result = string
+
+            if let range = string.rangeOfString("${", range: string.startIndex..<string.endIndex) {
+                result = string[string.startIndex..<range.startIndex]
+
+                let eq  = string.rangeOfString("=", range: range.startIndex..<string.endIndex)
+                let end = string.rangeOfString("}", range: range.startIndex..<string.endIndex)
+
+                if eq != nil {
+                    let key = string[range.endIndex ..< eq!.startIndex]
+
+                    let resolved = try resolver!(key: key)
+
+                    if (Tracer.ENABLED) {
+                        Tracer.trace("loader", level: .HIGH, message: "resolve configuration key \(key) = \(resolved)")
+                    }
+
+                    if  resolved != nil {
+                        result += resolved!
+                    }
+                    else {
+                        result += try resolve(string[eq!.endIndex..<end!.startIndex])
+                    }
+                }
+                else {
+                    let key = string[range.endIndex ..< end!.startIndex]
+                    let resolved = try resolver!(key: key)!
+
+                    if (Tracer.ENABLED) {
+                        Tracer.trace("loader", level: .HIGH, message: "resolve configuration key \(key) = \(resolved)")
+                    }
+
+                    result += resolved
+                } // else
+
+                result += try resolve(string[end!.endIndex..<string.endIndex])
+            } // if
+
+            return result
+        }
+
+        func setup() throws -> Void {
+            // local function
+
+            func resolveConfiguration(key: String) throws -> String? {
+                let fqn = FQN.fromString(key)
+
+                if context.configurationManager.hasValue(fqn.namespace, key: fqn.key) {
+                    return try context.configurationManager.getValue(String.self, namespace: fqn.namespace, key: fqn.key)
+                }
+                else {
+                    return nil
+                }
+            }
+
+            resolver =  resolveConfiguration
+
+            if context.parent == nil {
+                // add initial bean declarations so that constructed objects can also refer to those instances
+
+                try context.define(ApplicationContext.BeanDeclaration(instance: context.injector))
+                try context.define(ApplicationContext.BeanDeclaration(instance: context.configurationManager))
+
+                context.injector.register(BeanInjection())
+                context.injector.register(ConfigurationValueInjection(configurationManager: context.configurationManager))
+            }
+        }
+
+        // internal
+
+        func getDependency(bean : ApplicationContext.BeanDeclaration) -> Dependency {
+            var dependency = dependencies[bean]
+            if dependency == nil {
+                dependency = Dependency(declaration: bean)
+
+                dependencyList.append(dependency!)
+                dependencies[bean] = dependency!
+            }
+
+            return dependency!
+        }
+
+        func dependency(bean : ApplicationContext.BeanDeclaration, before : ApplicationContext.BeanDeclaration) {
+            getDependency(bean).successors.append(getDependency(before))
+        }
+
+        func addDeclaration(declaration : ApplicationContext.BeanDeclaration) throws -> ApplicationContext.BeanDeclaration {
+            // add
+
+            let dependency = Dependency(declaration: declaration)
+
+            dependencies[declaration] = dependency
+            dependencyList.append(dependency)
+
+            return declaration
+        }
+
+        func sortDependencies(dependencies : [Dependency]) -> [[ApplicationContext.BeanDeclaration]] {
+            // closure state
+
+            var index = 0
+            var stack: [Dependency] = []
+            var cycles: [[ApplicationContext.BeanDeclaration]] = []
+
+            // local func
+
+            func traverse(dependency: Dependency) {
+                dependency.index = index
+                dependency.lowLink = index
+
+                index += 1
+
+                stack.append(dependency) // add to the stack
+
+                for successor in dependency.successors {
+                    if successor.index == nil {
+                        traverse(successor)
+
+                        dependency.lowLink = min(dependency.lowLink, successor.lowLink)
+                    }
+                    else if stack.contains(successor) {
+                        // if the component was not closed yet
+
+                        dependency.lowLink = min(dependency.lowLink, successor.index!)
+                    }
+                } // for
+
+                if dependency.lowLink == dependency.index! {
+                    // if we are in the root of the component
+
+                    var group:[Dependency] = []
+
+                    var member: Dependency
+                    repeat {
+                        member = stack.removeLast()
+
+                        group.append(member)
+                    } while member !== dependency
+
+                    if group.count > 1 {
+                        cycles.append(group.map({$0.declaration}))
+                    }
+                }
+            }
+
+            // get goin'
+
+            for dependency in dependencies {
+                if dependency.index == nil {
+                    traverse(dependency)
+                }
+            }
+
+            return cycles
+        }
+
+        func load() throws -> ApplicationContext {
+            loading = true
+
+            try setup()
+
+            // collect
+
+            if (Tracer.ENABLED) {
+                Tracer.trace("loader", level: .HIGH, message: "collect bean information")
+            }
+
+            // collect
+
+            for dependency in dependencyList {
+                try dependency.declaration.collect(context, loader: self) // define
+            }
+
+            // connect
+
+            if (Tracer.ENABLED) {
+                Tracer.trace("loader", level: .HIGH, message: "connect beans")
+            }
+
+            for dependency in dependencyList {
+                try dependency.declaration.connect(self)
+            }
+
+            // sort
+
+            let cycles = sortDependencies(dependencyList)
+            if cycles.count > 0 {
+                let builder = StringBuilder()
+
+                builder.append("\(cycles.count) cycles:")
+                var index = 0
+                for cycle in cycles {
+                    builder.append("\n\(index): ")
+                    for declaration in cycle {
+                        builder.append(declaration).append(" ")
+                    }
+
+                    index += 1
+                }
+
+                throw ApplicationContextErrors.CylicDependencies(message: builder.toString())
+            }
+
+            // sort according to index
+
+            dependencyList.sortInPlace({$0.index < $1.index})
+            //beanDeclarations.sortInPlace({$0.index < $1.index})
+
+            if (Tracer.ENABLED) {
+                Tracer.trace("loader", level: .HIGH, message: "resolve beans")
+            }
+
+            // instantiate all non lazy singletons, etc...
+
+            for dependency in dependencyList {
+                try dependency.declaration.resolve(self)
+            }
+
+            // done
+
+            return context
+        }
+    }
+
     // instance data
-    
+
+    var loader : Loader?
     var parent : ApplicationContext? = nil
     var injector : Injector
     var configurationManager : ConfigurationManager
@@ -425,8 +732,12 @@ public class ApplicationContext : BeanFactory {
     var scopes = [String:BeanScope]()
     
     // init
+
+    //convenience init() throws {
+    //    try self.init(parent: nil)
+    //}
     
-    init(parent : ApplicationContext?, data : NSData) throws {
+    init(parent : ApplicationContext? = nil) throws {
         if parent != nil {
             self.parent = parent
             
@@ -450,16 +761,97 @@ public class ApplicationContext : BeanFactory {
             registerScope(PrototypeScope())
             registerScope(SingletonScope())
         }
-        
-        try ApplicationContextLoader(context: self, data: data)
+
+        loader = Loader(context: self)
     }
-    
-    // internal
-    
-    func registerScope(scope : BeanScope) -> Void {
+
+    // public
+
+    public func loadXML(data : NSData) throws {
+        try XMLContextLoader(context: self, data: data)
+    }
+
+    public func refresh() throws {
+        if loader != nil {
+            // check parent
+
+            if parent != nil {
+                try parent!.validate()
+            }
+
+            // load
+
+            try loader!.load()
+
+            loader = nil // prevent double loading...
+        }
+    }
+
+    func validate() throws {
+        if loader != nil && !loader!.loading {
+            try refresh()
+        }
+    }
+
+    public func registerScope(scope : BeanScope) -> Void {
         scopes[scope.name] = scope
     }
+
+    // fluent
+
+    func scope(scope : String) throws -> BeanScope {
+        return try getScope(scope)
+    }
+
+    public func bean(instance : AnyObject, id : String? = nil, scope :  String = "singleton") throws -> ApplicationContext.BeanDeclaration {
+        let result = ApplicationContext.BeanDeclaration(instance: instance)
+
+        if id != nil {
+            result.id = id
+        }
+
+        //result.scope = try self.scope(scope)
+
+        return result
+    }
+
+    public func bean(className : String, id : String? = nil) throws -> ApplicationContext.BeanDeclaration {
+        let result = ApplicationContext.BeanDeclaration()
+
+        if id != nil {
+            result.id = id
+        }
+
+        result.bean = try BeanDescriptor.forClass(className)
+
+        return result
+    }
+
+    public func bean(clazz : AnyClass, id : String? = nil) throws -> ApplicationContext.BeanDeclaration {
+        let result = ApplicationContext.BeanDeclaration()
+
+        if id != nil {
+            result.id = id
+        }
+
+        result.bean = BeanDescriptor.forClass(clazz)
+
+        return result
+    }
+
+    public func property(name: String? = nil) ->  ApplicationContext.PropertyDeclaration {
+        let result =  ApplicationContext.PropertyDeclaration()
+
+        if name != nil {
+            result.name = name!
+        }
+
+        return result
+    }
+
     
+    // internal
+
     func getScope(name : String) throws -> BeanScope {
         let scope = scopes[name]
         if scope == nil {
@@ -537,7 +929,19 @@ public class ApplicationContext : BeanFactory {
         }
     }
     
-    func addDeclaration(declaration : ApplicationContext.BeanDeclaration) throws -> ApplicationContext.BeanDeclaration {
+    public func define(declaration : ApplicationContext.BeanDeclaration) throws -> ApplicationContext {
+        // fix scope if not available
+
+        if declaration.scope == nil {
+            declaration.scope = try getScope("singleton")
+        }
+
+        // pass to loader is set
+
+        if loader != nil {
+            try loader!.addDeclaration(declaration)
+        }
+
         // remember id
         
         if declaration.id != nil { // doesn't matter if abstract or not
@@ -552,13 +956,13 @@ public class ApplicationContext : BeanFactory {
         
         // done
         
-        return declaration
+        return self
     }
     
     func getCandidate(clazz : AnyClass) throws -> ApplicationContext.BeanDeclaration {
         //let clazz : AnyClass = try Classes.unwrapOptional(type)
         
-        let candidates = findByType(try BeanDescriptor.forClass(clazz))
+        let candidates = findByType(BeanDescriptor.forClass(clazz))
         
         if candidates.count == 0 {
             throw ApplicationContextErrors.NoCandidateForType(type: clazz)
@@ -649,6 +1053,8 @@ public class ApplicationContext : BeanFactory {
     // public
 
     public func getBean<T>(type : T.Type, byId id : String? = nil) throws -> T {
+        try validate()
+
         if id != nil {
             if let bean = self.byId[id!] {
                 return try bean.getInstance(self) as! T
@@ -675,31 +1081,35 @@ public class ApplicationContext : BeanFactory {
 
     // without generics...this sucks
     public func getBean(type : AnyClass, byId id : String? = nil) throws -> AnyObject {
+        try validate()
+
         if id != nil {
             if let bean = self.byId[id!] {
-                return try bean.getInstance(self) as! AnyObject
+                return try bean.getInstance(self) 
             }
             else {
                 throw ApplicationContextErrors.UnknownBeanById(id: id!, context: "")
             }
         }
         else {
-            let result = findByType(BeanDescriptor.forClass(type as! AnyClass))
+            let result = findByType(BeanDescriptor.forClass(type ))
 
             if result.count == 0 {
-                throw ApplicationContextErrors.UnknownBeanByType(type: type as! AnyClass)
+                throw ApplicationContextErrors.UnknownBeanByType(type: type )
             }
             else if result.count > 1 {
-                throw ApplicationContextErrors.AmbiguousBeanByType(type: type as! AnyClass)
+                throw ApplicationContextErrors.AmbiguousBeanByType(type: type )
             }
             else {
-                return try result[0].getInstance(self) as! AnyObject
+                return try result[0].getInstance(self)
             }
 
         }
     }
     
     public func inject(object : AnyObject) throws -> Void {
+        try validate()
+
         try injector.inject(object, context: self)
     }
     
@@ -709,7 +1119,11 @@ public class ApplicationContext : BeanFactory {
     
     // BeanFactory
     
-    func create(bean : ApplicationContext.BeanDeclaration) throws -> AnyObject {
+    public func create(bean : ApplicationContext.BeanDeclaration) throws -> AnyObject {
         return try bean.create(self)
     }
+}
+
+func ==(lhs: ApplicationContext.Loader.Dependency, rhs: ApplicationContext.Loader.Dependency) -> Bool {
+    return lhs === rhs
 }

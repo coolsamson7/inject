@@ -19,10 +19,9 @@ class ConfigurationTest: XCTestCase {
 
         ConfigurationNamespaceHandler(namespace: "configuration")
 
-        let context = try! ApplicationContext(
-                parent: nil,
-                data: parentData
-                )
+        let context = try! ApplicationContext(parent: nil)
+
+        try! context.loadXML(parentData)
 
         let configurationManager = context.getConfigurationManager()
 

@@ -92,7 +92,7 @@ class Foo : FooBase {
 class BeanFactoryTests: XCTestCase {
     // tests
     
-    func testBeans() {
+    func testXML() {
         Classes.setDefaultBundle(self.dynamicType)
 
         ConfigurationNamespaceHandler(namespace: "configuration")
@@ -102,17 +102,17 @@ class BeanFactoryTests: XCTestCase {
         let parentData = NSData(contentsOfURL: NSBundle(forClass: BeanFactoryTests.self).URLForResource("parent", withExtension: "xml")!)!
         let childData  = NSData(contentsOfURL: NSBundle(forClass: BeanFactoryTests.self).URLForResource("application", withExtension: "xml")!)!
 
-        var context = try! ApplicationContext(
-                parent: nil,
-                data: parentData
-                )
+        var context = try! ApplicationContext(parent: nil)
+
+        try! context.loadXML(parentData)
         
         // load child
 
         context = try! ApplicationContext(
-            parent: context,
-            data: childData
+            parent: context
         )
+
+        try! context.loadXML(childData)
         
         // check
         
@@ -137,20 +137,97 @@ class BeanFactoryTests: XCTestCase {
         // Measure
 
         try! Timer.measure({
-            var context = try! ApplicationContext(
-                    parent: nil,
-                    data: parentData
-                    )
+            var context = try! ApplicationContext()
+
+            try! context.loadXML(parentData)
 
             // load child
 
-            context = try! ApplicationContext(
-                    parent: context,
-                    data: childData
-                    )
+            context = try! ApplicationContext(parent: context)
+
+            try! context.loadXML(childData)
 
             return true
         }, times: 1000)
+
+    }
+
+    func testFluent() {
+        Classes.setDefaultBundle(self.dynamicType)
+
+        let parent = try! ApplicationContext(parent: nil)
+
+        try! parent
+           .define(parent.bean("ProcessInfoConfigurationSource")
+              .id("x1"))
+
+           .define(parent.bean("Data")
+              .id("b0")
+              .property("string", value: "b0")
+              .property("int", value: "1")
+              .property("float", value: "-1.1")
+              .property("double", value: "-2.2"))
+
+           .define(parent.bean("Foo")
+               .property("name", value: "${andi=Andreas?}")
+               .property("age", value: "${SIMULATOR_MAINSCREEN_HEIGHT=51}")) // TODO
+
+           .define(parent.bean("Bar")
+               .id("bar")
+               .abstract()
+               .property("name", value: "${andi=Andreas?}"))
+
+        // TODO  <configuration:define key="bla" type="Int" value="bla"/>
+
+        let child = try! ApplicationContext(parent: parent)
+
+        try! child
+            .define(child.bean("Data")
+                .id("b1")
+                .dependsOn("b0")
+                .property("string", value: "b1")
+                .property("int", value: "1")
+                .property("float", value: "1.1")
+                .property("double", value: "2.2"))
+
+            .define(child.bean("Data")
+                .id("lazy")
+                .lazy()
+                .property("string", value: "lazy")
+                .property("int", value: "1")
+                .property("float", value: "1.1")
+                .property("double", value: "2.2"))
+
+            .define(child.bean("Data")
+                .id("prototype")
+                //.scope("prototype") // TODO FOO
+                .property("string", value: "b1")
+                .property("int", value: "1")
+                .property("float", value: "1.1")
+                .property("double", value: "2.2"))
+
+            //.define(fluentChild.bean("BarFactory")
+                //TODO.target("Bar")
+                //)
+
+        // check
+
+        let bean : Data = try! child.getBean(Data.self, byId: "b1")
+
+        XCTAssert(bean.string == "b1")
+
+        //let lazy = try! child.getBean(Data.self, byId: "lazy")
+
+        //XCTAssert(lazy.string == "lazy")
+
+        //let proto1 = try! child.getBean(Data.self, byId: "prototype")
+        //let proto2 = try! child.getBean(Data.self, byId: "prototype")
+
+        //XCTAssert(proto1 !== proto2)
+
+        //let bar = try! child.getBean(Bar.self)
+
+        //XCTAssert(bar.age == 4711)
 
     }
 }

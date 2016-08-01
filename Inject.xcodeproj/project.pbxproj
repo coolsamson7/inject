@@ -17,6 +17,7 @@
 		28D35928AF40530049A81A27 /* Synchronized.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D3575B01494DF267926589 /* Synchronized.swift */; };
 		28D35B32992669F931AA5F25 /* Mutex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D3575E22AAD939D050ACAE /* Mutex.swift */; };
 		28D35C7540DA6069D4696114 /* Optional.extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D3559793F614E3502B5A0F /* Optional.extension.swift */; };
+		28D35C949BC967BAD019A928 /* XMLContextLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D35754F0C89ABFA9A702C2 /* XMLContextLoader.swift */; };
 		28D35CCF8BA4308CCFCD5FAE /* Future.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D35EA05D3041A74BA7B450 /* Future.swift */; };
 		B03F0FCC1D3F90210037DB1D /* ConfigurationTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D353F6EBA43DDB0EC12AFB /* ConfigurationTest.swift */; };
 		B092332E1D3CEF8A008267A2 /* BeanDescriptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B092332D1D3CEF8A008267A2 /* BeanDescriptor.swift */; };
@@ -94,6 +95,7 @@
 		28D353F6EBA43DDB0EC12AFB /* ConfigurationTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConfigurationTest.swift; sourceTree = "<group>"; };
 		28D3559793F614E3502B5A0F /* Optional.extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Optional.extension.swift; sourceTree = "<group>"; };
 		28D356CE5B72AE61DACA2634 /* FactoryBean.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FactoryBean.swift; sourceTree = "<group>"; };
+		28D35754F0C89ABFA9A702C2 /* XMLContextLoader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = XMLContextLoader.swift; sourceTree = "<group>"; };
 		28D3575B01494DF267926589 /* Synchronized.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Synchronized.swift; sourceTree = "<group>"; };
 		28D3575E22AAD939D050ACAE /* Mutex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Mutex.swift; sourceTree = "<group>"; };
 		28D358B5936379ACEE78AE9B /* Lock.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Lock.swift; sourceTree = "<group>"; };
@@ -239,6 +241,7 @@
 				B09233501D3CFCCA008267A2 /* ContextAware.swift */,
 				B09233511D3CFCCA008267A2 /* NamespaceHandler.swift */,
 				28D356CE5B72AE61DACA2634 /* FactoryBean.swift */,
+				28D35754F0C89ABFA9A702C2 /* XMLContextLoader.swift */,
 			);
 			path = inject;
 			sourceTree = "<group>";
@@ -547,6 +550,7 @@
 				28D3591BD2FA8399CD0C926C /* Array.extension.swift in Sources */,
 				28D3574428428DE812E11504 /* Timer.swift in Sources */,
 				28D3537384EAB4C62773C01D /* FactoryBean.swift in Sources */,
+				28D35C949BC967BAD019A928 /* XMLContextLoader.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

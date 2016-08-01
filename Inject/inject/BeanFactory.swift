@@ -6,6 +6,6 @@
 //  Copyright © 2016 Andreas Ernst. All rights reserved.
 //
 
-protocol BeanFactory {
+public protocol BeanFactory {
     func create(bean : ApplicationContext.BeanDeclaration) throws -> AnyObject
 }

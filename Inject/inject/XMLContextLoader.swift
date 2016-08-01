@@ -1,14 +1,12 @@
 //
-//  ApplicationContextLoader.swift
+//  XMLContextLoader.swift
 //  Inject
 //
 //  Created by Andreas Ernst on 18.07.16.
 //  Copyright © 2016 Andreas Ernst. All rights reserved.
 //
 
-public typealias Resolver = (key : String) throws -> String?
-
-public class XApplicationContextLoader: XMLParser {
+public class XMLContextLoader: XMLParser {
     // local classes
     
     public class Declaration : NSObject, OriginAware {
@@ -166,28 +164,9 @@ public class XApplicationContextLoader: XMLParser {
         }
     }
     
-    class Dependency : Equatable {
-        // instance data
-        
-        var declaration : ApplicationContext.BeanDeclaration
-        var successors : [Dependency] = []
-        var index : Int? = nil
-        var lowLink : Int = 0
-        
-        // init
-        
-        init(declaration : ApplicationContext.BeanDeclaration) {
-            self.declaration = declaration
-        }
-    }
-    
     // instance data
     
     var context: ApplicationContext
-    var beans : [ApplicationContext.BeanDeclaration] = []
-    var dependencyList : [Dependency] = []
-    var dependencies = IdentityMap<ApplicationContext.BeanDeclaration, Dependency>()
-    var resolver : Resolver? = nil
     
     // init
     
@@ -198,13 +177,11 @@ public class XApplicationContextLoader: XMLParser {
         
         try setupParser()
         
-        try setup()
-        
         try parse(data)
     }
     
     // public
-    
+    /*
     func resolve(string : String) throws -> String {
         var result = string
         
@@ -246,7 +223,7 @@ public class XApplicationContextLoader: XMLParser {
         
         return result
     }
-    
+
     func setup() throws -> Void {
         // local function
         
@@ -266,13 +243,13 @@ public class XApplicationContextLoader: XMLParser {
         if context.parent == nil {
             // add initial bean declarations so that constructed objects can also refer to those instances
             
-           // try ApplicationContext.BeanDeclaration(instance: context.injector).collect(context, loader: self)
-           // try ApplicationContext.BeanDeclaration(instance: context.configurationManager).collect(context, loader: self)
+            try ApplicationContext.BeanDeclaration(instance: context.injector).collect(context, loader: self)
+            try ApplicationContext.BeanDeclaration(instance: context.configurationManager).collect(context, loader: self)
             
             context.injector.register(BeanInjection())
             context.injector.register(ConfigurationValueInjection(configurationManager: context.configurationManager))
         }
-    }
+    }*/
     
     func setupParser() throws -> Void {
         try register(
@@ -297,7 +274,7 @@ public class XApplicationContextLoader: XMLParser {
         // and all namespace handlers
 
         for (namespace, handler) in NamespaceHandler.handlers {
-            //try handler.register(self)
+            try handler.register(self)
         }
     }
     
@@ -322,178 +299,27 @@ public class XApplicationContextLoader: XMLParser {
         return beanDeclarations
     }
     
-    // internal
-    
-    func getDependency(bean : ApplicationContext.BeanDeclaration) -> Dependency {
-        var dependency = dependencies[bean]
-        if dependency == nil {
-            dependency = Dependency(declaration: bean)
-            
-            dependencyList.append(dependency!)
-            dependencies[bean] = dependency!
-        }
-        
-        return dependency!
-    }
-    
-    func dependency(bean : ApplicationContext.BeanDeclaration, before : ApplicationContext.BeanDeclaration) {
-        getDependency(bean).successors.append(getDependency(before))
-    }
-    
-    func addDeclaration(declaration : ApplicationContext.BeanDeclaration) throws -> ApplicationContext.BeanDeclaration {
-        // fix scope if not available
-        
-        if declaration.scope == nil {
-            declaration.scope = try context.getScope("singleton")
-        }
-        
-        // add
-        
-        let dependency = Dependency(declaration: declaration)
-        
-        dependencies[declaration] = dependency
-        dependencyList.append(dependency)
-        
-        beans.append(declaration)
-        
-        return declaration
-    }
-    
-    func sortDependencies(dependencies : [Dependency]) -> [[ApplicationContext.BeanDeclaration]] {
-        // closure state
-        
-        var index = 0
-        var stack: [Dependency] = []
-        var cycles: [[ApplicationContext.BeanDeclaration]] = []
-        
-        // local func
-        
-        func traverse(dependency: Dependency) {
-            dependency.index = index
-            dependency.lowLink = index
-            
-            index += 1
-            
-            stack.append(dependency) // add to the stack
-            
-            for successor in dependency.successors {
-                if successor.index == nil {
-                    traverse(successor)
-                    
-                    dependency.lowLink = min(dependency.lowLink, successor.lowLink)
-                }
-                else if stack.contains(successor) {
-                    // if the component was not closed yet
-                    
-                    dependency.lowLink = min(dependency.lowLink, successor.index!)
-                }
-            } // for
-            
-            if dependency.lowLink == dependency.index! {
-                // if we are in the root of the component
-                
-                var group:[Dependency] = []
-                
-                var member: Dependency
-                repeat {
-                    member = stack.removeLast()
-                    
-                    group.append(member)
-                } while member !== dependency
-                
-                if group.count > 1 {
-                    cycles.append(group.map({$0.declaration}))
-                }
-            }
-        }
-        
-        // get goin'
-        
-        for dependency in dependencies {
-            if dependency.index == nil {
-                traverse(dependency)
-            }
-        }
-        
-        return cycles
-    }
-    
-    func process(beans : Beans) throws -> ApplicationContext {
-        // collect
-        
-        if (Tracer.ENABLED) {
-            Tracer.trace("loader", level: .HIGH, message: "collect bean information")
-        }
-        
-        let beanDeclarations = try convert(beans)
-        
-        // collect
-        
-        for bean in beanDeclarations {
-            //try bean.collect(context, loader: self)
-        }
-        
-        // connect
-        
-        if (Tracer.ENABLED) {
-            Tracer.trace("loader", level: .HIGH, message: "connect beans")
-        }
-        
-        for bean in beanDeclarations {
-            //try bean.connect(self)
-        }
-        
-        // sort
-        
-        let cycles = sortDependencies(dependencyList)
-        if cycles.count > 0 {
-            let builder = StringBuilder()
-            
-            builder.append("\(cycles.count) cycles:")
-            var index = 0
-            for cycle in cycles {
-                builder.append("\n\(index): ")
-                for declaration in cycle {
-                    builder.append(declaration).append(" ")
-                }
-                
-                index += 1
-            }
-            
-            throw ApplicationContextErrors.CylicDependencies(message: builder.toString())
-        }
-        
-        // sort according to index
-        
-        dependencyList.sortInPlace({$0.index < $1.index})
-        //beanDeclarations.sortInPlace({$0.index < $1.index})
-        
-        if (Tracer.ENABLED) {
-            Tracer.trace("loader", level: .HIGH, message: "resolve beans")
-        }
-        
-        // instantiate all non lazy singletons, etc...
-        
-        for dependency in dependencyList {
-            //try dependency.declaration.resolve(self)
-        }
-        
-        // done
-        
-        return context
-    }
-    
     // override
     
     override func parse(data : NSData) throws -> AnyObject? {
-        let beans = try super.parse(data) as! Beans
-        
-        // convert
-        
-        return try process(beans)
-    }
-}
+        if (Tracer.ENABLED) {
+            Tracer.trace("xml loader", level: .HIGH, message: "parse")
+        }
 
-func ==(lhs: XApplicationContextLoader.Dependency, rhs: XApplicationContextLoader.Dependency) -> Bool {
-    return lhs === rhs
+        let beans = try super.parse(data) as! Beans
+
+        if (Tracer.ENABLED) {
+            Tracer.trace("xml loader", level: .HIGH, message: "process")
+        }
+
+        let beanDeclarations = try convert(beans)
+
+        // collect
+
+        for bean in beanDeclarations {
+            try context.define(bean)
+        }
+
+        return nil
+    }
 }
