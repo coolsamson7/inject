@@ -136,11 +136,27 @@ public class ApplicationContext : BeanFactory {
             return self
         }
 
-        public func property(name: String, value : String) -> BeanDeclaration {
+        public func property(name: String, value : Any? = nil, ref : String? = nil, resolve : String? = nil, bean : BeanDeclaration? = nil, inject : InjectBean? = nil) -> BeanDeclaration {
             let property = PropertyDeclaration()
 
             property.name = name
-            property.value = value
+
+            // TODO: sanity check
+            if ref != nil {
+                property.value = ApplicationContext.BeanReference(ref: ref!)
+            }
+            else if resolve != nil {
+                property.value = ApplicationContext.PlaceHolder(value: resolve!)
+            }
+            else if bean != nil {
+                property.value = ApplicationContext.EmbeddedBean(bean: bean!)
+            }
+            else if inject != nil {
+                property.value = ApplicationContext.InjectedBean(inject: inject!)
+            }
+            else {
+                property.value = ApplicationContext.Value(value: value!)
+            }
 
             properties.append(property)
             
@@ -230,8 +246,12 @@ public class ApplicationContext : BeanFactory {
         }
         
         func resolve(loader : ApplicationContext.Loader) throws -> Void {
-            // instantiate singletons, etc.
-            
+            for property in properties {
+                try property.resolve(loader)
+            }
+        }
+
+        func prepare(loader : ApplicationContext.Loader) throws -> Void {
             try scope!.prepare(self, factory: loader.context)
         }
         
@@ -251,21 +271,29 @@ public class ApplicationContext : BeanFactory {
             for property in properties {
                 let beanProperty = property.property!
                 
-                let resolved = try property.resolve(context)
+                let resolved = try property.get(context)
 
                 if resolved != nil {
                     let type = resolved!.dynamicType
                     
-                    if beanProperty.getPropertyType() != type {
-                       throw ApplicationContextErrors.TypeMismatch(message: " property \(Classes.className(bean!.clazz)).\(beanProperty.getName()) expected a \(beanProperty.getPropertyType()) got \(type)")
-                    }
-                    else {
-                        if (Tracer.ENABLED) {
-                            Tracer.trace("loader", level: .HIGH, message: "set \(resolved!) as property \(bean).\(beanProperty.getName())")
+                    if beanProperty.getPropertyType() != type { // TODO: isAssignaböeFrom
+                        if let clazz = beanProperty.getPropertyType() as? AnyClass {
+                            if let object = resolved as? AnyObject {
+                                if !object.isKindOfClass(clazz) {
+                                    print("asd")
+                                }
+                            }
+                            else {print("ocuh")}
                         }
-                        
-                        try beanProperty.set(result, value: resolved)
+                        else {throw ApplicationContextErrors.TypeMismatch(message: " property \(Classes.className(bean!.clazz)).\(beanProperty.getName()) expected a \(beanProperty.getPropertyType()) got \(type)")}
                     }
+
+                    if (Tracer.ENABLED) {
+                        Tracer.trace("loader", level: .HIGH, message: "set \(resolved!) as property \(bean).\(beanProperty.getName())")
+                    }
+
+                    try beanProperty.set(result, value: resolved)
+
                 }
             }
             
@@ -301,14 +329,179 @@ public class ApplicationContext : BeanFactory {
             return builder.toString()
         }
     }
+
+    // these classes act as containers for various ways to reference values
+
+    class ValueHolder {
+        func collect(loader : ApplicationContext.Loader, beanDeclaration : BeanDeclaration) throws -> Void {
+            // noop
+        }
+
+        func connect(loader : ApplicationContext.Loader, beanDeclaration : BeanDeclaration, type : Any.Type) throws -> Void {
+            // noop
+        }
+
+        func resolve(loader : ApplicationContext.Loader, type : Any.Type) throws -> ValueHolder {
+            return  self
+        }
+
+        func get(context : ApplicationContext) throws -> Any {
+            fatalError("ouch")
+        }
+    }
+
+    class BeanReference : ValueHolder {
+        // instance data
+
+        var ref : BeanDeclaration
+
+        // init
+
+        init(ref : String) {
+            self.ref = BeanDeclaration(id: ref)
+        }
+
+        // override
+
+        override func connect(loader : ApplicationContext.Loader, beanDeclaration : BeanDeclaration, type : Any.Type) throws -> Void {
+            ref = try loader.context.getDeclarationById(ref.id!) // replace with real declaration
+
+            loader.dependency(ref, before: beanDeclaration)
+        }
+
+        override func resolve(loader : ApplicationContext.Loader, type : Any.Type) throws -> ValueHolder {
+            return self // TODO type check
+        }
+
+        override func get(context : ApplicationContext) throws -> Any {
+            return try ref.getInstance(context)
+        }
+    }
+
+    class InjectedBean : ValueHolder {
+        // instance data
+
+        var inject : InjectBean
+        var bean : BeanDeclaration?
+
+        // init
+
+        init(inject : InjectBean) {
+            self.inject = inject
+        }
+
+        // override
+
+        override func connect(loader : ApplicationContext.Loader, beanDeclaration : BeanDeclaration, type : Any.Type) throws -> Void {
+            if inject.id != nil {
+                bean = try loader.context.getDeclarationById(inject.id!)
+            }
+            else {
+                bean = try loader.context.getCandidate(type as! AnyClass)
+            }
+
+            loader.dependency(bean!, before: beanDeclaration)
+        }
+
+        override func get(context : ApplicationContext) throws -> Any {
+            return try bean!.getInstance(context)
+        }
+    }
+
+    class EmbeddedBean : ValueHolder {
+        // instance data
+
+        var bean : BeanDeclaration
+
+        // init
+
+        init(bean : BeanDeclaration) {
+            self.bean = bean
+        }
+
+        // override
+
+        override func collect(loader : ApplicationContext.Loader, beanDeclaration : BeanDeclaration) throws -> Void {
+            try loader.context.define(bean)
+        }
+
+        override func connect(loader : ApplicationContext.Loader, beanDeclaration : BeanDeclaration, type : Any.Type) throws -> Void {
+            loader.dependency(bean, before: beanDeclaration)
+        }
+
+        override func resolve(loader : ApplicationContext.Loader, type : Any.Type) throws -> ValueHolder {
+            return self // TODO typecheck
+        }
+
+        override func get(context : ApplicationContext) throws -> Any {
+            return try bean.getInstance(context)
+        }
+    }
+
+    class Value : ValueHolder {
+        // instance data
+
+        var value : Any
+
+        // init
+
+        init(value : Any) {
+            self.value = value
+        }
+
+        // override
+
+        override func get(context : ApplicationContext) throws -> Any {
+            return value
+        }
+    }
+
+    class PlaceHolder : ValueHolder {
+        // instance data
+
+        var value : String
+
+        // init
+
+        init(value : String) {
+            self.value = value
+        }
+
+        // override
+
+        override func resolve(loader : ApplicationContext.Loader, type : Any.Type) throws -> ValueHolder {
+            // replace placeholders first...
+
+            value = try loader.resolve(value)
+
+            var result : Any = value;
+
+            // check for conversions
+
+            if type != String.self {
+                if let conversion = StandardConversionFactory.instance.findConversion(String.self, targetType: type) {
+                    do {
+                        result = try conversion(object: value)
+                    }
+                            catch ConversionErrors.ConversionException( _, let targetType, _) {
+                        throw ConversionErrors.ConversionException(value: value, targetType: targetType, context: "")//[\(origin!.line):\(origin!.column)]")
+                    }
+                }
+                else {
+                    throw ApplicationContextErrors.TypeMismatch(message: "no conversion applicable between String and \(type)")
+                }
+            }
+            // done
+
+            return Value(value: result)
+        }
+    }
     
-    public class PropertyDeclaration : Declaration, Ancestor {
+    public class PropertyDeclaration : Declaration {
         // instance data
         
         var name  : String = ""
-        var value : Any?
-        var ref   : BeanDeclaration?
-        var declaration : BeanDeclaration?
+        var value : ValueHolder?
         var property : BeanDescriptor.PropertyDescriptor?
         
         // functions
@@ -319,74 +512,38 @@ public class ApplicationContext : BeanFactory {
             if property == nil {
                 throw ApplicationContextErrors.UnknownProperty(property: name, bean: beanDeclaration)
             }
-            
-            // resolve static values
-            
-            if let stringValue = value as? String {
-                // convert?
-                
-                if property!.getPropertyType() != String.self {
-                    if let conversion = StandardConversionFactory.instance.findConversion(String.self, targetType: property!.getPropertyType()) {
-                        do {
-                            value = try conversion(object: try loader.resolve(stringValue))
-                        }
-                        catch ConversionErrors.ConversionException( _, let targetType, _) {
-                            throw ConversionErrors.ConversionException(value: stringValue, targetType: targetType, context: "[\(origin!.line):\(origin!.column)]")
-                        }
-                    }
-                    else {
-                        throw ApplicationContextErrors.TypeMismatch(message: "no conversion applicable between String and \(property!.getPropertyType())")
-                    }
-                }
-                else {
-                    value = try loader.resolve(stringValue)
-                }
-            } // if
         }
         
         func collect(beanDeclaration : BeanDeclaration, context : ApplicationContext, loader: ApplicationContext.Loader) throws -> Void {
             if beanDeclaration.bean != nil { // abstract classes
                 try resolveProperty(beanDeclaration, loader: loader)
             }
-            
-            // done
-            
-            if declaration != nil {
-                try context.define(declaration!)
+            else {
+                print("ocuh")
             }
+
+            try value!.collect(loader, beanDeclaration: beanDeclaration)
         }
         
         func connect(beanDeclaration : BeanDeclaration, loader : ApplicationContext.Loader) throws -> Void {
-            if declaration != nil {
-                loader.dependency(declaration!, before: beanDeclaration)
+            if property == nil {
+                // HACK
+                try resolveProperty(beanDeclaration, loader: loader)
             }
-            else if ref != nil {
-                ref = try loader.context.getDeclarationById(ref!.id!) // replace with real declaration
-                
-                loader.dependency(ref!, before: beanDeclaration)
-            }
+
+            try value!.connect(loader, beanDeclaration: beanDeclaration, type: property!.getPropertyType())
         }
         
-        func resolve(context : ApplicationContext) throws -> Any? {
-            if ref != nil {
-                return try ref!.getInstance(context)
-            }
-            else if declaration != nil {
-                return try declaration!.getInstance(context)
-            }
-            else {
-                return value
-            }
+        func resolve(loader : ApplicationContext.Loader) throws -> Any? {
+            return try value = value!.resolve(loader, type: property!.getPropertyType())
         }
-        
-        // Node
-        
-        func addChild(child : AnyObject) -> Void {
-            if let bean = child as? BeanDeclaration {
-                declaration = bean
-            }
+
+        func get(context : ApplicationContext) throws -> Any? {
+            return try value!.get(context)
         }
     }
+
+    // default scopes
 
     public class PrototypeScope : BeanScope {
         // Scope
@@ -717,16 +874,27 @@ public class ApplicationContext : BeanFactory {
             // sort according to index
 
             dependencyList.sortInPlace({$0.index < $1.index})
-            //beanDeclarations.sortInPlace({$0.index < $1.index})
+
+            // resolve
+
 
             if (Tracer.ENABLED) {
                 Tracer.trace("loader", level: .HIGH, message: "resolve beans")
             }
 
-            // instantiate all non lazy singletons, etc...
-
             for dependency in dependencyList {
                 try dependency.declaration.resolve(self)
+            }
+
+            // instantiate all non lazy singletons, etc...
+
+
+            if (Tracer.ENABLED) {
+                Tracer.trace("loader", level: .HIGH, message: "prepare beans")
+            }
+
+            for dependency in dependencyList {
+                try dependency.declaration.prepare(self)
             }
 
             // done
@@ -810,7 +978,7 @@ public class ApplicationContext : BeanFactory {
 
     // fluent
 
-    func scope(scope : String) throws -> BeanScope {
+    public func scope(scope : String) throws -> BeanScope {
         return try getScope(scope)
     }
 
@@ -849,17 +1017,6 @@ public class ApplicationContext : BeanFactory {
 
         return result
     }
-
-    public func property(name: String? = nil) ->  ApplicationContext.PropertyDeclaration {
-        let result =  ApplicationContext.PropertyDeclaration()
-
-        if name != nil {
-            result.name = name!
-        }
-
-        return result
-    }
-
     
     // internal
 

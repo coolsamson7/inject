@@ -135,7 +135,7 @@ public class XMLContextLoader: XMLParser {
         // instance data
         
         var name  : String = ""
-        var value : AnyObject?
+        var value : String?
         var ref   : String?
         
         var declaration : Bean?
@@ -148,10 +148,17 @@ public class XMLContextLoader: XMLParser {
             property.origin = origin
             
             property.name = name
-            property.value = value
-            property.ref = ref != nil ? ApplicationContext.BeanDeclaration(id: ref!): nil
-            property.declaration = declaration != nil ? try declaration!.convert(context) : nil
-            
+            if ref != nil {
+                property.value = ApplicationContext.BeanReference(ref: ref!)
+            }
+            else if declaration != nil {
+                property.value = ApplicationContext.EmbeddedBean(bean: try declaration!.convert(context))
+            }
+            else {
+                property.value = ApplicationContext.PlaceHolder(value: value!)
+            }
+
+
             return property
         }
         
@@ -181,75 +188,6 @@ public class XMLContextLoader: XMLParser {
     }
     
     // public
-    /*
-    func resolve(string : String) throws -> String {
-        var result = string
-        
-        if let range = string.rangeOfString("${", range: string.startIndex..<string.endIndex) {
-            result = string[string.startIndex..<range.startIndex]
-            
-            let eq  = string.rangeOfString("=", range: range.startIndex..<string.endIndex)
-            let end = string.rangeOfString("}", range: range.startIndex..<string.endIndex)
-            
-            if eq != nil {
-                let key = string[range.endIndex ..< eq!.startIndex]
-                
-                let resolved = try resolver!(key: key)
-                
-                if (Tracer.ENABLED) {
-                    Tracer.trace("loader", level: .HIGH, message: "resolve configuration key \(key) = \(resolved)")
-                }
-                
-                if  resolved != nil {
-                    result += resolved!
-                }
-                else {
-                    result += try resolve(string[eq!.endIndex..<end!.startIndex])
-                }
-            }
-            else {
-                let key = string[range.endIndex ..< end!.startIndex]
-                let resolved = try resolver!(key: key)!
-                
-                if (Tracer.ENABLED) {
-                    Tracer.trace("loader", level: .HIGH, message: "resolve configuration key \(key) = \(resolved)")
-                }
-                
-                result += resolved
-            } // else
-            
-            result += try resolve(string[end!.endIndex..<string.endIndex])
-        } // if
-        
-        return result
-    }
-
-    func setup() throws -> Void {
-        // local function
-        
-        func resolveConfiguration(key: String) throws -> String? {
-            let fqn = FQN.fromString(key)
-
-            if context.configurationManager.hasValue(fqn.namespace, key: fqn.key) {
-                return try context.configurationManager.getValue(String.self, namespace: fqn.namespace, key: fqn.key)
-            }
-            else {
-                return nil
-            }
-        }
-        
-        resolver =  resolveConfiguration
-        
-        if context.parent == nil {
-            // add initial bean declarations so that constructed objects can also refer to those instances
-            
-            try ApplicationContext.BeanDeclaration(instance: context.injector).collect(context, loader: self)
-            try ApplicationContext.BeanDeclaration(instance: context.configurationManager).collect(context, loader: self)
-            
-            context.injector.register(BeanInjection())
-            context.injector.register(ConfigurationValueInjection(configurationManager: context.configurationManager))
-        }
-    }*/
     
     func setupParser() throws -> Void {
         try register(
