@@ -248,11 +248,35 @@ public class ApplicationContext : BeanFactory {
         func resolve(loader : ApplicationContext.Loader) throws -> Void {
             for property in properties {
                 try property.resolve(loader)
+
+                if !checkTypes(property.value!.getType(), expected: property.getType()) {
+                    throw ApplicationContextErrors.TypeMismatch(message: " property \(Classes.className(bean!.clazz)).\(property.name) expected a \(property.property!.getPropertyType()) got \(property.getType())")
+                }
             }
         }
 
         func prepare(loader : ApplicationContext.Loader) throws -> Void {
             try scope!.prepare(self, factory: loader.context)
+        }
+
+        func checkTypes(type: Any.Type, expected : Any.Type) -> Bool {
+            if type != expected {
+                if let expectedClazz = expected as? AnyClass {
+                    if let clazz = type as? AnyClass {
+                        if !clazz.isSubclassOfClass(expectedClazz) {
+                            return false
+                        }
+                    }
+                    else {
+                        return false
+                    }
+                }
+                else {
+                    return false
+                }
+            }
+
+            return true
         }
         
         func getInstance(context : ApplicationContext) throws -> AnyObject {
@@ -270,32 +294,18 @@ public class ApplicationContext : BeanFactory {
             
             for property in properties {
                 let beanProperty = property.property!
-                
                 let resolved = try property.get(context)
 
                 if resolved != nil {
-                    let type = resolved!.dynamicType
-                    
-                    if beanProperty.getPropertyType() != type { // TODO: isAssignaböeFrom
-                        if let clazz = beanProperty.getPropertyType() as? AnyClass {
-                            if let object = resolved as? AnyObject {
-                                if !object.isKindOfClass(clazz) {
-                                    print("asd")
-                                }
-                            }
-                            else {print("ocuh")}
-                        }
-                        else {throw ApplicationContextErrors.TypeMismatch(message: " property \(Classes.className(bean!.clazz)).\(beanProperty.getName()) expected a \(beanProperty.getPropertyType()) got \(type)")}
-                    }
-
                     if (Tracer.ENABLED) {
                         Tracer.trace("loader", level: .HIGH, message: "set \(resolved!) as property \(bean).\(beanProperty.getName())")
                     }
 
                     try beanProperty.set(result, value: resolved)
-
-                }
+                } // if
             }
+
+            // run processors
             
             try context.populateInstance(result);
             
@@ -346,7 +356,11 @@ public class ApplicationContext : BeanFactory {
         }
 
         func get(context : ApplicationContext) throws -> Any {
-            fatalError("ouch")
+            fatalError("ValueHolder.get is abstract")
+        }
+
+        func getType() -> Any.Type {
+            fatalError("ValueHolder.getType is abstract")
         }
     }
 
@@ -369,12 +383,13 @@ public class ApplicationContext : BeanFactory {
             loader.dependency(ref, before: beanDeclaration)
         }
 
-        override func resolve(loader : ApplicationContext.Loader, type : Any.Type) throws -> ValueHolder {
-            return self // TODO type check
-        }
 
         override func get(context : ApplicationContext) throws -> Any {
             return try ref.getInstance(context)
+        }
+
+        override func getType() -> Any.Type {
+            return ref.bean!.clazz
         }
     }
 
@@ -406,6 +421,10 @@ public class ApplicationContext : BeanFactory {
         override func get(context : ApplicationContext) throws -> Any {
             return try bean!.getInstance(context)
         }
+
+        override func getType() -> Any.Type {
+            return bean!.bean!.clazz
+        }
     }
 
     class EmbeddedBean : ValueHolder {
@@ -429,12 +448,12 @@ public class ApplicationContext : BeanFactory {
             loader.dependency(bean, before: beanDeclaration)
         }
 
-        override func resolve(loader : ApplicationContext.Loader, type : Any.Type) throws -> ValueHolder {
-            return self // TODO typecheck
-        }
-
         override func get(context : ApplicationContext) throws -> Any {
             return try bean.getInstance(context)
+        }
+
+        override func getType() -> Any.Type {
+            return bean.bean!.clazz
         }
     }
 
@@ -453,6 +472,10 @@ public class ApplicationContext : BeanFactory {
 
         override func get(context : ApplicationContext) throws -> Any {
             return value
+        }
+
+        override func getType() -> Any.Type {
+            return value.dynamicType
         }
     }
 
@@ -527,7 +550,7 @@ public class ApplicationContext : BeanFactory {
         
         func connect(beanDeclaration : BeanDeclaration, loader : ApplicationContext.Loader) throws -> Void {
             if property == nil {
-                // HACK
+                // HACK...dunno why...
                 try resolveProperty(beanDeclaration, loader: loader)
             }
 
@@ -540,6 +563,10 @@ public class ApplicationContext : BeanFactory {
 
         func get(context : ApplicationContext) throws -> Any? {
             return try value!.get(context)
+        }
+
+        func getType() -> Any.Type {
+            return value!.getType()
         }
     }
 
