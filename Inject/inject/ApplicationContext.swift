@@ -249,7 +249,7 @@ public class ApplicationContext : BeanFactory {
             for property in properties {
                 try property.resolve(loader)
 
-                if !checkTypes(property.value!.getType(), expected: property.getType()) {
+                if !checkTypes(property.getType(), expected: property.property!.getPropertyType()) {
                     throw ApplicationContextErrors.TypeMismatch(message: " property \(Classes.className(bean!.clazz)).\(property.name) expected a \(property.property!.getPropertyType()) got \(property.getType())")
                 }
             }
