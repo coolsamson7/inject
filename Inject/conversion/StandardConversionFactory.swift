@@ -40,7 +40,8 @@ public class StandardConversionFactory : ConversionFactory {
     var registry = [Key:Conversion]()
     
     // constructor
-    
+
+
     init() {
         // String
         
@@ -78,13 +79,80 @@ public class StandardConversionFactory : ConversionFactory {
         // Float
         
         register(Float.self, targetType: String.self, conversion: {String($0 as! Float)})
-        register(Float.self, targetType: Int.self, conversion: {Int($0 as! Float)})
+        //register(Float.self, targetType: Int.self, conversion: {Int($0 as! Float)})
+        register(Float.self, targetType: Double.self, conversion: {Double($0 as! Float)})
+
+        // Double
+
+        register(Double.self, targetType: String.self, conversion: {String($0 as! Double)})
+        //register(Float.self, targetType: Int.self, conversion: {Int($0 as! Float)})
         
         // Int
         
         register(Int.self, targetType: String.self, conversion: {String($0 as! Int)})
         register(Int.self, targetType: Float.self, conversion: {Float($0 as! Int)})
-        
+        register(Int.self, targetType: Double.self, conversion: {Double($0 as! Int)})
+
+        // Int64
+
+        register(Int64.self, targetType: String.self, conversion: {String($0 as! Int64)})
+        register(Int64.self, targetType: Float.self, conversion: {Float($0 as! Int64)})
+        register(Int64.self, targetType: Double.self, conversion: {Double($0 as! Int64)})
+
+        // UInt64
+
+        register(UInt64.self, targetType: String.self, conversion: {String($0 as! UInt64)})
+        register(UInt64.self, targetType: Float.self, conversion: {Float($0 as! UInt64)})
+        register(UInt64.self, targetType: Double.self, conversion: {Double($0 as! UInt64)})
+
+        // Int32
+
+        register(Int32.self, targetType: String.self, conversion: {String($0 as! Int32)})
+        register(Int32.self, targetType: Int64.self, conversion: {Int64($0 as! Int32)})
+        register(Int32.self, targetType: Float.self, conversion: {Float($0 as! Int32)})
+        register(Int32.self, targetType: Double.self, conversion: {Double($0 as! Int32)})
+
+        // UInt32
+
+        register(UInt32.self, targetType: String.self, conversion: {String($0 as! UInt32)})
+        register(UInt32.self, targetType: UInt64.self, conversion: {UInt64($0 as! UInt32)})
+        register(UInt32.self, targetType: Float.self, conversion: {Float($0 as! UInt32)})
+        register(UInt32.self, targetType: Double.self, conversion: {Double($0 as! UInt32)})
+
+        // Int16
+
+        register(Int16.self, targetType: String.self, conversion: {String($0 as! Int16)})
+        register(Int16.self, targetType: Int32.self, conversion: {Int32($0 as! Int16)})
+        register(Int16.self, targetType: Int64.self, conversion: {Int64($0 as! Int16)})
+        register(Int16.self, targetType: Float.self, conversion: {Float($0 as! Int16)})
+        register(Int16.self, targetType: Double.self, conversion: {Double($0 as! Int16)})
+
+        // UInt16
+
+        register(UInt16.self, targetType: String.self, conversion: {String($0 as! UInt16)})
+        register(UInt16.self, targetType: UInt32.self, conversion: {UInt32($0 as! Int16)})
+        register(UInt16.self, targetType: UInt32.self, conversion: {UInt64($0 as! Int16)})
+        register(UInt16.self, targetType: Float.self, conversion: {Float($0 as! UInt16)})
+        register(UInt16.self, targetType: Double.self, conversion: {Double($0 as! UInt16)})
+
+        // Int8
+
+        register(Int8.self, targetType: String.self, conversion: {String($0 as! Int8)})
+        register(Int8.self, targetType: Int16.self, conversion: {Int16($0 as! Int8)})
+        register(Int8.self, targetType: Int32.self, conversion: {Int32($0 as! Int8)})
+        register(Int8.self, targetType: Int64.self, conversion: {Int64($0 as! Int8)})
+        register(Int8.self, targetType: Float.self, conversion: {Float($0 as! Int8)})
+        register(Int8.self, targetType: Double.self, conversion: {Double($0 as! Int8)})
+
+        // UInt8
+
+        register(UInt8.self, targetType: String.self, conversion: {String($0 as! UInt8)})
+        register(UInt8.self, targetType: UInt16.self, conversion: {UInt16($0 as! UInt8)})
+        register(UInt8.self, targetType: UInt32.self, conversion: {UInt32($0 as! UInt8)})
+        register(UInt8.self, targetType: UInt64.self, conversion: {UInt64($0 as! UInt8)})
+        register(UInt8.self, targetType: Float.self, conversion: {Float($0 as! UInt8)})
+        register(UInt8.self, targetType: Double.self, conversion: {Double($0 as! UInt8)})
+
         // Bool
         
         register(Bool.self, targetType: String.self, conversion: {($0 as! Bool) ? "true" : "false"})

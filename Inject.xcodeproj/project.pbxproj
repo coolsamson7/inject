@@ -32,7 +32,7 @@
 		B09233441D3CFC41008267A2 /* Box.swift in Sources */ = {isa = PBXBuildFile; fileRef = B09233421D3CFC41008267A2 /* Box.swift */; };
 		B09233471D3CFC88008267A2 /* ThreadLocal.swift in Sources */ = {isa = PBXBuildFile; fileRef = B09233461D3CFC88008267A2 /* ThreadLocal.swift */; };
 		B09233521D3CFCCA008267A2 /* Environment.swift in Sources */ = {isa = PBXBuildFile; fileRef = B09233491D3CFCCA008267A2 /* Environment.swift */; };
-		B09233531D3CFCCA008267A2 /* ApplicationContextErrors.swift in Sources */ = {isa = PBXBuildFile; fileRef = B092334A1D3CFCCA008267A2 /* ApplicationContextErrors.swift */; };
+		B09233531D3CFCCA008267A2 /* EnvironmentErrors.swift in Sources */ = {isa = PBXBuildFile; fileRef = B092334A1D3CFCCA008267A2 /* EnvironmentErrors.swift */; };
 		B09233551D3CFCCA008267A2 /* Bean.swift in Sources */ = {isa = PBXBuildFile; fileRef = B092334C1D3CFCCA008267A2 /* Bean.swift */; };
 		B09233561D3CFCCA008267A2 /* BeanFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = B092334D1D3CFCCA008267A2 /* BeanFactory.swift */; };
 		B09233571D3CFCCA008267A2 /* BeanPostProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B092334E1D3CFCCA008267A2 /* BeanPostProcessor.swift */; };
@@ -115,7 +115,7 @@
 		B09233421D3CFC41008267A2 /* Box.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Box.swift; sourceTree = "<group>"; };
 		B09233461D3CFC88008267A2 /* ThreadLocal.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ThreadLocal.swift; sourceTree = "<group>"; };
 		B09233491D3CFCCA008267A2 /* Environment.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Environment.swift; sourceTree = "<group>"; };
-		B092334A1D3CFCCA008267A2 /* ApplicationContextErrors.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ApplicationContextErrors.swift; sourceTree = "<group>"; };
+		B092334A1D3CFCCA008267A2 /* EnvironmentErrors.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EnvironmentErrors.swift; sourceTree = "<group>"; };
 		B092334C1D3CFCCA008267A2 /* Bean.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Bean.swift; sourceTree = "<group>"; };
 		B092334D1D3CFCCA008267A2 /* BeanFactory.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BeanFactory.swift; sourceTree = "<group>"; };
 		B092334E1D3CFCCA008267A2 /* BeanPostProcessor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BeanPostProcessor.swift; sourceTree = "<group>"; };
@@ -230,7 +230,7 @@
 				B092338A1D3D0293008267A2 /* Injection.swift */,
 				B09233881D3D0263008267A2 /* Injector.swift */,
 				B09233491D3CFCCA008267A2 /* Environment.swift */,
-				B092334A1D3CFCCA008267A2 /* ApplicationContextErrors.swift */,
+				B092334A1D3CFCCA008267A2 /* EnvironmentErrors.swift */,
 				B092334C1D3CFCCA008267A2 /* Bean.swift */,
 				B092334D1D3CFCCA008267A2 /* BeanFactory.swift */,
 				B092334E1D3CFCCA008267A2 /* BeanPostProcessor.swift */,
@@ -533,7 +533,7 @@
 				B092336E1D3CFE28008267A2 /* ConfigurationSource.swift in Sources */,
 				B09233891D3D0263008267A2 /* Injector.swift in Sources */,
 				B092337D1D3D00D9008267A2 /* OriginAware.swift in Sources */,
-				B09233531D3CFCCA008267A2 /* ApplicationContextErrors.swift in Sources */,
+				B09233531D3CFCCA008267A2 /* EnvironmentErrors.swift in Sources */,
 				B09233551D3CFCCA008267A2 /* Bean.swift in Sources */,
 				B09233791D3D00D9008267A2 /* Ancestor.swift in Sources */,
 				28D356D9A9627C5D2758C58D /* Semaphore.swift in Sources */,

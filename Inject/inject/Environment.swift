@@ -272,7 +272,7 @@ public class Environment: BeanFactory {
                 try property.resolve(loader)
 
                 if !checkTypes(property.getType(), expected: property.property!.getPropertyType()) {
-                    throw ApplicationContextErrors.TypeMismatch(message: " property \(Classes.className(bean!.clazz)).\(property.name) expected a \(property.property!.getPropertyType()) got \(property.getType())")
+                    throw EnvironmentErrors.TypeMismatch(message: " property \(Classes.className(bean!.clazz)).\(property.name) expected a \(property.property!.getPropertyType()) got \(property.getType())")
                 }
             }
         }
@@ -490,7 +490,78 @@ public class Environment: BeanFactory {
             self.value = value
         }
 
+        // TODO
+
+        func isNumberType(type : Any.Type) -> Bool {
+            if type == Int8.self {
+                return true
+            }
+            else if type == UInt8.self {
+                return true
+            }
+            else if type == Int16.self {
+                return true
+            }
+            else if type == UInt16.self {
+                return true
+            }
+            else if type == Int32.self {
+                return true
+            }
+            else if type == UInt32.self {
+                return true
+            }
+            else if type == Int64.self {
+                return true
+            }
+            else if type == UInt64.self {
+                return true
+            }
+            else if type == Int.self {
+                return true
+            }
+            else if type == Float.self {
+                return true
+            }
+            else if type == Double.self {
+                return true
+            }
+
+
+            return false
+        }
+
+        // move somewhere else...
+        func coerceNumber(value: Any, type: Any.Type) throws -> (value:Any, success:Bool) {
+            if isNumberType(type) {
+                let conversion = StandardConversionFactory.instance.findConversion(value.dynamicType, targetType: type)
+
+                if conversion != nil {
+                    return (try conversion!(object: value), true)
+                }
+            }
+
+            return (value, false)
+        }
+
         // override
+
+        override func resolve(loader : Environment.Loader, type : Any.Type) throws -> ValueHolder {
+            if type != value.dynamicType {
+                // check if we can coerce numbers...
+
+                let coercion = try coerceNumber(value, type: type)
+
+                if coercion.success {
+                    value = coercion.value
+                }
+                else {
+                    throw EnvironmentErrors.TypeMismatch(message: "could not convert a \(value.dynamicType ) into a \(type)")
+                }
+            }
+
+            return  self
+        }
 
         override func get(environment: Environment) throws -> Any {
             return value
@@ -533,7 +604,7 @@ public class Environment: BeanFactory {
                     }
                 }
                 else {
-                    throw ApplicationContextErrors.TypeMismatch(message: "no conversion applicable between String and \(type)")
+                    throw EnvironmentErrors.TypeMismatch(message: "no conversion applicable between String and \(type)")
                 }
             }
             // done
@@ -555,7 +626,7 @@ public class Environment: BeanFactory {
             property = beanDeclaration.bean!.findProperty(name)
             
             if property == nil {
-                throw ApplicationContextErrors.UnknownProperty(property: name, bean: beanDeclaration)
+                throw EnvironmentErrors.UnknownProperty(property: name, bean: beanDeclaration)
             }
         }
         
@@ -913,7 +984,7 @@ public class Environment: BeanFactory {
                     index += 1
                 }
 
-                throw ApplicationContextErrors.CylicDependencies(message: builder.toString())
+                throw EnvironmentErrors.CylicDependencies(message: builder.toString())
             }
 
             // sort according to index
@@ -1000,10 +1071,10 @@ public class Environment: BeanFactory {
                 try bean.postConstruct()
             }
 
-            // ContextAware
+            // EnvironmentAware
 
-            if var contextAware = instance as? EnvironmentAware {
-                contextAware.environment = environment!
+            if var environmentAware = instance as? EnvironmentAware {
+                environmentAware.environment = environment!
             }
 
             // done
@@ -1073,8 +1144,6 @@ public class Environment: BeanFactory {
             try define(BeanDeclaration(instance: configurationManager))
 
             // default post processor
-
-            //postProcessors.append(ApplicationContextProcessor(context: self))
 
             try define(BeanDeclaration(instance: EnvironmentPostProcessor(environment: self))) // should be the first bean!
         }
@@ -1171,7 +1240,7 @@ public class Environment: BeanFactory {
             try loader!.addDeclaration(declaration)
         }
         else {
-            throw ApplicationContextErrors.Exception(message: "context is frozen")
+            throw EnvironmentErrors.Exception(message: "environment is frozen")
         }
 
         // remember id
@@ -1209,11 +1278,11 @@ public class Environment: BeanFactory {
         //self.byType = parent.byType
         //self.byId = parent.byId
 
-        // patch ContextAware
+        // patch EnvironmentAware
 
         for declaration in parent.localBeans {
-            if var contextAware = declaration.singleton as? EnvironmentAware { // does not make sense for beans other than singletons...
-                contextAware.environment = self
+            if var environmentAware = declaration.singleton as? EnvironmentAware { // does not make sense for beans other than singletons...
+                environmentAware.environment = self
             }
         }
     }
@@ -1242,7 +1311,7 @@ public class Environment: BeanFactory {
     func getScope(name : String) throws -> BeanScope {
         let scope = scopes[name]
         if scope == nil {
-            throw ApplicationContextErrors.UnknownScope(scope: name, context: "")
+            throw EnvironmentErrors.UnknownScope(scope: name, context: "")
         }
         else {
             return scope!
@@ -1256,7 +1325,7 @@ public class Environment: BeanFactory {
                 byId[id] = declaration
             }
             else {
-                throw ApplicationContextErrors.AmbiguousBeanById(id: id, context: "")
+                throw EnvironmentErrors.AmbiguousBeanById(id: id, context: "")
             }
         }
     }
@@ -1308,10 +1377,10 @@ public class Environment: BeanFactory {
         let candidates = getBeansByType(BeanDescriptor.forClass(clazz))
         
         if candidates.count == 0 {
-            throw ApplicationContextErrors.NoCandidateForType(type: clazz)
+            throw EnvironmentErrors.NoCandidateForType(type: clazz)
         }
         if candidates.count > 1 {
-            throw ApplicationContextErrors.AmbiguousCandidatesForType(type: clazz)
+            throw EnvironmentErrors.AmbiguousCandidatesForType(type: clazz)
         }
         else {
             return candidates[0]
@@ -1338,7 +1407,7 @@ public class Environment: BeanFactory {
         let declaration = byId[id]
         
         if declaration == nil {
-            throw ApplicationContextErrors.UnknownBeanById(id: id, context: "")
+            throw EnvironmentErrors.UnknownBeanById(id: id, context: "")
         }
         
         return declaration!
@@ -1386,17 +1455,17 @@ public class Environment: BeanFactory {
                 return try bean.getInstance(self) as! T
             }
             else {
-                throw ApplicationContextErrors.UnknownBeanById(id: id!, context: "")
+                throw EnvironmentErrors.UnknownBeanById(id: id!, context: "")
             }
         }
         else {
             let result = getBeansByType(BeanDescriptor.forClass(type as! AnyClass))
             
             if result.count == 0 {
-                throw ApplicationContextErrors.UnknownBeanByType(type: type as! AnyClass)
+                throw EnvironmentErrors.UnknownBeanByType(type: type as! AnyClass)
             }
             else if result.count > 1 {
-                throw ApplicationContextErrors.AmbiguousBeanByType(type: type as! AnyClass)
+                throw EnvironmentErrors.AmbiguousBeanByType(type: type as! AnyClass)
             }
             else {
                 return try result[0].getInstance(self) as! T
@@ -1414,17 +1483,17 @@ public class Environment: BeanFactory {
                 return try bean.getInstance(self) 
             }
             else {
-                throw ApplicationContextErrors.UnknownBeanById(id: id!, context: "")
+                throw EnvironmentErrors.UnknownBeanById(id: id!, context: "")
             }
         }
         else {
             let result = getBeansByType(BeanDescriptor.forClass(type ))
 
             if result.count == 0 {
-                throw ApplicationContextErrors.UnknownBeanByType(type: type )
+                throw EnvironmentErrors.UnknownBeanByType(type: type )
             }
             else if result.count > 1 {
-                throw ApplicationContextErrors.AmbiguousBeanByType(type: type )
+                throw EnvironmentErrors.AmbiguousBeanByType(type: type )
             }
             else {
                 return try result[0].getInstance(self)

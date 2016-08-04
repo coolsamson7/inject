@@ -1,12 +1,12 @@
 //
-//  ApplicationContextErrors.swift
+//  EnvironmentErrors.swift
 //  Inject
 //
 //  Created by Andreas Ernst on 18.07.16.
 //  Copyright © 2016 Andreas Ernst. All rights reserved.
 //
 
-public enum ApplicationContextErrors: ErrorType , CustomStringConvertible {
+public enum EnvironmentErrors: ErrorType , CustomStringConvertible {
     case ParseError(message: String)
     case NoCandidateForType(type : Any.Type)
     case AmbiguousCandidatesForType(type : Any.Type)

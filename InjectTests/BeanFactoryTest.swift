@@ -140,7 +140,7 @@ class BeanFactoryTests: XCTestCase {
 
         // Measure
 
-        if true {
+        if false {
             try! Timer.measure({
                 var environment = try! Environment(name: "parent")
 

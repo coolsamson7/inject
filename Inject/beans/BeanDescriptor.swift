@@ -94,17 +94,17 @@ public class BeanDescriptor : CustomStringConvertible {
             return true;
         }
         
-        public func get(object: AnyObject!) -> AnyObject? {
+        public func get(object: AnyObject!) -> Any {
             return object.valueForKey(name)
         }
         
         public func set(object: AnyObject, value: Any?) throws -> Void {
             if value != nil {
-                object.setValue(value as? AnyObject, forKey: name)
+                object.setValue(box(value!), forKey: name)
             }
             else {
                 if optional {
-                    object.setValue(value as? AnyObject, forKey: name)
+                    object.setValue(value, forKey: name)
                 }
                 else {
                     throw BeanDescriptorErrors.CannotSetNil(message: "nil not allowed for property \(self.name)")
@@ -126,6 +126,46 @@ public class BeanDescriptor : CustomStringConvertible {
             if inject is InjectBean {
                 autowired = true
             }
+        }
+
+        // internal
+
+        // take car of boxing...ugh
+
+        func box(value: Any) -> AnyObject {
+            if value is Int64 {
+                return NSNumber(longLong: value as! Int64)
+            }
+
+            if value is UInt64 {
+                return NSNumber(unsignedLongLong: value as! UInt64)
+            }
+
+            if value is Int32 {
+                return NSNumber(int: value as! Int32)
+            }
+
+            if value is UInt32 {
+                return NSNumber(unsignedInt: value as! UInt32)
+            }
+
+            if value is Int16 {
+                return NSNumber(short: value as! Int16)
+            }
+
+            if value is UInt16 {
+                return NSNumber(unsignedShort: value as! UInt16)
+            }
+
+            if value is Int8 {
+                return NSNumber(char: value as! Int8)
+            }
+
+            if value is UInt8 {
+                return NSNumber(unsignedChar: value as! UInt8)
+            }
+
+            return value as! AnyObject
         }
         
         // CustomStringConvertible
@@ -297,7 +337,7 @@ public class BeanDescriptor : CustomStringConvertible {
     
     // reflection
     
-    func get(object: NSObject!, property: String) throws -> AnyObject? {
+    func get(object: NSObject!, property: String) throws -> Any? {
         return try getProperty(property).get(object);
     }
     

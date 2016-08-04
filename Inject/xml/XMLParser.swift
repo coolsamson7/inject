@@ -131,7 +131,7 @@ public class XMLParser: NSObject {
                         //TODO attributeContainer[key] = value
                     }
                     else {
-                        throw ApplicationContextErrors.ParseError(message: "unknown xml attribute \"\(key)\" in [\(parser.lineNumber):\(parser.columnNumber)]")
+                        throw EnvironmentErrors.ParseError(message: "unknown xml attribute \"\(key)\" in [\(parser.lineNumber):\(parser.columnNumber)]")
                     }
                 }
             }
