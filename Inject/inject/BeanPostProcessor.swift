@@ -7,5 +7,5 @@
 //
 
 protocol BeanPostProcessor {
-    func process(bean : AnyObject) -> AnyObject // reihenfolge!!!!!
+    func process(bean : AnyObject) throws -> AnyObject
 }

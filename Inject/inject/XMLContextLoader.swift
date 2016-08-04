@@ -241,13 +241,13 @@ public class XMLContextLoader: XMLParser {
     
     override func parse(data : NSData) throws -> AnyObject? {
         if (Tracer.ENABLED) {
-            Tracer.trace("xml loader", level: .HIGH, message: "parse")
+            Tracer.trace("inject.xml", level: .HIGH, message: "parse")
         }
 
         let beans = try super.parse(data) as! Beans
 
         if (Tracer.ENABLED) {
-            Tracer.trace("xml loader", level: .HIGH, message: "process")
+            Tracer.trace("inject.xml", level: .HIGH, message: "process")
         }
 
         let beanDeclarations = try convert(beans)

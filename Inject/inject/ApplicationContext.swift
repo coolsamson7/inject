@@ -59,7 +59,7 @@ public class ApplicationContext : BeanFactory {
         }
     }
     
-    public class BeanDeclaration : Declaration, Ancestor {
+    public class BeanDeclaration : Declaration {
         // instance data
         
         var scope : BeanScope? = nil
@@ -84,6 +84,7 @@ public class ApplicationContext : BeanFactory {
         
         init(instance : AnyObject) {
             self.factory = ValueFactory(object: instance)
+            self.singleton = instance
             self.bean = BeanDescriptor.forClass(instance.dynamicType)
         }
         
@@ -176,6 +177,27 @@ public class ApplicationContext : BeanFactory {
         }
         
         // func
+
+        func report(builder : StringBuilder) {
+            builder.append(Classes.className(bean!.clazz))
+            if id != nil {
+                builder.append("[\"\(id!)\"]")
+            }
+
+            if lazy {
+                builder.append(" lazy: true")
+            }
+
+            if abstract {
+                builder.append(" abstract: true")
+            }
+
+            if self.scope!.name != "singleton" {
+                builder.append(" scope: \(scope!.name)")
+            }
+
+            builder.append("\n")
+        }
         
         func inheritFrom(parent : BeanDeclaration, loader: ApplicationContext.Loader) throws -> Void  {
             var resolveProperties = false
@@ -257,6 +279,16 @@ public class ApplicationContext : BeanFactory {
 
         func prepare(loader : ApplicationContext.Loader) throws -> Void {
             try scope!.prepare(self, factory: loader.context)
+
+            // check for post processors
+
+            if bean!.clazz is BeanPostProcessor.Type {
+                if (Tracer.ENABLED) {
+                    Tracer.trace("inject.runtime", level: .HIGH, message: "add post processor \(bean!.clazz)")
+                }
+
+                loader.context.postProcessors.append(try self.getInstance(loader.context) as! BeanPostProcessor) // sanity checks
+            }
         }
 
         func checkTypes(type: Any.Type, expected : Any.Type) -> Bool {
@@ -285,7 +317,7 @@ public class ApplicationContext : BeanFactory {
         
         func create(context : ApplicationContext) throws -> AnyObject {
             if (Tracer.ENABLED) {
-                Tracer.trace("loader", level: .HIGH, message: "create \(bean!.clazz) instance")
+                Tracer.trace("inject.runtime", level: .HIGH, message: "create instance of \(bean!.clazz)")
             }
             
             let result = try factory.create(self) // constructor, value, etc
@@ -298,7 +330,7 @@ public class ApplicationContext : BeanFactory {
 
                 if resolved != nil {
                     if (Tracer.ENABLED) {
-                        Tracer.trace("loader", level: .HIGH, message: "set \(resolved!) as property \(bean).\(beanProperty.getName())")
+                        Tracer.trace("inject.runtime", level: .FULL, message: "set \(Classes.className(bean!.clazz)).\(beanProperty.getName()) = \(resolved!)")
                     }
 
                     try beanProperty.set(result, value: resolved)
@@ -307,17 +339,7 @@ public class ApplicationContext : BeanFactory {
 
             // run processors
             
-            try context.populateInstance(result);
-            
-            return result
-        }
-        
-        // Ancestor
-        
-        func addChild(child : AnyObject) -> Void {
-            if child is PropertyDeclaration {
-                properties.append(child as! PropertyDeclaration)
-            }
+            return try context.runPostProcessors(result);
         }
         
         // CustomStringConvertible
@@ -709,7 +731,7 @@ public class ApplicationContext : BeanFactory {
                     let resolved = try resolver!(key: key)
 
                     if (Tracer.ENABLED) {
-                        Tracer.trace("loader", level: .HIGH, message: "resolve configuration key \(key) = \(resolved)")
+                        Tracer.trace("inject.configuration", level: .HIGH, message: "resolve configuration key \(key) = \(resolved)")
                     }
 
                     if  resolved != nil {
@@ -724,7 +746,7 @@ public class ApplicationContext : BeanFactory {
                     let resolved = try resolver!(key: key)!
 
                     if (Tracer.ENABLED) {
-                        Tracer.trace("loader", level: .HIGH, message: "resolve configuration key \(key) = \(resolved)")
+                        Tracer.trace("inject.configuration", level: .HIGH, message: "resolve configuration key \(key) = \(resolved)")
                     }
 
                     result += resolved
@@ -751,16 +773,6 @@ public class ApplicationContext : BeanFactory {
             }
 
             resolver =  resolveConfiguration
-
-            if context.parent == nil {
-                // add initial bean declarations so that constructed objects can also refer to those instances
-
-                try context.define(ApplicationContext.BeanDeclaration(instance: context.injector))
-                try context.define(ApplicationContext.BeanDeclaration(instance: context.configurationManager))
-
-                context.injector.register(BeanInjection())
-                context.injector.register(ConfigurationValueInjection(configurationManager: context.configurationManager))
-            }
         }
 
         // internal
@@ -823,7 +835,7 @@ public class ApplicationContext : BeanFactory {
                 } // for
 
                 if dependency.lowLink == dependency.index! {
-                    // if we are in the root of the component
+                    // root of a component
 
                     var group:[Dependency] = []
 
@@ -852,6 +864,10 @@ public class ApplicationContext : BeanFactory {
         }
 
         func load() throws -> ApplicationContext {
+            if (Tracer.ENABLED) {
+                Tracer.trace("inject.loader", level: .HIGH, message: "load \(context.name)")
+            }
+
             loading = true
 
             try setup()
@@ -859,10 +875,8 @@ public class ApplicationContext : BeanFactory {
             // collect
 
             if (Tracer.ENABLED) {
-                Tracer.trace("loader", level: .HIGH, message: "collect bean information")
+                Tracer.trace("inject.loader", level: .HIGH, message: "collect beans")
             }
-
-            // collect
 
             for dependency in dependencyList {
                 try dependency.declaration.collect(context, loader: self) // define
@@ -871,7 +885,7 @@ public class ApplicationContext : BeanFactory {
             // connect
 
             if (Tracer.ENABLED) {
-                Tracer.trace("loader", level: .HIGH, message: "connect beans")
+                Tracer.trace("inject.loader", level: .HIGH, message: "connect beans")
             }
 
             for dependency in dependencyList {
@@ -879,6 +893,10 @@ public class ApplicationContext : BeanFactory {
             }
 
             // sort
+
+            if (Tracer.ENABLED) {
+                Tracer.trace("inject.loader", level: .HIGH, message: "sort beans")
+            }
 
             let cycles = sortDependencies(dependencyList)
             if cycles.count > 0 {
@@ -902,26 +920,29 @@ public class ApplicationContext : BeanFactory {
 
             dependencyList.sortInPlace({$0.index < $1.index})
 
+            // and resort local beans
+
+            context.localBeans.sortInPlace({dependencies[$0]!.index < dependencies[$1]!.index})
+
             // resolve
 
-
             if (Tracer.ENABLED) {
-                Tracer.trace("loader", level: .HIGH, message: "resolve beans")
+                Tracer.trace("inject.loader", level: .HIGH, message: "resolve beans")
             }
 
             for dependency in dependencyList {
-                try dependency.declaration.resolve(self)
-            }
+                let bean = dependency.declaration
 
-            // instantiate all non lazy singletons, etc...
+                try bean.resolve(self)
+            }
 
 
             if (Tracer.ENABLED) {
-                Tracer.trace("loader", level: .HIGH, message: "prepare beans")
+                Tracer.trace("inject.loader", level: .HIGH, message: "prepare beans")
             }
 
             for dependency in dependencyList {
-                try dependency.declaration.prepare(self)
+                try dependency.declaration.prepare(self)  // instantiate all non lazy singletons, add post processors, etc...
             }
 
             // done
@@ -930,8 +951,70 @@ public class ApplicationContext : BeanFactory {
         }
     }
 
+    class ApplicationContextPostProcessor: NSObject, ContextAware, BeanPostProcessor {
+        // instance data
+
+        var injector : Injector
+        var _context : ApplicationContext?
+        var context : ApplicationContext? {
+            get {
+                return _context
+            }
+            set {
+                _context = newValue
+            }
+        }
+
+        // init
+
+        // needed by the BeanDescriptor
+        override init() {
+            self.injector = Injector()
+            super.init()
+        }
+
+        init(context : ApplicationContext) {
+            self.injector = context.injector
+            self._context = context
+
+
+            super.init()
+        }
+
+        // BeanPostProcessor
+
+        func process(instance : AnyObject) throws -> AnyObject {
+            if (Tracer.ENABLED) {
+                Tracer.trace("inject.runtime", level: .HIGH, message: "default post process a \"\(instance.dynamicType)\"")
+            }
+
+            // inject
+
+            try injector.inject(instance, context: context!)
+
+            // check protocols
+
+            // Bean
+
+            if let bean = instance as? Bean {
+                try bean.postConstruct()
+            }
+
+            // ContextAware
+
+            if var contextAware = instance as? ContextAware {
+                contextAware.context = context!
+            }
+
+            // done
+
+            return instance
+        }
+    }
+
     // instance data
 
+    var name : String = ""
     var loader : Loader?
     var parent : ApplicationContext? = nil
     var injector : Injector
@@ -940,35 +1023,61 @@ public class ApplicationContext : BeanFactory {
     var byId = [String : BeanDeclaration]()
     var postProcessors = [BeanPostProcessor]()
     var scopes = [String:BeanScope]()
+    var localBeans = [BeanDeclaration]()
+
+    var singletonScope : BeanScope
     
     // init
     
-    init(parent : ApplicationContext? = nil) throws {
+    init(name: String, parent : ApplicationContext? = nil) throws {
+        self.name = name
+
         if parent != nil {
             self.parent = parent
-            
-            // inherit stuff
-            
             self.injector = parent!.injector
             self.configurationManager = parent!.configurationManager
-            // is that good to copy arrays?
-            self.postProcessors = parent!.postProcessors
+            self.singletonScope = parent!.singletonScope
+            self.scopes = parent!.scopes
+
             self.byType = parent!.byType
             self.byId = parent!.byId
-            self.scopes = parent!.scopes
-            
+
+            loader = Loader(context: self)
         }
         else {
-            injector = Injector()
-            configurationManager = try ConfigurationManager(scope: Scope.WILDCARD)
-            
-            // default scopes
-            
-            registerScope(PrototypeScope())
-            registerScope(SingletonScope())
-        }
+            // configuration manager
 
-        loader = Loader(context: self)
+            configurationManager = try ConfigurationManager(scope: Scope.WILDCARD)
+
+            // injector
+
+            injector = Injector()
+
+            injector.register(BeanInjection())
+            injector.register(ConfigurationValueInjection(configurationManager: configurationManager))
+
+            // default scopes
+
+            singletonScope = SingletonScope() // cache scope
+
+            registerScope(PrototypeScope())
+            registerScope(singletonScope)
+
+            // set loader here in order to prevent exception..
+
+            loader = Loader(context: self)
+
+            // add initial bean declarations so that constructed objects can also refer to those instances
+
+            try define(BeanDeclaration(instance: injector))
+            try define(BeanDeclaration(instance: configurationManager))
+
+            // default post processor
+
+            //postProcessors.append(ApplicationContextProcessor(context: self))
+
+            try define(BeanDeclaration(instance: ApplicationContextPostProcessor(context: self))) // should be the first bean!
+        }
     }
 
     // public
@@ -983,19 +1092,23 @@ public class ApplicationContext : BeanFactory {
 
             if parent != nil {
                 try parent!.validate()
+
+                inheritFrom(parent!)
+            }
+
+            if (Tracer.ENABLED) {
+                Tracer.trace("inject.runtime", level: .HIGH, message: "refresh \(name)")
             }
 
             // load
 
             try loader!.load()
 
-            loader = nil // prevent double loading...
-        }
-    }
+            // report
 
-    func validate() throws {
-        if loader != nil && !loader!.loading {
-            try refresh()
+            //report()
+
+            loader = nil // prevent double loading...
         }
     }
 
@@ -1044,8 +1157,87 @@ public class ApplicationContext : BeanFactory {
 
         return result
     }
-    
+
+    public func define(declaration : ApplicationContext.BeanDeclaration) throws -> ApplicationContext {
+        // fix scope if not available
+
+        if declaration.scope == nil {
+            declaration.scope = singletonScope
+        }
+
+        // pass to loader if set
+
+        if loader != nil {
+            try loader!.addDeclaration(declaration)
+        }
+        else {
+            throw ApplicationContextErrors.Exception(message: "context is frozen")
+        }
+
+        // remember id
+
+        if declaration.id != nil { // doesn't matter if abstract or not
+            try rememberId(declaration)
+        }
+
+        // remember by type for injections
+
+        if !declaration.abstract {
+            try rememberType(declaration)
+        }
+
+        // local beans
+
+        localBeans.append(declaration)
+
+        // done
+
+        return self
+    }
+
     // internal
+
+    func inheritFrom(parent : ApplicationContext) {
+        if (Tracer.ENABLED) {
+            Tracer.trace("inject.loader", level: .HIGH, message: "inherit from \(parent.name)")
+        }
+
+        self.postProcessors = parent.postProcessors
+
+        // nor merge for dictionaries...
+
+        //self.byType = parent.byType
+        //self.byId = parent.byId
+
+        // patch ContextAware
+
+        for declaration in parent.localBeans {
+            if var contextAware = declaration.singleton as? ContextAware { // does not make sense for beans other than singletons...
+                contextAware.context = self
+            }
+        }
+    }
+
+
+    func report() {
+        let builder = StringBuilder()
+
+        builder.append("### \(name) beans:\n")
+
+        for bean in localBeans {
+            bean.report(builder)
+        }
+
+        builder.append("\n")
+
+        print(builder.toString())
+    }
+
+    func validate() throws {
+        if loader != nil && !loader!.loading {
+            try refresh()
+        }
+    }
 
     func getScope(name : String) throws -> BeanScope {
         let scope = scopes[name]
@@ -1056,19 +1248,7 @@ public class ApplicationContext : BeanFactory {
             return scope!
         }
     }
-    
-    func setParent(parent : ApplicationContext) {
-        self.parent = parent
-        
-        // inherit stuff
-        
-        self.injector = parent.injector
-        self.configurationManager = parent.configurationManager
-        // is that good to copy arrays?
-        self.postProcessors = parent.postProcessors
-        self.byType = parent.byType
-        self.byId = parent.byId
-    }
+
     
     func rememberId(declaration : ApplicationContext.BeanDeclaration) throws -> Void {
         if let id = declaration.id {
@@ -1123,44 +1303,9 @@ public class ApplicationContext : BeanFactory {
             }
         }
     }
-    
-    public func define(declaration : ApplicationContext.BeanDeclaration) throws -> ApplicationContext {
-        // fix scope if not available
 
-        if declaration.scope == nil {
-            declaration.scope = try getScope("singleton")
-        }
-
-        // pass to loader is set
-
-        if loader != nil {
-            try loader!.addDeclaration(declaration)
-        }
-        else {
-            fatalError("context is frozen")
-        }
-
-        // remember id
-        
-        if declaration.id != nil { // doesn't matter if abstract or not
-            try rememberId(declaration)
-        }
-        
-        // remember by type for injections
-        
-        if !declaration.abstract {
-            try rememberType(declaration)
-        }
-        
-        // done
-        
-        return self
-    }
-    
     func getCandidate(clazz : AnyClass) throws -> ApplicationContext.BeanDeclaration {
-        //let clazz : AnyClass = try Classes.unwrapOptional(type)
-        
-        let candidates = findByType(BeanDescriptor.forClass(clazz))
+        let candidates = getBeansByType(BeanDescriptor.forClass(clazz))
         
         if candidates.count == 0 {
             throw ApplicationContextErrors.NoCandidateForType(type: clazz)
@@ -1173,41 +1318,20 @@ public class ApplicationContext : BeanFactory {
         }
     }
     
-    func populateInstance(instance : AnyObject) throws -> Void {
+    func runPostProcessors(instance : AnyObject) throws -> AnyObject {
+        var result = instance
+
         // inject
         
         if (Tracer.ENABLED) {
-            Tracer.trace("loader", level: .HIGH, message: "populate a \"\(instance.dynamicType)\"")
+            Tracer.trace("inject.runtime", level: .HIGH, message: "run post processors on a \"\(result.dynamicType)\"")
         }
-        
-        try injector.inject(instance, context: self)
-        
-        // execute processors
-        
+
         for processor in postProcessors {
-            processor.process(instance)
+            result = try processor.process(result)
         }
-        
-        // check protocols
-        
-        // Bean
-        
-        if let bean = instance as? Bean {
-            try bean.postConstruct()
-        }
-        
-        // ContextAware
-        
-        if var contextAware = instance as? ContextAware {
-            contextAware.context = self
-        }
-        
-        // remember post processors
-        // TODO: must be done only once!
-        
-        if let postProcessor = instance as? BeanPostProcessor {
-            postProcessors.append(postProcessor)
-        }
+
+        return result
     }
     
     func getDeclarationById(id : String) throws -> ApplicationContext.BeanDeclaration {
@@ -1219,8 +1343,14 @@ public class ApplicationContext : BeanFactory {
         
         return declaration!
     }
-    
-    func findByType(bean : BeanDescriptor) -> [ApplicationContext.BeanDeclaration] {
+
+    // public
+
+    public func getBeansByType(clazz : AnyClass) -> [ApplicationContext.BeanDeclaration] {
+        return getBeansByType(BeanDescriptor.forClass(clazz))
+    }
+
+    public func getBeansByType(bean : BeanDescriptor) -> [ApplicationContext.BeanDeclaration] {
         // local func
         
         func collect(bean : BeanDescriptor, inout candidates : [ApplicationContext.BeanDeclaration]) -> Void {
@@ -1247,8 +1377,6 @@ public class ApplicationContext : BeanFactory {
         
         return result
     }
-    
-    // public
 
     public func getBean<T>(type : T.Type, byId id : String? = nil) throws -> T {
         try validate()
@@ -1262,7 +1390,7 @@ public class ApplicationContext : BeanFactory {
             }
         }
         else {
-            let result = findByType(BeanDescriptor.forClass(type as! AnyClass))
+            let result = getBeansByType(BeanDescriptor.forClass(type as! AnyClass))
             
             if result.count == 0 {
                 throw ApplicationContextErrors.UnknownBeanByType(type: type as! AnyClass)
@@ -1290,7 +1418,7 @@ public class ApplicationContext : BeanFactory {
             }
         }
         else {
-            let result = findByType(BeanDescriptor.forClass(type ))
+            let result = getBeansByType(BeanDescriptor.forClass(type ))
 
             if result.count == 0 {
                 throw ApplicationContextErrors.UnknownBeanByType(type: type )

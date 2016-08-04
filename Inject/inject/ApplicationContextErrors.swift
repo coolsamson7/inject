@@ -18,6 +18,7 @@ public enum ApplicationContextErrors: ErrorType , CustomStringConvertible {
     case CylicDependencies(message:String)
     case UnknownScope(scope : String, context: String)
     case TypeMismatch(message: String)
+    case Exception(message: String)
     
     // CustomStringConvertible
     
@@ -60,6 +61,9 @@ public enum ApplicationContextErrors: ErrorType , CustomStringConvertible {
             
         case .UnknownScope(let scope):
             builder.append("\(self.dynamicType).UnknownScope: unknown scope \"\(scope)\"");
+
+            case .Exception(let message):
+                builder.append("\(self.dynamicType).Exception: \"\(message)\"");
         } // switch
         
         return builder.toString()

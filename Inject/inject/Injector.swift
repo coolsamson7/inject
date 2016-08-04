@@ -25,7 +25,7 @@ public class Injector : NSObject {
                 let value = try injection.computeValue(inject, property: property, context: context)
                 
                 if (Tracer.ENABLED) {
-                    Tracer.trace("loader", level: .HIGH, message: "inject \(value) in property \(target.dynamicType).\(property.getName())")
+                    Tracer.trace("inject", level: .HIGH, message: "inject \(value) in property \(target.dynamicType).\(property.getName())")
                 }
                 
                 try property.set(target, value: value)
