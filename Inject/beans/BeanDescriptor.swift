@@ -165,7 +165,7 @@ public class BeanDescriptor : CustomStringConvertible {
                 return NSNumber(unsignedChar: value as! UInt8)
             }
 
-            return value as! AnyObject
+            return value as! AnyObject // Strings...
         }
         
         // CustomStringConvertible
