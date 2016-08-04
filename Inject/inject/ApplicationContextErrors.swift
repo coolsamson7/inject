@@ -14,7 +14,7 @@ public enum ApplicationContextErrors: ErrorType , CustomStringConvertible {
     case AmbiguousBeanByType(type : AnyClass)
     case AmbiguousBeanById(id : String, context: String)
     case UnknownBeanById(id : String, context: String)
-    case UnknownProperty(property:String, bean : ApplicationContext.BeanDeclaration)
+    case UnknownProperty(property:String, bean : Environment.BeanDeclaration)
     case CylicDependencies(message:String)
     case UnknownScope(scope : String, context: String)
     case TypeMismatch(message: String)

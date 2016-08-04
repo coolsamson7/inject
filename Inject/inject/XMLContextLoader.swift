@@ -6,7 +6,7 @@
 //  Copyright © 2016 Andreas Ernst. All rights reserved.
 //
 
-public class XMLContextLoader: XMLParser {
+public class XMLEnvironmentLoader: XMLParser {
     // local classes
     
     public class Declaration : NSObject, OriginAware {
@@ -72,23 +72,23 @@ public class XMLContextLoader: XMLParser {
         
         // public
         
-        public func convert(context : ApplicationContext) throws -> ApplicationContext.BeanDeclaration {
-            let bean = ApplicationContext.BeanDeclaration()
+        public func convert(environment: Environment) throws -> Environment.BeanDeclaration {
+            let bean = Environment.BeanDeclaration()
             
             bean.origin = origin
             
-            bean.scope = try context.getScope(scope)
+            bean.scope = try environment.getScope(scope)
             bean.lazy = lazy
             bean.abstract = abstract
-            bean.parent = parent != nil ? ApplicationContext.BeanDeclaration(id: parent!) : nil
+            bean.parent = parent != nil ? Environment.BeanDeclaration(id: parent!) : nil
             bean.id = id
-            bean.dependsOn = dependsOn != nil ? ApplicationContext.BeanDeclaration(id: dependsOn!) : nil
+            bean.dependsOn = dependsOn != nil ? Environment.BeanDeclaration(id: dependsOn!) : nil
             bean.bean = clazz != nil ? try BeanDescriptor.forClass(clazz!) : nil
             bean.target =  target != nil ? try BeanDescriptor.forClass(target!) : nil
             
             
             for property in properties {
-                bean.properties.append(try property.convert(context))
+                bean.properties.append(try property.convert(environment))
             }
             
             return bean
@@ -142,20 +142,20 @@ public class XMLContextLoader: XMLParser {
         
         // public
         
-        internal func convert(context : ApplicationContext) throws -> ApplicationContext.PropertyDeclaration {
-            let property = ApplicationContext.PropertyDeclaration()
+        internal func convert(environment: Environment) throws -> Environment.PropertyDeclaration {
+            let property = Environment.PropertyDeclaration()
             
             property.origin = origin
             
             property.name = name
             if ref != nil {
-                property.value = ApplicationContext.BeanReference(ref: ref!)
+                property.value = Environment.BeanReference(ref: ref!)
             }
             else if declaration != nil {
-                property.value = ApplicationContext.EmbeddedBean(bean: try declaration!.convert(context))
+                property.value = Environment.EmbeddedBean(bean: try declaration!.convert(environment))
             }
             else {
-                property.value = ApplicationContext.PlaceHolder(value: value!)
+                property.value = Environment.PlaceHolder(value: value!)
             }
 
 
@@ -173,11 +173,11 @@ public class XMLContextLoader: XMLParser {
     
     // instance data
     
-    var context: ApplicationContext
+    var context: Environment
     
     // init
     
-    init(context: ApplicationContext, data : NSData) throws {
+    init(context: Environment, data : NSData) throws {
         self.context = context
         
         super.init()
@@ -216,8 +216,8 @@ public class XMLContextLoader: XMLParser {
         }
     }
     
-    func convert(beans : Beans) throws -> [ApplicationContext.BeanDeclaration] {
-        var beanDeclarations : [ApplicationContext.BeanDeclaration] = []
+    func convert(beans : Beans) throws -> [Environment.BeanDeclaration] {
+        var beanDeclarations : [Environment.BeanDeclaration] = []
         
         for declaration in beans.declarations {
             if let bean = declaration as? Bean {

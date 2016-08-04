@@ -14,16 +14,16 @@ class ConfigurationTest: XCTestCase {
 
 
     func testConfiguration() {
-        Tracer.setTraceLevel("loader", level: .FULL)
+        Tracer.setTraceLevel("inject", level: .FULL)
         let parentData = NSData(contentsOfURL: NSBundle(forClass: ConfigurationTest.self).URLForResource("configuration", withExtension: "xml")!)!
 
         ConfigurationNamespaceHandler(namespace: "configuration")
 
-        let context = try! ApplicationContext(parent: nil)
+        let environment = try! Environment(name: "environment")
 
-        try! context.loadXML(parentData)
+        try! environment.loadXML(parentData)
 
-        let configurationManager = context.getConfigurationManager()
+        let configurationManager = environment.getConfigurationManager()
 
         let string = try! configurationManager.getValue(String.self, namespace: "com.foo", key: "string")
         let int    = try! configurationManager.getValue(Int.self, namespace: "com.foo", key: "int")

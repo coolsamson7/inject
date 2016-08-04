@@ -20,9 +20,9 @@ public class Injector : NSObject {
             analyze(injector, bean: bean);
         }
         
-        func inject(target : AnyObject, context: ApplicationContext) throws -> Void {
+        func inject(target : AnyObject, context: Environment) throws -> Void {
             for (inject, property, injection) in injections {
-                let value = try injection.computeValue(inject, property: property, context: context)
+                let value = try injection.computeValue(inject, property: property, environment: context)
                 
                 if (Tracer.ENABLED) {
                     Tracer.trace("inject", level: .HIGH, message: "inject \(value) in property \(target.dynamicType).\(property.getName())")
@@ -58,7 +58,7 @@ public class Injector : NSObject {
         }
     }
     
-    func inject(target : AnyObject, context: ApplicationContext) throws -> Void  {
+    func inject(target : AnyObject, context: Environment) throws -> Void  {
         let bean = BeanDescriptor.forClass(target.dynamicType)
         
         if let classInjections = cachedInjections[bean.clazz] {

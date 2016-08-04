@@ -104,7 +104,7 @@ public class ConfigurationNamespaceHandler : NamespaceHandler {
     
     // override
     
-    override func register(loader : XMLContextLoader) throws {
+    override func register(loader : XMLEnvironmentLoader) throws {
         try super.register(loader)
 
         try loader.register(
@@ -119,7 +119,7 @@ public class ConfigurationNamespaceHandler : NamespaceHandler {
         )
     }
     
-    override func process(namespaceAware : NamespaceAware, inout beans : [ApplicationContext.BeanDeclaration]) throws -> Void {
+    override func process(namespaceAware : NamespaceAware, inout beans : [Environment.BeanDeclaration]) throws -> Void {
         if let configuration = namespaceAware as? Configuration {
             let url = "configuration snippets"
             let namespace = configuration.configurationNamespace

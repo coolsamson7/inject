@@ -20,7 +20,7 @@ public class ConfigurationValueInjection : Injection {
     
     // implement
     
-    override func computeValue(inject : Inject, property: BeanDescriptor.PropertyDescriptor, context : ApplicationContext) throws -> Any {
+    override func computeValue(inject : Inject, property: BeanDescriptor.PropertyDescriptor, environment: Environment) throws -> Any {
         if let injectConfigurationValue = inject as? InjectConfigurationValue {
             return try configurationManager!.getValue(property.getPropertyType(), namespace: injectConfigurationValue.namespace, key: injectConfigurationValue.key, defaultValue: injectConfigurationValue.defaultValue)
         } // if

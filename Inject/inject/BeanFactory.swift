@@ -7,5 +7,5 @@
 //
 
 public protocol BeanFactory {
-    func create(bean : ApplicationContext.BeanDeclaration) throws -> AnyObject
+    func create(bean : Environment.BeanDeclaration) throws -> AnyObject
 }

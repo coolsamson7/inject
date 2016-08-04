@@ -6,6 +6,6 @@
 //  Copyright © 2016 Andreas Ernst. All rights reserved.
 //
 
-protocol ContextAware {
-    var context : ApplicationContext? { get set }
+protocol EnvironmentAware {
+    var environment: Environment? { get set }
 }

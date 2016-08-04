@@ -36,6 +36,7 @@ class Data : NSObject , Bean, ClassInitializer {
     var float : Float = 0.0
     var double : Double = 0.0
     var character : Character = Character(" ")
+    var int8 : Int8 = 0
 
     var foo  : FooBase?
     var bar  : Bar?
@@ -91,13 +92,15 @@ class Foo : FooBase {
 }
 
 class BeanFactoryTests: XCTestCase {
+    override class func setUp() {
+        Classes.setDefaultBundle(BeanFactoryTests.self)
+
+        Tracer.setTraceLevel("inject", level: .FULL)
+    }
+
     // tests
     
     func testXML() {
-        Classes.setDefaultBundle(self.dynamicType)
-
-        Tracer.setTraceLevel("loader", level: .FULL)
-
         ConfigurationNamespaceHandler(namespace: "configuration")
 
         // load parent xml
@@ -105,60 +108,64 @@ class BeanFactoryTests: XCTestCase {
         let parentData = NSData(contentsOfURL: NSBundle(forClass: BeanFactoryTests.self).URLForResource("parent", withExtension: "xml")!)!
         let childData  = NSData(contentsOfURL: NSBundle(forClass: BeanFactoryTests.self).URLForResource("application", withExtension: "xml")!)!
 
-        var context = try! ApplicationContext(parent: nil)
+        var environment = try! Environment(name: "parent")
 
-        try! context.loadXML(parentData)
+        try! environment.loadXML(parentData)
         
         // load child
 
-        context = try! ApplicationContext(parent: context)
+        environment = try! Environment(name: "parent", parent: environment)
 
-        try! context.loadXML(childData)
+        try! environment.loadXML(childData)
         
         // check
         
-        let bean : Data = try! context.getBean(Data.self, byId: "b1")
+        let bean : Data = try! environment.getBean(Data.self, byId: "b1")
         
         XCTAssert(bean.string == "b1")
         
-        let lazy = try! context.getBean(Data.self, byId: "lazy")
+        let lazy = try! environment.getBean(Data.self, byId: "lazy")
         
         XCTAssert(lazy.string == "lazy")
         
-        let proto1 = try! context.getBean(Data.self, byId: "prototype")
-        let proto2 = try! context.getBean(Data.self, byId: "prototype")
+        let proto1 = try! environment.getBean(Data.self, byId: "prototype")
+        let proto2 = try! environment.getBean(Data.self, byId: "prototype")
         
         XCTAssert(proto1 !== proto2)
 
         
-        let bar = try! context.getBean(Bar.self)
+        let bar = try! environment.getBean(Bar.self)
         
         XCTAssert(bar.age == 4711)
 
         // Measure
 
-        try! Timer.measure({
-            var context = try! ApplicationContext()
+        if true {
+            try! Timer.measure({
+                var environment = try! Environment(name: "parent")
 
-            try! context.loadXML(parentData)
+                try! environment.loadXML(parentData)
 
-            // load child
+                // load child
 
-            context = try! ApplicationContext(parent: context)
+                environment = try! Environment(name: "child", parent: environment)
 
-            try! context.loadXML(childData)
+                try! environment.loadXML(childData)
 
-            return true
-        }, times: 1000)
+                // force load!
+
+                try! environment.getBean(Bar.self)
+
+                return true
+            }, times: 1000)
+        }
 
     }
 
-    func testFluent() {
-        Classes.setDefaultBundle(self.dynamicType)
+    func testFluent() throws {
+        let parent = try Environment(name: "parent")
 
-        let parent = try! ApplicationContext(parent: nil)
-
-        try! parent
+        try parent
            .define(parent.bean(ProcessInfoConfigurationSource.self)
               .id("x1"))
 
@@ -167,7 +174,7 @@ class BeanFactoryTests: XCTestCase {
               .property("string", value: "b0")
               .property("int", value: 1)
               .property("float", value: Float(-1.1))
-              .property("double", value: Double(-2.2)))
+              .property("double", value: -2.2))
 
            .define(parent.bean(Foo.self)
                .id("foo")
@@ -179,7 +186,7 @@ class BeanFactoryTests: XCTestCase {
                .abstract()
                .property("name", resolve: "${andi=Andreas?}"))
 */
-        let child = try! ApplicationContext(parent: parent)
+        let child = try! Environment(name: "child", parent: parent)
 
         try! child
             .define(child.bean(Data.self)
@@ -188,8 +195,9 @@ class BeanFactoryTests: XCTestCase {
                 .property("foo", inject: InjectBean(id: "foo"))
                 .property("string", value: "b1")
                 .property("int", value: 1)
+                .property("int8", value: Int8(1))
                 .property("float", value: Float(1.1))
-                .property("double", value: Double(2.2)))
+                .property("double", value: 2.2))
 
             .define(child.bean(Data.self)
                 .id("lazy")
@@ -201,7 +209,7 @@ class BeanFactoryTests: XCTestCase {
                 .property("string", value: "lazy")
                 .property("int", value: 1)
                 .property("float", value: Float(1.1))
-                .property("double", value: Double(2.2)))
+                .property("double", value: 2.2))
 
             .define(child.bean(Data.self)
                 .id("prototype")
@@ -209,7 +217,7 @@ class BeanFactoryTests: XCTestCase {
                 .property("string", value: "b1")
                 .property("int", value: 1)
                 .property("float", value: Float(1.1))
-                .property("double", value: Double(2.2)))
+                .property("double", value: 2.2))
 
              //.define(child.bean(BarFactory.self)
              //   .target("Bar"))
@@ -231,7 +239,7 @@ class BeanFactoryTests: XCTestCase {
 
         let bar = try! child.getBean(Bar.self)
 
-        XCTAssert(bar.age == 4711)
+        XCTAssert(bar.age == 0)
 
         let foo = try! child.getBean(Foo.self, byId: "foo")
 

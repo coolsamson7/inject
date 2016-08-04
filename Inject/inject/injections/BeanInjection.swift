@@ -14,15 +14,15 @@ public class BeanInjection : Injection {
     
     // implement
     
-    override func computeValue(inject : Inject, property: BeanDescriptor.PropertyDescriptor, context : ApplicationContext) throws -> Any {
+    override func computeValue(inject : Inject, property: BeanDescriptor.PropertyDescriptor, environment: Environment) throws -> Any {
         if let beanInject = inject as? InjectBean {
             if beanInject.id != nil {
-                return try context.getBean(AnyObject.self, byId: beanInject.id!);
+                return try environment.getBean(AnyObject.self, byId: beanInject.id!);
             }
             else {
                 let clazz : AnyClass = property.getPropertyType() as! AnyClass // = AnyObject.type
 
-                return try context.getBean(clazz)
+                return try environment.getBean(clazz)
             }
         } // if
         

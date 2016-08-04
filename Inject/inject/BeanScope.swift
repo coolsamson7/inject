@@ -11,9 +11,9 @@ public protocol BeanScope {
         get
     }
     
-    func prepare(bean : ApplicationContext.BeanDeclaration, factory : BeanFactory) throws
+    func prepare(bean : Environment.BeanDeclaration, factory : BeanFactory) throws
     
-    func get(bean : ApplicationContext.BeanDeclaration, factory : BeanFactory) throws -> AnyObject
+    func get(bean : Environment.BeanDeclaration, factory : BeanFactory) throws -> AnyObject
     
     func finish()
 }

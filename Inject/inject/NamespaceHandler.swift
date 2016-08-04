@@ -27,7 +27,7 @@ public class NamespaceHandler {
     // instance data
     
     var namespace : String
-    var context : ApplicationContext? = nil
+    var environment: Environment? = nil
 
     // init
     
@@ -40,11 +40,11 @@ public class NamespaceHandler {
     // fluent stuff
 
     func scope(scope : String) throws -> BeanScope {
-        return try context!.getScope(scope)
+        return try environment!.getScope(scope)
     }
     
-    public func beanDeclaration(instance : AnyObject, id : String? = nil, scope :  String = "singleton") throws -> ApplicationContext.BeanDeclaration {
-        let result = ApplicationContext.BeanDeclaration(instance: instance)
+    public func beanDeclaration(instance : AnyObject, id : String? = nil, scope :  String = "singleton") throws -> Environment.BeanDeclaration {
+        let result = Environment.BeanDeclaration(instance: instance)
         
         if id != nil {
             result.id = id
@@ -55,8 +55,8 @@ public class NamespaceHandler {
         return result
     }
     
-    public func beanDeclaration(clazz : String, id : String? = nil) throws -> ApplicationContext.BeanDeclaration {
-        let result = ApplicationContext.BeanDeclaration()
+    public func beanDeclaration(clazz : String, id : String? = nil) throws -> Environment.BeanDeclaration {
+        let result = Environment.BeanDeclaration()
         
         if id != nil {
             result.id = id
@@ -67,8 +67,8 @@ public class NamespaceHandler {
         return result
     }
     
-    public func property(name: String? = nil) ->  ApplicationContext.PropertyDeclaration {
-        let result =  ApplicationContext.PropertyDeclaration()
+    public func property(name: String? = nil) ->  Environment.PropertyDeclaration {
+        let result =  Environment.PropertyDeclaration()
         
         if name != nil {
             result.name = name!
@@ -87,10 +87,10 @@ public class NamespaceHandler {
     
     // abstract
     
-    func register(loader : XMLContextLoader) throws {
-        self.context = loader.context
+    func register(loader : XMLEnvironmentLoader) throws {
+        self.environment = loader.context
     }
     
-    func process(namespaceAware : NamespaceAware, inout beans : [ApplicationContext.BeanDeclaration]) throws -> Void {
+    func process(namespaceAware : NamespaceAware, inout beans : [Environment.BeanDeclaration]) throws -> Void {
     }
 }
