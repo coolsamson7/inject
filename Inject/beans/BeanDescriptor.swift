@@ -104,7 +104,7 @@ public class BeanDescriptor : CustomStringConvertible {
             }
             else {
                 if optional {
-                    object.setValue(value, forKey: name)
+                    object.setValue(nil, forKey: name)
                 }
                 else {
                     throw BeanDescriptorErrors.CannotSetNil(message: "nil not allowed for property \(self.name)")

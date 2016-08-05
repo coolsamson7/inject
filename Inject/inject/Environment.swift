@@ -378,11 +378,11 @@ public class Environment: BeanFactory {
         }
 
         func get(environment: Environment) throws -> Any {
-            fatalError("ValueHolder.get is abstract")
+            fatalError("\(self.dynamicType).get is abstract")
         }
 
         func getType() -> Any.Type {
-            fatalError("ValueHolder.getType is abstract")
+            fatalError("\(self.dynamicType).getType is abstract")
         }
     }
 
@@ -763,11 +763,19 @@ public class Environment: BeanFactory {
             var successors : [Dependency] = []
             var index : Int? = nil
             var lowLink : Int = 0
+            var inCount = 0
 
             // init
 
             init(declaration : Environment.BeanDeclaration) {
                 self.declaration = declaration
+            }
+
+            // methods
+
+            func addSuccessor(dependency: Dependency) -> Void {
+                successors.append(dependency)
+                dependency.inCount += 1
             }
         }
 
@@ -861,7 +869,7 @@ public class Environment: BeanFactory {
         }
 
         func dependency(bean : Environment.BeanDeclaration, before : Environment.BeanDeclaration) {
-            getDependency(bean).successors.append(getDependency(before))
+            getDependency(bean).addSuccessor(getDependency(before))
         }
 
         func addDeclaration(declaration : Environment.BeanDeclaration) throws -> Environment.BeanDeclaration {
@@ -931,6 +939,8 @@ public class Environment: BeanFactory {
                 }
             }
 
+            // done
+
             return cycles
         }
 
@@ -986,6 +996,34 @@ public class Environment: BeanFactory {
 
                 throw EnvironmentErrors.CylicDependencies(message: builder.toString())
             }
+            else {
+                // hmmm....tarjan does not sort topologically..let's do that here
+
+                var stack = [Dependency]()
+                for dependency in dependencyList {
+                    if dependency.inCount == 0 {
+                        stack.append(dependency)
+                    }
+                } // for
+
+                var index = 0
+                while !stack.isEmpty {
+                    let dependency = stack.removeFirst()
+
+                    dependency.index = index
+
+                    //print("\(index): \(dependency.declaration.bean!.clazz)")
+
+                    for successor in dependency.successors {
+                        successor.inCount -= 1
+                        if successor.inCount == 0 {
+                            stack.append(successor)
+                        }
+                    } // for
+
+                    index += 1
+                }
+            }
 
             // sort according to index
 
@@ -1005,16 +1043,17 @@ public class Environment: BeanFactory {
                 let bean = dependency.declaration
 
                 try bean.resolve(self)
-            }
+                try bean.prepare(self)
+            } // for
 
 
             if (Tracer.ENABLED) {
                 Tracer.trace("inject.loader", level: .HIGH, message: "prepare beans")
             }
 
-            for dependency in dependencyList {
+            /*for dependency in dependencyList {
                 try dependency.declaration.prepare(self)  // instantiate all non lazy singletons, add post processors, etc...
-            }
+            }*/
 
             // done
 
