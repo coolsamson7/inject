@@ -57,7 +57,7 @@ Here is a sample configuration file `sample.xml` that will demonstrate most of t
 
     <!-- will inherit the class and the magic number -->
 
-    <bean id="bar" class="Bar" parent="bar-parent">
+    <bean id="bar" class="Bar" parent="bar-parent" lazy="true">
         <property name="id" value="bar"/>
     </bean>
 
@@ -103,22 +103,22 @@ var environment = Environment(name: "environment")
 
 environment
    .loadXML(data)
-   .refresh() // wold be done on demand anyway whenever a first getter is called 
+   .refresh() // would be done on demand anyway whenever a getter is called that references the internal layout 
 ```
 beans can be retrieved via a simple api
 
 ```swift
-// by type if ony one instance exists
+// by type if one instance only exists
 
 let baz = try environment.getBean(Baz.self)
 
-// by type
+// by id
 
 let foo = try context.environment(Foo.self, byId: "foo-1")
 
 ```
 
-If you don't like xml a flunet interafce is provided that will offer the same features.
+If you don't like xml a fluent interface is provided that will offer the same features.
 
 Here is the - more or less - equivalent
 
@@ -133,12 +133,14 @@ try environment
     .define(environment.bean(Foo.self)
         .id("foo-1")
         .property("id", value: "foo-1")
+        //.property("bar", inject: InjectBean()) the injection is expressed in the class itself, so this is not needed!
         .property("number", resolve: "${dunno=1}"))
 
     .define(environment.bean(Foo.self)
         .id("foo-prototype")
         .scope(environment.scope("prototype"))
         .property("id", value: "foo-prototype")
+        //.property("bar", inject: InjectBean()) the injection is expressed in the class itself, so this is not needed!
         .property("number", resolve: "${com.foo:bar=1}"))
 
     .define(environment.bean(Bar.self)
@@ -148,6 +150,7 @@ try environment
 
     .define(environment.bean(Bar.self)
         .id("bar")
+        .lazy()
         .parent("bar-parent")
         .property("id", value: "bar"))
 
@@ -174,7 +177,8 @@ try environment
 
 Here is a summary of the supported features
 * full dependency management including `depends-on`, `ref`, embedded `<bean>`'s as property values, and injections
-* property injections ( only.. ) including automatic type conversions
+* full typechecking with respect to property values
+* property injections ( only.. ) including automatic type conversions and number coercions ( for the fluent part )
 * injections resembling the spring `@Inject` autowiring mechanism
 * support for different scopes including `singleton`  and `protoype` as builtin flavors
 * support for lazy initialized beans
