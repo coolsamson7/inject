@@ -48,7 +48,7 @@ public class Classes {
     
     /// return a class instance given a class name
     public class func class4Name(className : String) throws -> AnyClass {
-        var result = NSClassFromString(className)
+        var result : AnyClass? = NSClassFromString(className)
 
         if result != nil {
             return result!

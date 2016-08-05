@@ -27,6 +27,8 @@ class ConfigurationTest: XCTestCase {
            .loadXML(parentData)
            .refresh()
 
+        print(environment.report())
+
         let configurationManager = environment.getConfigurationManager()
 
         print(configurationManager.report())

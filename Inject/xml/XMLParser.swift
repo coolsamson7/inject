@@ -54,7 +54,7 @@ public class XMLParser: NSObject {
         // init
         
         init(clazz: AnyClass, element : String) {
-            self.clazz = BeanDescriptor.forClass(clazz)
+            self.clazz = try! BeanDescriptor.forClass(clazz)
             self.element = element
         }
         
@@ -109,7 +109,7 @@ public class XMLParser: NSObject {
                 self.parent = parent
                 self.definition = definition
                 
-                instance = definition.clazz.create()
+                instance = try! definition.clazz.create()
             }
             
             // func

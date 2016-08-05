@@ -209,7 +209,7 @@ public class XMLEnvironmentLoader: XMLParser {
 
         // and all namespace handlers
 
-        for (namespace, handler) in NamespaceHandler.handlers {
+        for (_, handler) in NamespaceHandler.handlers {
             try handler.register(self)
         }
     }
@@ -232,11 +232,7 @@ public class XMLEnvironmentLoader: XMLParser {
                 try environment.define(try bean.convert(self.environment))
             }
             else if let namespaceAware = declaration as? NamespaceAware {
-                let namespace = namespaceAware.namespace
-
-                let handler = NamespaceHandler.byNamespace(namespace!)
-
-                try handler.process(namespaceAware, environment: environment)
+                try NamespaceHandler.byNamespace(namespaceAware.namespace!).process(namespaceAware, environment: environment)
             }
         }
 

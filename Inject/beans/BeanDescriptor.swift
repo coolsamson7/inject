@@ -23,7 +23,7 @@ public class BeanDescriptor : CustomStringConvertible {
     /// - Parameter clazz: the corresponding class
     ///
     /// - Returns: the `BeanDescriptor` instance for the particular class
-    public class func forClass(clazz: AnyClass) -> BeanDescriptor {
+    public class func forClass(clazz: AnyClass) throws -> BeanDescriptor {
         if let bean = beans[clazz] {
             return bean;
         }
@@ -32,14 +32,14 @@ public class BeanDescriptor : CustomStringConvertible {
             
             beans[clazz] = bean;
             
-            bean.analyze()
+            try bean.analyze()
             
             return bean;
         }
     }
     
     public class func forClass(clazz: String) throws -> BeanDescriptor {
-        return forClass(try Classes.class4Name(clazz))
+        return try forClass(try Classes.class4Name(clazz))
     }
     
     // inner classes
@@ -185,15 +185,15 @@ public class BeanDescriptor : CustomStringConvertible {
         }
     }
     
-    public class RelationDescriptor: PropertyDescriptor {
+    public class RelationDescriptor : PropertyDescriptor {
         // instance data
         
         var target: BeanDescriptor;
         
         // override
         
-        override init(bean: BeanDescriptor, name: String, index: Int, overallIndex: Int, type: Any.Type, optional: Bool) {
-            target = BeanDescriptor.forClass(type as! NSObject.Type)
+        override init(bean: BeanDescriptor, name: String, index: Int, overallIndex: Int, type: Any.Type, optional: Bool)  {
+            target = try! BeanDescriptor.forClass(type as! AnyClass)
             
             super.init(bean: bean, name: name, index: index, overallIndex: overallIndex, type: type, optional: optional);
         }
@@ -240,12 +240,12 @@ public class BeanDescriptor : CustomStringConvertible {
         return AttributeDescriptor(bean: self, name: name, index: index, overallIndex: overallIndex, type: type, optional: optional)
     }
     
-    private func analyze() {
+    private func analyze() throws {
         // check superclass
         
         if let superClass = clazz.superclass() {
             if superClass != NSObject.self {
-                superBean = BeanDescriptor.forClass(superClass)
+                superBean = try BeanDescriptor.forClass(superClass)
                 
                 superBean!.directSubBeans.append(self)
                 
@@ -263,7 +263,7 @@ public class BeanDescriptor : CustomStringConvertible {
 
         // create a sample instance
 
-        let instance  = create();
+        let instance  = try create();
 
         // and check the mirror...
 
@@ -303,8 +303,13 @@ public class BeanDescriptor : CustomStringConvertible {
         return clazz
     }
     
-    public func create() -> AnyObject {
-        return (clazz as! NSObject.Type).init();
+    public func create() throws -> AnyObject {
+        if let objectClass = clazz as? NSObject.Type {
+            return objectClass.init()
+        }
+        else {
+            throw EnvironmentErrors.Exception(message: "expected \(Classes.className(clazz)) to be a NSObject subclass")
+        }
     }
     
     public func getProperties() -> [PropertyDescriptor] {

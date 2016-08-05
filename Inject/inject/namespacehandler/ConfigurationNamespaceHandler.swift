@@ -38,9 +38,7 @@ public class ConfigurationNamespaceHandler : NamespaceHandler {
     }
     
     // nodes
-    
-    
-    @objc(Configuration)
+
     class Configuration : NSObject, Ancestor, NamespaceAware, OriginAware {
         // instance data
         
@@ -80,8 +78,7 @@ public class ConfigurationNamespaceHandler : NamespaceHandler {
             }
         }
     }
-    
-    @objc(Define)
+
     class Define : NSObject {
         // instance data
         

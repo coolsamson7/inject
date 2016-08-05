@@ -25,7 +25,7 @@ class BeanDescriptorTests: XCTestCase {
     }
 
     func testProperties() throws {
-        let bean = BeanDescriptor.forClass(Foo.self)
+        let bean = try BeanDescriptor.forClass(Foo.self)
 
         let foo = Foo()
         

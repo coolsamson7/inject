@@ -15,7 +15,7 @@ public class FQN : Hashable, CustomStringConvertible {
     // class func
     
     class func fromString(str : String) -> FQN {
-        let colon  = str.rangeOfString("=", range: str.startIndex..<str.endIndex)
+        let colon  = str.rangeOfString(":", range: str.startIndex..<str.endIndex)
         if colon != nil {
             let namespace = str[str.startIndex..<colon!.startIndex]
             let key = str[colon!.endIndex..<str.endIndex]

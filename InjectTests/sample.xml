@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+        xmlns:configuration="http://www.springframework.org/schema/configuration"
+        xmlns="http://www.springframework.org/schema/beans"
+        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+                        http://www.springframework.org/schema/configuration http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <!-- plist configuration source -->
+
+    <!--bean class="PlistConfigurationSource">
+       <property name="name" value="Info"/>
+    </bean-->
+
+    <!-- builtin namespace & corresponding handler for configuration values -->
+
+    <configuration:configuration namespace="com.foo">
+        <configuration:define key="bar" type="Int" value="1"/>
+    </configuration:configuration>
+
+    <!-- a sample bean post processor which will print on stdout -->
+
+    <bean class="SamplePostProcessor"/>
+
+    <!-- foo -->
+
+    <!-- depends-on will switch the instantiation order -->
+
+    <bean id="foo-1" class="Foo" depends-on="foo-2">
+        <property name="id" value="foo-1"/>
+        <!-- references an unknown configuration key, which will set the defaultvalue instead... -->
+        <property name="number" value="${dunno=1}"/>
+    </bean>
+
+    <bean id="foo-2" class="Foo">
+        <property name="id" value="foo-2"/>
+        <!-- same thing recursively -->Baz.self
+        <property name="number" value="${dunno=${wtf=1}}"/>
+    </bean>
+
+    <!-- whenever the bean is fetched a new instance will be created -->
+
+    <bean id="foo-prototype" class="Foo" scope="prototype">
+        <property name="id" value="foo-prototype"/>
+        <!-- this should work... the : separates the namespace from the key! -->
+        <property name="number" value="${com.foo:bar}"/>
+    </bean>
+
+    <!-- bar will be injected by all foo's. Obviously the bar needs to be constructed first -->
+
+    <bean id="bar-parent" class="Bar" abstract="true">
+        <property name="magic" value="4711"/>
+    </bean>
+
+    <!-- will inherit the class and the magic number -->
+
+    <bean id="bar" class="Bar" parent="bar-parent">
+        <property name="id" value="bar"/>
+    </bean>
+
+    <!-- both foo's will inject the bar instance -->
+
+    <!-- baz factory will create Baz instances... -->
+
+    <bean class="BazFactory" target="Baz">
+        <property name="name" value="factory"/>
+        <!-- will be set as the baz id... -->
+        <property name="id" value="id"/>
+    </bean>
+
+    <!-- bazongs -->
+
+    <bean id="bazong-1" class="Bazong">
+        <property name="id" value="id"/>
+        <!-- by reference -->
+        <property name="foo" ref="foo-1"/>
+    </bean>
+
+    <bean id="bazong-2" class="Bazong">
+        <property name="id" value="id"/>
+        <!-- in-place -->
+        <property name="foo">
+            <bean class="Foo">
+                <property name="id" value="foo-3"/>
+                <property name="number" value="1"/>
+            </bean>
+        </property>
+    </bean>
+</beans>

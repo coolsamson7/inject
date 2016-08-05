@@ -37,12 +37,12 @@
         <!--property name="character" value="b0"/-->
     </bean>
     
-    <bean class="Foo">
+    <bean class="FooBean">
         <property name="name" value="${andi=Andreas?}"/>
         <property name="age" value="${SIMULATOR_MAINSCREEN_HEIGHT=51}"/>
     </bean>
     
-    <bean id="bar" abstract="true" class="Bar">
+    <bean id="bar" abstract="true" class="BarBean">
         <property name="name" value="${andi=Andreas?}"/>
     </bean>
     

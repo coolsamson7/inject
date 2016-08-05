@@ -16,12 +16,10 @@ class TestObjectClass : NSObject {
     
 }
 
-@objc
 class TestAnnotadedObjectClass : NSObject {
     
 }
 
-@objc(TestAnnotadedNamedObjectClass)
 class TestAnnotadedNamedObjectClass : NSObject {
     
 }
@@ -48,13 +46,13 @@ class ClassesTests: XCTestCase {
             "InjectTests.ClassesTests$LocalClass"
         ] {
         do {
-           let clazz = try Classes.class4Name(name)
+           try Classes.class4Name(name)
         }
         catch ClassesErrors.Exception(let message) {
             print("##### " + message)
         }
         catch {
-            print("##### ocuh")
+            print("##### ouch")
         }
         } // for
     }

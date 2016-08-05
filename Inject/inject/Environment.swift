@@ -20,7 +20,7 @@ public class Environment: BeanFactory {
         // BeanFactory
 
         func create(declaration: BeanDeclaration) throws -> AnyObject {
-            return declaration.bean!.create()
+            return try declaration.bean!.create()
         }
     }
 
@@ -85,7 +85,7 @@ public class Environment: BeanFactory {
         init(instance : AnyObject) {
             self.factory = ValueFactory(object: instance)
             //self.singleton = instance
-            self.bean = BeanDescriptor.forClass(instance.dynamicType)
+            self.bean = try! BeanDescriptor.forClass(instance.dynamicType)
         }
         
         override init() {
@@ -131,8 +131,8 @@ public class Environment: BeanFactory {
             return self
         }
 
-        public func parent(parent : BeanDeclaration) -> BeanDeclaration {
-            self.parent = parent // TODO string / Bean?
+        public func parent(parent : String) -> BeanDeclaration {
+            self.parent = BeanDeclaration(id: parent)
 
             return self
         }
@@ -164,8 +164,8 @@ public class Environment: BeanFactory {
             return self
         }
 
-        public func target(target : String) throws -> BeanDeclaration {
-            self.target = try BeanDescriptor.forClass(target)
+        public func target(clazz : AnyClass) throws -> BeanDeclaration {
+            self.target = try BeanDescriptor.forClass(clazz)
 
             return self
         }
@@ -634,9 +634,6 @@ public class Environment: BeanFactory {
             if beanDeclaration.bean != nil { // abstract classes
                 try resolveProperty(beanDeclaration, loader: loader)
             }
-            else {
-                print("ocuh")
-            }
 
             try value!.collect(loader, beanDeclaration: beanDeclaration)
         }
@@ -802,7 +799,7 @@ public class Environment: BeanFactory {
                 result = string[string.startIndex..<range.startIndex]
 
                 let eq  = string.rangeOfString("=", range: range.startIndex..<string.endIndex)
-                let end = string.rangeOfString("}", range: range.startIndex..<string.endIndex)
+                let end = string.rangeOfString("}", range: range.startIndex..<string.endIndex, options: .BackwardsSearch)
 
                 if eq != nil {
                     let key = string[range.endIndex ..< eq!.startIndex]
@@ -1215,10 +1212,6 @@ public class Environment: BeanFactory {
 
             try loader!.load()
 
-            // report
-
-            //report()
-
             loader = nil // prevent double loading...
         } // if
 
@@ -1266,7 +1259,7 @@ public class Environment: BeanFactory {
             result.id = id
         }
 
-        result.bean = BeanDescriptor.forClass(clazz)
+        result.bean = try BeanDescriptor.forClass(clazz)
 
         return result
     }
@@ -1332,18 +1325,16 @@ public class Environment: BeanFactory {
     }
 
 
-    func report() {
+    public func report() -> String {
         let builder = StringBuilder()
 
-        builder.append("### \(name) beans:\n")
+        builder.append("### ENVIRONMENT \(name) REPORT\n")
 
         for bean in localBeans {
             bean.report(builder)
         }
 
-        builder.append("\n")
-
-        print(builder.toString())
+        return builder.toString()
     }
 
     func validate() throws {
@@ -1418,7 +1409,7 @@ public class Environment: BeanFactory {
     }
 
     func getCandidate(clazz : AnyClass) throws -> Environment.BeanDeclaration {
-        let candidates = getBeansByType(BeanDescriptor.forClass(clazz))
+        let candidates = getBeansByType(try BeanDescriptor.forClass(clazz))
         
         if candidates.count == 0 {
             throw EnvironmentErrors.NoCandidateForType(type: clazz)
@@ -1460,7 +1451,7 @@ public class Environment: BeanFactory {
     // public
 
     public func getBeansByType(clazz : AnyClass) -> [Environment.BeanDeclaration] {
-        return getBeansByType(BeanDescriptor.forClass(clazz))
+        return getBeansByType(try! BeanDescriptor.forClass(clazz))
     }
 
     public func getBeansByType(bean : BeanDescriptor) -> [Environment.BeanDeclaration] {
@@ -1503,7 +1494,7 @@ public class Environment: BeanFactory {
             }
         }
         else {
-            let result = getBeansByType(BeanDescriptor.forClass(type as! AnyClass))
+            let result = getBeansByType(try BeanDescriptor.forClass(type as! AnyClass))
             
             if result.count == 0 {
                 throw EnvironmentErrors.UnknownBeanByType(type: type as! AnyClass)
@@ -1531,7 +1522,7 @@ public class Environment: BeanFactory {
             }
         }
         else {
-            let result = getBeansByType(BeanDescriptor.forClass(type ))
+            let result = getBeansByType(try BeanDescriptor.forClass(type ))
 
             if result.count == 0 {
                 throw EnvironmentErrors.UnknownBeanByType(type: type )

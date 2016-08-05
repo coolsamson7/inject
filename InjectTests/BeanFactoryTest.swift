@@ -11,9 +11,9 @@ import Foundation
 
 @testable import Inject
 
-class BarFactory : NSObject, FactoryBean {
+class BarFactoryBean: NSObject, FactoryBean {
     func create() throws -> AnyObject {
-        let result = Bar()
+        let result = BarBean()
 
         result.name = "factory"
         result.age = 4711
@@ -22,7 +22,7 @@ class BarFactory : NSObject, FactoryBean {
     }
 }
 
-class Bar : NSObject {
+class BarBean: NSObject {
     var name : String = "andi"
     var age : Int = 51
     var weight : Int = 87
@@ -39,7 +39,7 @@ class Data : NSObject , Bean, ClassInitializer {
     var int8 : Int8 = 0
 
     var foo  : FooBase?
-    var bar  : Bar?
+    var bar  : BarBean?
 
     // ClassInitializer
 
@@ -74,7 +74,7 @@ class FooBase : NSObject, Bean {
     }
 }
 
-class Foo : FooBase {
+class FooBean: FooBase {
     var name : String?
     var age : Int = 0
 
@@ -134,7 +134,7 @@ class BeanFactoryTests: XCTestCase {
         XCTAssert(proto1 !== proto2)
 
         
-        let bar = try! environment.getBean(Bar.self)
+        let bar = try! environment.getBean(BarBean.self)
         
         XCTAssert(bar.age == 4711)
 
@@ -154,7 +154,7 @@ class BeanFactoryTests: XCTestCase {
 
                 // force load!
 
-                try! environment.getBean(Bar.self)
+                try! environment.getBean(BarBean.self)
 
                 return true
             }, times: 1000)
@@ -178,7 +178,7 @@ class BeanFactoryTests: XCTestCase {
               .property("float", value: Float(-1.1))
               .property("double", value: -2.2))
 
-           .define(parent.bean(Foo.self)
+           .define(parent.bean(FooBean.self)
                .id("foo")
                .property("name", resolve: "${andi=Andreas?}")
                .property("age", resolve: "${SIMULATOR_MAINSCREEN_HEIGHT=51}")) // TODO?
@@ -204,7 +204,7 @@ class BeanFactoryTests: XCTestCase {
             .define(child.bean(Data.self)
                 .id("lazy")
                 .lazy()
-                .property("bar", bean: child.bean(Bar.self)
+                .property("bar", bean: child.bean(BarBean.self)
                       .property("name", value: "name")
                       .property("age", value: 0)
                 )
@@ -241,11 +241,11 @@ class BeanFactoryTests: XCTestCase {
 
         XCTAssert(proto1 !== proto2)
 
-        let bar = try! child.getBean(Bar.self)
+        let bar = try! child.getBean(BarBean.self)
 
         XCTAssert(bar.age == 0)
 
-        let foo = try! child.getBean(Foo.self, byId: "foo")
+        let foo = try! child.getBean(FooBean.self, byId: "foo")
 
         //XCTAssert(bar.age == 4711)
     }
