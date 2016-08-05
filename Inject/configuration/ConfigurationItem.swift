@@ -11,14 +11,14 @@ public class ConfigurationItem {
     
     var fqn : FQN
     var type : Any.Type
-    var value : AnyObject
+    var value : Any
     var source : String
     var scope : Scope
     var dynamic = false
     
     // init
     
-    init(fqn : FQN, type : Any.Type, value : AnyObject, source : String, scope : Scope = Scope.WILDCARD, dynamic : Bool = false) {
+    init(fqn : FQN, type : Any.Type, value : Any, source : String, scope : Scope = Scope.WILDCARD, dynamic : Bool = false) {
         self.fqn     = fqn
         self.type    = type
         self.value   = value

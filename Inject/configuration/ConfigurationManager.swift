@@ -32,17 +32,17 @@ public class ConfigurationManager : NSObject, ConfigurationAdministration, Confi
         }
     }
     
-    class ConfigurationListenerData {
+    class ConfigurationListenerData : Equatable {
         // instance data
         
         var scope : Scope
         var fqn : FQN
         var configurationListener : ConfigurationListener
-        var type: AnyClass;
+        var type: Any.Type;
         
         // init
         
-        init( scope : Scope, fqn : FQN,  configurationListener : ConfigurationListener, expectedType :AnyClass) {
+        init( scope : Scope, fqn : FQN,  configurationListener : ConfigurationListener, expectedType : Any.Type) {
             self.scope = scope;
             self.fqn = fqn;
             self.configurationListener = configurationListener;
@@ -52,7 +52,7 @@ public class ConfigurationManager : NSObject, ConfigurationAdministration, Confi
     
     // static data
     
-    static var NOT_FOUND : ConfigurationItem = ConfigurationItem(fqn: FQN(namespace: "", key: ""), type: AnyObject.self, value: "", source: "", scope : Scope.WILDCARD)
+    static var NOT_FOUND : ConfigurationItem = ConfigurationItem(fqn: FQN(namespace: "", key: ""), type: Any.self, value: "", source: "", scope : Scope.WILDCARD)
     
     // instance data
     
@@ -86,7 +86,7 @@ public class ConfigurationManager : NSObject, ConfigurationAdministration, Confi
         return items[ScopeAndName(scope : scope, fqn : fqn)]
     }
     
-    private func  resolveEffectiveConfigurationItem(scope : Scope, fqn : FQN,  scopeAndName : ScopeAndName) -> ConfigurationItem? {
+    private func resolveEffectiveConfigurationItem(scope : Scope, fqn : FQN,  scopeAndName : ScopeAndName) -> ConfigurationItem? {
         var resultItem = items[scopeAndName];
         if resultItem == nil  {
             let parentScope = scope.getParentScope();
@@ -144,7 +144,48 @@ public class ConfigurationManager : NSObject, ConfigurationAdministration, Confi
         
         return value
     }
-    
+
+    func report() -> String {
+        let builder = StringBuilder()
+
+        builder.append("### Configuration Report\n\n")
+
+        var descriptions = [String: ArrayOf<FQN>]();
+        for (_, item) in self.items {
+            var itemsFromResource = descriptions[item.source];
+
+            if itemsFromResource == nil {
+                itemsFromResource = ArrayOf<FQN>();
+                descriptions[item.source] = itemsFromResource;
+            }
+
+            if !itemsFromResource!.contains(item.fqn) {
+                itemsFromResource!.append(item.fqn);
+            } // if
+        } // for
+
+
+        if !descriptions.isEmpty {
+            for (source, items) in descriptions {
+                builder.append("\n### Source \"\(source)\"\n")
+
+                for fqn in items { // sorting
+                    let item = getEffectiveConfigurationItem(self.scope, fqn: fqn)
+                    if item != nil {
+                        builder.append(fqn).append("=\(item!.value)\n")
+                    }
+                }
+
+                builder.append("\n");
+            }
+        }
+        else {
+            builder.append("none");
+        }
+
+        return builder.toString()
+    }
+
     // ConfigurationAdministration
     
     func addSource(source : ConfigurationSource) throws -> Void {
@@ -180,7 +221,7 @@ public class ConfigurationManager : NSObject, ConfigurationAdministration, Confi
     
     // ConfigurationProvider
     
-    public func addListener(namespace : String, key : String,  listener : ConfigurationListener , expectedType : AnyClass, scope : Scope = Scope.WILDCARD) -> Void {
+    public func addListener(namespace : String, key : String,  listener : ConfigurationListener , expectedType : Any.Type, scope : Scope = Scope.WILDCARD) -> Void {
         let fqn = FQN(namespace: namespace, key: key)
         
         if listeners[fqn] == nil {
@@ -199,7 +240,7 @@ public class ConfigurationManager : NSObject, ConfigurationAdministration, Confi
         return getEffectiveConfigurationItem(scope != nil ? scope! : self.scope, fqn: FQN(namespace: namespace, key: key)) != nil
     }
     
-    public func getValue(type : Any.Type, namespace : String, key : String, defaultValue: AnyObject? = nil, scope : Scope? = nil) throws -> Any {
+    public func getValue(type : Any.Type, namespace : String, key : String, defaultValue: Any? = nil, scope : Scope? = nil) throws -> Any {
         let resultItem = getEffectiveConfigurationItem(scope != nil ? scope! : self.scope, fqn: FQN(namespace: namespace, key: key));
         
         if resultItem == nil {
@@ -228,7 +269,7 @@ public class ConfigurationManager : NSObject, ConfigurationAdministration, Confi
     }
 
 
-    public func getValue<T>(type : T.Type, namespace : String, key : String, defaultValue: AnyObject? = nil, scope : Scope? = nil) throws -> T {
+    public func getValue<T>(type : T.Type, namespace : String, key : String, defaultValue: T? = nil, scope : Scope? = nil) throws -> T {
         let resultItem = getEffectiveConfigurationItem(scope != nil ? scope! : self.scope, fqn: FQN(namespace: namespace, key: key));
         
         if resultItem == nil {
@@ -240,7 +281,7 @@ public class ConfigurationManager : NSObject, ConfigurationAdministration, Confi
                 return try maybeConvert(type, value: defaultValue!) as! T
             }
             else {
-                throw ConfigurationErrors.Exception(message: "neither configuration value\(namespace):\(key) nor default found");//return defaultValue
+                throw ConfigurationErrors.Exception(message: "neither configuration value\(namespace):\(key) nor default found");
             }
         }
         else {
@@ -259,4 +300,8 @@ public class ConfigurationManager : NSObject, ConfigurationAdministration, Confi
 
 func ==(lhs: ConfigurationManager.ScopeAndName, rhs: ConfigurationManager.ScopeAndName) -> Bool {
     return lhs.scope == rhs.scope && lhs.fqn == rhs.fqn
+}
+
+func ==(lhs: ConfigurationManager.ConfigurationListenerData, rhs: ConfigurationManager.ConfigurationListenerData) -> Bool {
+    return lhs === rhs
 }

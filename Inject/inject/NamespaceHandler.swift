@@ -88,9 +88,9 @@ public class NamespaceHandler {
     // abstract
     
     func register(loader : XMLEnvironmentLoader) throws {
-        self.environment = loader.context
+        self.environment = loader.environment
     }
     
-    func process(namespaceAware : NamespaceAware, inout beans : [Environment.BeanDeclaration]) throws -> Void {
+    func process(namespaceAware : NamespaceAware, environment : Environment) throws -> Void {
     }
 }

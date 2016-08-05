@@ -20,6 +20,8 @@
 		28D35C949BC967BAD019A928 /* XMLEnvironmentLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D35754F0C89ABFA9A702C2 /* XMLEnvironmentLoader.swift */; };
 		28D35CCF8BA4308CCFCD5FAE /* Future.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D35EA05D3041A74BA7B450 /* Future.swift */; };
 		B03F0FCC1D3F90210037DB1D /* ConfigurationTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D353F6EBA43DDB0EC12AFB /* ConfigurationTest.swift */; };
+		B0546DA01D54B4580034BA3F /* PListSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0546D9E1D54B4580034BA3F /* PListSource.swift */; };
+		B0546DA11D54B4580034BA3F /* ProcessInfoSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0546D9F1D54B4580034BA3F /* ProcessInfoSource.swift */; };
 		B092332E1D3CEF8A008267A2 /* BeanDescriptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B092332D1D3CEF8A008267A2 /* BeanDescriptor.swift */; };
 		B09233311D3CEFC1008267A2 /* IdentityMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = B09233301D3CEFC1008267A2 /* IdentityMap.swift */; };
 		B09233361D3CF0DF008267A2 /* Tracer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B09233351D3CF0DF008267A2 /* Tracer.swift */; };
@@ -103,6 +105,8 @@
 		28D35D492457692B206D2C34 /* Semaphore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Semaphore.swift; sourceTree = "<group>"; };
 		28D35EA05D3041A74BA7B450 /* Future.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Future.swift; sourceTree = "<group>"; };
 		28D35F661D4C3673FD61424B /* Array.extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Array.extension.swift; sourceTree = "<group>"; };
+		B0546D9E1D54B4580034BA3F /* PListSource.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PListSource.swift; sourceTree = "<group>"; };
+		B0546D9F1D54B4580034BA3F /* ProcessInfoSource.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProcessInfoSource.swift; sourceTree = "<group>"; };
 		B092332D1D3CEF8A008267A2 /* BeanDescriptor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BeanDescriptor.swift; sourceTree = "<group>"; };
 		B09233301D3CEFC1008267A2 /* IdentityMap.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IdentityMap.swift; sourceTree = "<group>"; };
 		B09233351D3CF0DF008267A2 /* Tracer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Tracer.swift; sourceTree = "<group>"; };
@@ -180,6 +184,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		B0546D9D1D54B4580034BA3F /* sources */ = {
+			isa = PBXGroup;
+			children = (
+				B0546D9E1D54B4580034BA3F /* PListSource.swift */,
+				B0546D9F1D54B4580034BA3F /* ProcessInfoSource.swift */,
+			);
+			path = sources;
+			sourceTree = "<group>";
+		};
 		B092332C1D3CEF8A008267A2 /* beans */ = {
 			isa = PBXGroup;
 			children = (
@@ -260,6 +273,7 @@
 		B092335E1D3CFD18008267A2 /* configuration */ = {
 			isa = PBXGroup;
 			children = (
+				B0546D9D1D54B4580034BA3F /* sources */,
 				B09233711D3CFF43008267A2 /* Scope.swift */,
 				B092336F1D3CFE46008267A2 /* FQN.swift */,
 				B09233651D3CFE28008267A2 /* AbstractConfigurationSource.swift */,
@@ -497,6 +511,7 @@
 				B092338B1D3D0293008267A2 /* Injection.swift in Sources */,
 				B09233571D3CFCCA008267A2 /* BeanPostProcessor.swift in Sources */,
 				B09233851D3D01D5008267A2 /* ConversionErrors.swift in Sources */,
+				B0546DA01D54B4580034BA3F /* PListSource.swift in Sources */,
 				B092336B1D3CFE28008267A2 /* ConfigurationAdministration.swift in Sources */,
 				B092332E1D3CEF8A008267A2 /* BeanDescriptor.swift in Sources */,
 				B09233871D3D01D5008267A2 /* StandardConversionFactory.swift in Sources */,
@@ -534,6 +549,7 @@
 				B09233891D3D0263008267A2 /* Injector.swift in Sources */,
 				B092337D1D3D00D9008267A2 /* OriginAware.swift in Sources */,
 				B09233531D3CFCCA008267A2 /* EnvironmentErrors.swift in Sources */,
+				B0546DA11D54B4580034BA3F /* ProcessInfoSource.swift in Sources */,
 				B09233551D3CFCCA008267A2 /* Bean.swift in Sources */,
 				B09233791D3D00D9008267A2 /* Ancestor.swift in Sources */,
 				28D356D9A9627C5D2758C58D /* Semaphore.swift in Sources */,

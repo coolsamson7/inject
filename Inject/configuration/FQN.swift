@@ -45,7 +45,7 @@ public class FQN : Hashable, CustomStringConvertible {
     // CustomStringConvertible
     
     public var description: String {
-        return "[namespace: \(namespace), key: \(key)]"
+        return "[namespace: \"\(namespace)\", key: \"\(key)\"]"
     }
 }
 

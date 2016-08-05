@@ -119,7 +119,7 @@ public class ConfigurationNamespaceHandler : NamespaceHandler {
         )
     }
     
-    override func process(namespaceAware : NamespaceAware, inout beans : [Environment.BeanDeclaration]) throws -> Void {
+    override func process(namespaceAware : NamespaceAware,  environment : Environment) throws -> Void {
         if let configuration = namespaceAware as? Configuration {
             let url = "configuration snippets"
             let namespace = configuration.configurationNamespace
@@ -168,7 +168,7 @@ public class ConfigurationNamespaceHandler : NamespaceHandler {
             
             // add bean
             
-            beans.append(try beanDeclaration(ConfigurationNamespaceHandlerSource(name: url, items: items)))
+            try environment.define(try beanDeclaration(ConfigurationNamespaceHandlerSource(name: url, items: items)))
         }
     }
 }

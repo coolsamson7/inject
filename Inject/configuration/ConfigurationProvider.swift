@@ -11,7 +11,7 @@ protocol ConfigurationProvider {
 
     func hasValue(namespace : String, key : String,  scope : Scope?) -> Bool
 
-    func getValue(type : Any.Type, namespace : String, key : String, defaultValue: AnyObject?, scope : Scope?) throws -> Any
+    func getValue(type : Any.Type, namespace : String, key : String, defaultValue: Any?, scope : Scope?) throws -> Any
     
-    func addListener(namespace : String, key : String,  listener : ConfigurationListener , expectedType : AnyClass, scope : Scope) -> Void
+    func addListener(namespace : String, key : String,  listener : ConfigurationListener , expectedType : Any.Type, scope : Scope) -> Void
 }

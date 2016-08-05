@@ -84,7 +84,7 @@ public class Environment: BeanFactory {
         
         init(instance : AnyObject) {
             self.factory = ValueFactory(object: instance)
-            self.singleton = instance
+            //self.singleton = instance
             self.bean = BeanDescriptor.forClass(instance.dynamicType)
         }
         
@@ -1027,7 +1027,7 @@ public class Environment: BeanFactory {
 
             // sort according to index
 
-            dependencyList.sortInPlace({$0.index < $1.index})
+            //dependencyList.sortInPlace({$0.index < $1.index})
 
             // and resort local beans
 
@@ -1039,19 +1039,19 @@ public class Environment: BeanFactory {
                 Tracer.trace("inject.loader", level: .HIGH, message: "resolve beans")
             }
 
-            for dependency in dependencyList {
-                let bean = dependency.declaration
+            for bean in context.localBeans {
+                //let bean = dependency.declaration
 
                 try bean.resolve(self)
                 try bean.prepare(self)
             } // for
 
 
-            if (Tracer.ENABLED) {
+            /*if (Tracer.ENABLED) {
                 Tracer.trace("inject.loader", level: .HIGH, message: "prepare beans")
             }
 
-            /*for dependency in dependencyList {
+            for dependency in dependencyList {
                 try dependency.declaration.prepare(self)  // instantiate all non lazy singletons, add post processors, etc...
             }*/
 
@@ -1190,11 +1190,14 @@ public class Environment: BeanFactory {
 
     // public
 
-    public func loadXML(data : NSData) throws {
-        try XMLEnvironmentLoader(context: self, data: data)
+    public func loadXML(data : NSData) throws -> Environment {
+        try XMLEnvironmentLoader(environment: self)
+           .parse(data)
+
+        return self
     }
 
-    public func refresh() throws {
+    public func refresh() throws -> Environment  {
         if loader != nil {
             // check parent
 
@@ -1217,7 +1220,9 @@ public class Environment: BeanFactory {
             //report()
 
             loader = nil // prevent double loading...
-        }
+        } // if
+
+        return self
     }
 
     public func registerScope(scope : BeanScope) -> Void {

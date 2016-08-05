@@ -15,15 +15,21 @@ class ConfigurationTest: XCTestCase {
 
     func testConfiguration() {
         Tracer.setTraceLevel("inject", level: .FULL)
+        Tracer.setTraceLevel("configuration", level: .FULL)
+
         let parentData = NSData(contentsOfURL: NSBundle(forClass: ConfigurationTest.self).URLForResource("configuration", withExtension: "xml")!)!
 
         ConfigurationNamespaceHandler(namespace: "configuration")
 
         let environment = try! Environment(name: "environment")
 
-        try! environment.loadXML(parentData)
+        try! environment
+           .loadXML(parentData)
+           .refresh()
 
         let configurationManager = environment.getConfigurationManager()
+
+        print(configurationManager.report())
 
         let string = try! configurationManager.getValue(String.self, namespace: "com.foo", key: "string")
         let int    = try! configurationManager.getValue(Int.self, namespace: "com.foo", key: "int")
@@ -32,6 +38,7 @@ class ConfigurationTest: XCTestCase {
         XCTAssert(string == "hello")
         XCTAssert(int == 1)
         XCTAssert(bool == true)
+
 
     }
 }

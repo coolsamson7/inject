@@ -6,7 +6,7 @@
 //  Copyright © 2016 Andreas Ernst. All rights reserved.
 //
 
-public class ArrayOf<T> : SequenceType {
+public class ArrayOf<T : Equatable> : SequenceType {
     // instance data
     
     private var values : [T]; // cannot put an array in a map!
@@ -38,6 +38,10 @@ public class ArrayOf<T> : SequenceType {
     }
     
     // func
+
+    public func contains(value : T) -> Bool {
+        return values.contains({$0 == value})
+    }
     
     public func append(value : T) -> Void {
         values.append(value)

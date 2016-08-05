@@ -140,7 +140,7 @@ class BeanFactoryTests: XCTestCase {
 
         // Measure
 
-        if false {
+        if true {
             try! Timer.measure({
                 var environment = try! Environment(name: "parent")
 
@@ -165,9 +165,11 @@ class BeanFactoryTests: XCTestCase {
     func testFluent() throws {
         let parent = try Environment(name: "parent")
 
+        try parent.getConfigurationManager().addSource(ProcessInfoConfigurationSource())
+
         try parent
-           .define(parent.bean(ProcessInfoConfigurationSource.self)
-              .id("x1"))
+           //.define(parent.bean(ProcessInfoConfigurationSource.self)
+           //   .id("x1"))
 
            .define(parent.bean(Data.self)
               .id("b0")
@@ -221,6 +223,8 @@ class BeanFactoryTests: XCTestCase {
 
              //.define(child.bean(BarFactory.self)
              //   .target("Bar"))
+
+        print(parent.getConfigurationManager().report())
 
         // check
 

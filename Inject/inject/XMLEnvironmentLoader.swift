@@ -173,18 +173,16 @@ public class XMLEnvironmentLoader: XMLParser {
     
     // instance data
     
-    var context: Environment
+    var environment: Environment
     
     // init
     
-    init(context: Environment, data : NSData) throws {
-        self.context = context
+    init(environment: Environment) throws {
+        self.environment = environment
         
         super.init()
         
         try setupParser()
-        
-        try parse(data)
     }
     
     // public
@@ -216,27 +214,6 @@ public class XMLEnvironmentLoader: XMLParser {
         }
     }
     
-    func convert(beans : Beans) throws -> [Environment.BeanDeclaration] {
-        var beanDeclarations : [Environment.BeanDeclaration] = []
-        
-        for declaration in beans.declarations {
-            if let bean = declaration as? Bean {
-                beanDeclarations.append(try bean.convert(self.context))
-            }
-            else if let namespaceAware = declaration as? NamespaceAware {
-                let namespace = namespaceAware.namespace
-                
-                let handler = NamespaceHandler.byNamespace(namespace!)
-
-                //try handler.register(self)
-                
-                try handler.process(namespaceAware, beans: &beanDeclarations)
-            }
-        }
-        
-        return beanDeclarations
-    }
-    
     // override
     
     override func parse(data : NSData) throws -> AnyObject? {
@@ -250,13 +227,19 @@ public class XMLEnvironmentLoader: XMLParser {
             Tracer.trace("inject.xml", level: .HIGH, message: "process")
         }
 
-        let beanDeclarations = try convert(beans)
+        for declaration in beans.declarations {
+            if let bean = declaration as? Bean {
+                try environment.define(try bean.convert(self.environment))
+            }
+            else if let namespaceAware = declaration as? NamespaceAware {
+                let namespace = namespaceAware.namespace
 
-        // collect
+                let handler = NamespaceHandler.byNamespace(namespace!)
 
-        for bean in beanDeclarations {
-            try context.define(bean)
+                try handler.process(namespaceAware, environment: environment)
+            }
         }
+
 
         return nil
     }
