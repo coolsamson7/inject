@@ -2,7 +2,7 @@
 
 I wanted to learn Swift so i decided to try something easy as a start; a dependency injection container :-) So here it is:
 
-`Inject` is a dependency injection container for Swift that picks up the basic Spring ideas as far as they are possible to be implemented ( mainly due to poor reflection support ) and adds a fluent interface for thos who don't like xml.
+`Inject` is a dependency injection container for Swift that picks up the basic `Spring` ideas as far as they are possible to be implemented ( mainly due to poor reflection support ) and adds a fluent interface for those who don't like xml.
 
 Let's look at an example first ( included in the repository )
 
@@ -20,8 +20,10 @@ Here is a sample configuration file `sample.xml` that will demonstrate most of t
     <configuration:configuration namespace="com.foo">
         <configuration:define key="bar" type="Int" value="1"/>
     </configuration:configuration>
+    
+    <!-- other supported possibilities for configuration sources are: process info and plists -->
 
-    <!-- a sample bean post processor which will print on stdout -->
+    <!-- a sample bean post processor that will simply print on stdout... -->
 
     <bean class="SamplePostProcessor"/>
 
@@ -31,7 +33,7 @@ Here is a sample configuration file `sample.xml` that will demonstrate most of t
 
     <bean id="foo-1" class="Foo" depends-on="foo-2">
         <property name="id" value="foo-1"/>
-        <!-- references an unknown configuration key, which will set the defaultvalue instead... -->
+        <!-- references an unknown configuration key, which will set the default value instead... -->
         <property name="number" value="${dunno=1}"/>
     </bean>
 
@@ -41,7 +43,8 @@ Here is a sample configuration file `sample.xml` that will demonstrate most of t
         <property name="number" value="${dunno=${wtf=1}}"/>
     </bean>
 
-    <!-- whenever the bean is fetched a new instance will be created -->
+    <!-- scope prototype means that whenever the bean is requestd a new instance will be created ( default scope is singleton ) -->
+    <!-- other scopes yould be easily added, e.g. a session scope... -->
 
     <bean id="foo-prototype" class="Foo" scope="prototype">
         <property name="id" value="foo-prototype"/>
@@ -55,7 +58,8 @@ Here is a sample configuration file `sample.xml` that will demonstrate most of t
         <property name="magic" value="4711"/>
     </bean>
 
-    <!-- will inherit the class and the magic number -->
+    <!-- will inherit the magic number -->
+    <!-- lazy means that it will be constructed when requested for the first time -->
 
     <bean id="bar" class="Bar" parent="bar-parent" lazy="true">
         <property name="id" value="bar"/>
@@ -206,7 +210,6 @@ And there are also limitations ( darn )
 * all objects need to have a default `init` function
 * 
 This limitation is due to the - missing - swift support for relection. As soon as the language evolves i would change that.. 
-
 # Roadmap
 * support the different package managers
 * wait for replies :-)
