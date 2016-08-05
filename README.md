@@ -1,47 +1,178 @@
 # inject
 
-I wanted to learn Swift so i decided to try something easy as a start; a dependency Injection Container for Swift :-)
+I wanted to learn Swift so i decided to try something easy as a start; a dependency injection container :-) So here it is:
 
-`Inject` is a dependency injection container for Swift that picks up the basic Spring ideas.
+`Inject` is a dependency injection container for Swift that picks up the basic Spring ideas as far as they are possible to be implemented ( mainly due to poor reflection support ) and adds a fluent interface for thos who don't like xml.
 
-Let's look at an example first
+Let's look at an example first ( included in the repository )
 
-Here is a sample `application.xml`
+Here is a sample configuration file `sample.xml` that will demonstrate most of the features
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <beans
-    xmlns="http://www.springframework.org/schema/beans"
-    xsi:schemaLocation="
-    http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
-    http://www.springframework.org/schema/configuration http://www.springframework.org/schema/util/spring-util.xsd">
+        xmlns:configuration="http://www.springframework.org/schema/configuration"
+        xmlns="http://www.springframework.org/schema/beans"
+        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+                        http://www.springframework.org/schema/configuration http://www.springframework.org/schema/util/spring-util.xsd">
+    
+    <!-- builtin namespace & corresponding handler for configuration values -->
 
-    <bean id="data" class="Data">
-        <property name="string" value="data"/>
-        <property name="int" value="1"/>
-        <property name="float" value="-1.1"/>
-        <property name="double" value="-2.2"/>
+    <configuration:configuration namespace="com.foo">
+        <configuration:define key="bar" type="Int" value="1"/>
+    </configuration:configuration>
+
+    <!-- a sample bean post processor which will print on stdout -->
+
+    <bean class="SamplePostProcessor"/>
+
+    <!-- foo -->
+
+    <!-- depends-on will switch the instantiation order -->
+
+    <bean id="foo-1" class="Foo" depends-on="foo-2">
+        <property name="id" value="foo-1"/>
+        <!-- references an unknown configuration key, which will set the defaultvalue instead... -->
+        <property name="number" value="${dunno=1}"/>
     </bean>
+
+    <bean id="foo-2" class="Foo">
+        <property name="id" value="foo-2"/>
+        <!-- same thing recursively -->
+        <property name="number" value="${dunno=${wtf=1}}"/>
+    </bean>
+
+    <!-- whenever the bean is fetched a new instance will be created -->
+
+    <bean id="foo-prototype" class="Foo" scope="prototype">
+        <property name="id" value="foo-prototype"/>
+        <!-- this should work... the : separates the namespace from the key! -->
+        <property name="number" value="${com.foo:bar}"/>
+    </bean>
+
+    <!-- bar will be injected by all foo's. Obviously the bar needs to be constructed first -->
+
+    <bean id="bar-parent" class="Bar" abstract="true">
+        <property name="magic" value="4711"/>
+    </bean>
+
+    <!-- will inherit the class and the magic number -->
+
+    <bean id="bar" class="Bar" parent="bar-parent">
+        <property name="id" value="bar"/>
+    </bean>
+
+    <!-- both foo's will inject the bar instance -->
+
+    <!-- baz factory will create Baz instances... -->
+
+    <bean class="BazFactory" target="Baz">
+        <property name="name" value="factory"/>
+        <!-- will be set as the baz id... -->
+        <property name="id" value="id"/>
+    </bean>
+
+    <!-- bazongs -->
+
+    <bean id="bazong-1" class="Bazong">
+        <property name="id" value="id"/>
+        <!-- by reference -->
+        <property name="foo" ref="foo-1"/>
+    </bean>
+
+    <bean id="bazong-2" class="Bazong">
+        <property name="id" value="id"/>
+        <!-- in-place -->
+        <property name="foo">
+            <bean class="Foo">
+                <property name="id" value="foo-3"/>
+                <property name="number" value="1"/>
+            </bean>
+        </property>
+    </bean>
+</beans>
 ```
 
-As you can see, i was too lazy to create an own xsd, so i stuck to the spring xsd :-)
+As you can see, i was too lazy to create an own xsd, so i will stick to the spring xsd for now :-)
 
-Fetching Beans is done like this:
+Once the container is setup, which is done like this:
 
 ```swift
-var data = NSData(contentsOfURL: NSBundle(forClass: BeanFactoryTests.self).URLForResource("application", withExtension: "xml")!)!
+var data : NSData = NSData(contentsOfURL: NSBundle(forClass: SampleTest.self).URLForResource("sample", withExtension: "xml")!)!
     
-var context = ApplicationContext()
+var environment = Environment(name: "environment")
 
-context.loadXML(data)
-        
-// by id        
-let bean = try! context.getBean(Data.self, byId: "data")
-// assume there is one instane of the specified type
-let sameBean = try! context.getBean(Data.self)
+environment
+   .loadXML(data)
+   .refresh() // wold be done on demand anyway whenever a first getter is called 
+```
+beans can be retrieved via a simple api
+
+```swift
+// by type if ony one instance exists
+
+let baz = try environment.getBean(Baz.self)
+
+// by type
+
+let foo = try context.environment(Foo.self, byId: "foo-1")
 
 ```
 
-Here is a brief summary of the supported features
+If you don't like xml a flunet interafce is provided that will offer the same features.
+
+Here is the - more or less - equivalent
+
+```swift
+let environment = try Environment(name: "fluent environment")
+
+try environment.getConfigurationManager().addSource(ProcessInfoConfigurationSource())
+
+try environment
+    .define(environment.bean(SamplePostProcessor.self))
+    
+    .define(environment.bean(Foo.self)
+        .id("foo-1")
+        .property("id", value: "foo-1")
+        .property("number", resolve: "${dunno=1}"))
+
+    .define(environment.bean(Foo.self)
+        .id("foo-prototype")
+        .scope(environment.scope("prototype"))
+        .property("id", value: "foo-prototype")
+        .property("number", resolve: "${com.foo:bar=1}"))
+
+    .define(environment.bean(Bar.self)
+        .id("bar-parent")
+        .abstract()
+        .property("magic", value: 4711))
+
+    .define(environment.bean(Bar.self)
+        .id("bar")
+        .parent("bar-parent")
+        .property("id", value: "bar"))
+
+    .define(environment.bean(BazFactory.self)
+        .target(Baz.self)
+        .id("baz")
+        .property("name", value: "factory")
+        .property("id", value: "id"))
+
+    .define(environment.bean(Bazong.self)
+        .id("bazong-1")
+        .property("id", value: "id")
+        .property("foo", ref: "foo-1"))
+
+    .define(environment.bean(Bazong.self)
+        .id("bazong-2")
+        .property("id", value: "id")
+        .property("foo", bean: environment.bean(Foo.self)
+            .property("id", value: "foo-3")
+            .property("number", value: 1)))
+
+    .refresh()
+```
+
+Here is a summary of the supported features
 * full dependency management including `depends-on`, `ref`, embedded `<bean>`'s as property values, and injections
 * property injections ( only.. ) including automatic type conversions
 * injections resembling the spring `@Inject` autowiring mechanism
@@ -51,8 +182,8 @@ Here is a brief summary of the supported features
 * lifecycle methods ( e.g. `postConstruct` )
 * `BeanPostProcessor`'s
 * `FactoryBean`'s
-* support for hierarchical containers, inheriting all aspects
-* support for placeholder resolution in xml files ( e.g. `${property=<default>}`) referencing possible configuration values that are retrieved by different providers ( e.g. process info, plists, etc. )
+* support for hierarchical containers, inheriting beans ( including the post processors, of course )
+* support for placeholder resolution ( e.g. `${property=<default>}`) referencing possible configuration values that are retrieved by different providers ( e.g. process info, plists, etc. )
 * support for custom namespace handlers that are much more easy to handle than in the spring world
 
 What is still missing ( mainly due to the crappy Swift support for reflection )
@@ -63,7 +194,6 @@ What is still missing ( mainly due to the crappy Swift support for reflection )
 And there are also limitations ( darn )
 * all objects need to derive from `NSObject`
 * all objects need to have a default `init` function
-* properties cannot be optional
 
 Roadmap
 * support the different package managers
