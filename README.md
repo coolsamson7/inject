@@ -15,19 +15,37 @@ Here is a sample configuration file `sample.xml` that will demonstrate most of t
         xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
                         http://www.springframework.org/schema/configuration http://www.springframework.org/schema/util/spring-util.xsd">
     
-    <!-- builtin namespace & corresponding handler for configuration values -->
+    <!-- configuration values are collected from different sources and can be referenced in xml and the api -->
+    <!-- in addition to static values dynamic sources are supported that will trigger listeners or simply change injected values on the fly-->
+    
+    <!-- here are some examples for sources -->
+    
+    <!-- builtin namespace & corresponding handler to set configuration values -->
 
     <configuration:configuration namespace="com.foo">
         <configuration:define key="bar" type="Int" value="1"/>
     </configuration:configuration>
     
-    <!-- other supported possibilities for configuration sources are: process info and plists -->
+    <!-- other supported sources are -->
+    
+    <!-- the current process info values, e.g. "PATH" -->
+    
+    <bean class="ProcessInfoConfigurationSource"/>
+    
+    <!-- a plist -->
 
-    <!-- a sample bean post processor that will simply print on stdout... -->
+    <bean class="PlistConfigurationSource">
+        <property name="name" value="Info"/>
+    </bean>
+    
+    <!-- a post processor will be called by the container after construction giving it the chance -->
+    <!-- to modify it or completely exchange it with another object ( proxy... ) -->
+    
+    <!-- here we simple print every bean on stdout...:-) -->
 
     <bean class="SamplePostProcessor"/>
 
-    <!-- foo -->
+    <!-- create some foo's -->
 
     <!-- depends-on will switch the instantiation order -->
 
@@ -112,13 +130,13 @@ environment
 beans can be retrieved via a simple api
 
 ```swift
-// by type if one instance only exists
+// by type if one instance only exists ( it would throw an error otherwise )
 
 let baz = try environment.getBean(Baz.self)
 
 // by id
 
-let foo = try context.environment(Foo.self, byId: "foo-1")
+let foo = try environment(Foo.self, byId: "foo-1")
 
 ```
 
@@ -130,6 +148,7 @@ Here is the - more or less - equivalent
 let environment = try Environment(name: "fluent environment")
 
 try environment.getConfigurationManager().addSource(ProcessInfoConfigurationSource())
+try environment.getConfigurationManager().addSource(PlistConfigurationSource(name: "Info"))
 
 try environment
     .define(environment.bean(SamplePostProcessor.self))
@@ -182,7 +201,7 @@ try environment
 # Features
 
 Here is a summary of the supported features
-* full dependency management including `depends-on`, `ref`, embedded `<bean>`'s as property values, and injections
+* full dependency management - and cycle detection - including `depends-on`, `ref`, embedded `<bean>`'s as property values, and injections
 * full typechecking with respect to property values
 * property injections ( only.. ) including automatic type conversions and number coercions ( for the fluent part )
 * injections resembling the spring `@Inject` autowiring mechanism
@@ -221,8 +240,8 @@ This limitation is due to the - missing - swift support for relection. As soon a
 # Help Needed
 
 Even with the limited language support, some features could be probable added. I you have experience with
-* NSProxy stuff 
-* swift/objc type system and ideally a type system on top of it
+* `NSProxy` stuff 
+* Swift/objc type system and ideally an abstraction on top of it
 * method invocation ( method and especially dynamic init-calls, etc. )
  
 give me a call! :-)
