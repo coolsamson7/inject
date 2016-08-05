@@ -196,6 +196,7 @@ Here is a summary of the supported features
 * support for placeholder resolution ( e.g. `${property=<default>}`) referencing possible configuration values that are retrieved by different providers ( e.g. process info, plists, etc. )
 * support for custom namespace handlers that are much more easy to handle than in the spring world
 
+
 # Missing
 
 What is still missing ( mainly due to the crappy Swift support for reflection )
@@ -208,19 +209,20 @@ What is still missing ( mainly due to the crappy Swift support for reflection )
 And there are also limitations ( darn )
 * all objects need to derive from `NSObject`
 * all objects need to have a default `init` function
-* 
+
 This limitation is due to the - missing - swift support for relection. As soon as the language evolves i would change that.. 
 # Roadmap
 * support the different package managers
 * wait for replies :-)
 * internal type system on top of the swift low level types ( answering questions like: what are the implemented protocols of a class, is a class a number type, is one type assignable from another type, what are my generic parameters, etc. ) 
 * support more injections
-* integrate proxy patterns for a service framework
+* integrate proxy patterns as a basis for a service framework
 
 # Help Needed
 
 Even with the limited language support, some features could be probable added. I you have experience with
 * NSProxy stuff 
-* swift/objc type system and mirror stuff
+* swift/objc type system and ideally a type system on top of it
 * method invocation ( method and especially dynamic init-calls, etc. )
+ 
 give me a call! :-)
