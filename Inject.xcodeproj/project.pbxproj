@@ -12,7 +12,6 @@
 		28D35361327C24F99A5F9B89 /* Condition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D352ECA30CE5AB92157F31 /* Condition.swift */; };
 		28D3537384EAB4C62773C01D /* FactoryBean.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D356CE5B72AE61DACA2634 /* FactoryBean.swift */; };
 		28D35492D5F0D7B1BC0BA2D5 /* SampleTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D359ADF037DEC78B9F6C26 /* SampleTest.swift */; };
-		28D355EEB0D9F2A99E6CDA66 /* TODO.TXT in Resources */ = {isa = PBXBuildFile; fileRef = 28D3505FF58457132C2B82C5 /* TODO.TXT */; };
 		28D356D9A9627C5D2758C58D /* Semaphore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D35D492457692B206D2C34 /* Semaphore.swift */; };
 		28D3574428428DE812E11504 /* Timer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D35CA5F6CA55C378348E63 /* Timer.swift */; };
 		28D3591BD2FA8399CD0C926C /* Array.extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D35F661D4C3673FD61424B /* Array.extension.swift */; };
@@ -92,7 +91,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		28D3505FF58457132C2B82C5 /* TODO.TXT */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = TODO.TXT; sourceTree = "<group>"; };
 		28D352ECA30CE5AB92157F31 /* Condition.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Condition.swift; sourceTree = "<group>"; };
 		28D35342BEEED3D1938A2349 /* ClassesTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClassesTest.swift; sourceTree = "<group>"; };
 		28D353F6EBA43DDB0EC12AFB /* ConfigurationTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConfigurationTest.swift; sourceTree = "<group>"; };
@@ -375,7 +373,6 @@
 				B0CB430D1D3CEE170038DF3B /* util */,
 				B0E8D7351D3CE01D000CCE0C /* Inject.h */,
 				B0E8D7371D3CE01D000CCE0C /* Info.plist */,
-				28D3505FF58457132C2B82C5 /* TODO.TXT */,
 			);
 			path = Inject;
 			sourceTree = "<group>";
@@ -488,7 +485,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				28D355EEB0D9F2A99E6CDA66 /* TODO.TXT in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
