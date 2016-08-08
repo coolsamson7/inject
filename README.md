@@ -1,5 +1,7 @@
 # inject
 
+[![Swift Version](https://img.shields.io/badge/Swift-2.2-F16D39.svg?style=flat)](https://developer.apple.com/swift)
+
 I wanted to learn Swift so i decided to try something easy as a start; a dependency injection container :-) So here it is:
 
 `Inject` is a dependency injection container for Swift that picks up the basic `Spring` ideas as far as they are possible to be implemented ( mainly due to poor reflection support ) and adds a fluent interface for those who don't like xml.
