@@ -2,7 +2,7 @@
 
 [![Swift Version](https://img.shields.io/badge/Swift-2.2-F16D39.svg?style=flat)](https://developer.apple.com/swift)
 
-![needle-38080_1280](https://cloud.githubusercontent.com/assets/19403960/17474115/a2e8cb96-5d54-11e6-90d8-a699425b9dc3.png =400x)
+![needle](https://cloud.githubusercontent.com/assets/19403960/17474460/43a71bd6-5d56-11e6-9bcb-6d2aaa9ac466.png)
 
 
 I wanted to learn Swift so i decided to try something easy as a start:-)
