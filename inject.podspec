@@ -10,7 +10,7 @@ Pod::Spec.new do |s|
 s.name         = "inject"
 s.version      = "0.9.1"
 s.summary      = "iOS: Swift dependency injection container"
-s.description  = "Swift dependency injection container"
+s.description  = "Swift dependency injection container picking up te basic spring ideas"
 s.homepage     = "https://github.com/coolsamson7/inject"
 
 
@@ -70,7 +70,7 @@ s.source       = { :git => "https://github.com/coolsamson7/inject.git", :tag => 
 #  Not including the public_header_files will make all headers public.
 #
 
-s.source_files  = 'inject/*'
+s.source_files  = 'inject/**/*.{h,swift}'
 
 # ――― Project Linking ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
 #
