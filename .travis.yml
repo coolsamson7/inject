@@ -1,0 +1,3 @@
+language: objective-c
+xcode_project: Inject.xcodeproj # path to your xcodeproj folder
+xcode_scheme: InjectTests
