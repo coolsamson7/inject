@@ -2,6 +2,8 @@
 
 [![Swift Version](https://img.shields.io/badge/Swift-2.2-F16D39.svg?style=flat)](https://developer.apple.com/swift)
 [![Build Status](https://travis-ci.org/coolsamson7/inject.svg?style=flat)](https://travis-ci.org/coolsamson7/inject)
+[![CocoaPods](https://img.shields.io/cocoapods/v/inject.svg)](https://github.com/coolsamson7/inject)
+[![License][mit-badge]][mit-url]
 
 ![needle](https://cloud.githubusercontent.com/assets/19403960/17474460/43a71bd6-5d56-11e6-9bcb-6d2aaa9ac466.png)
 
@@ -251,3 +253,12 @@ Even with the limited language support, some features could be probable added. I
 * method invocation ( method and especially dynamic init-calls, etc. )
  
 give me a call! :-)
+
+## License
+
+This project is released under the MIT license. See [LICENSE](LICENSE) for details.
+
+[swift-badge]: https://img.shields.io/badge/Swift-3.0-orange.svg?style=flat
+[swift-url]: https://swift.org
+[mit-badge]: https://img.shields.io/badge/License-MIT-blue.svg?style=flat
+[mit-url]: https://tldrlegal.com/license/mit-license
