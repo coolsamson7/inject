@@ -8,24 +8,45 @@
 
 public typealias Resolver = (key : String) throws -> String?
 
+/// this factory creates instances by calling a specified function
+class FactoryFactory<T> : BeanFactory {
+    // MARK: instance data
 
+    var factory : () -> T
+
+    // MARK: init
+
+    init(factory : () -> T ) {
+        self.factory = factory
+    }
+
+    // MARK: implement BeanFactory
+
+    func create(bean : Environment.BeanDeclaration) throws -> AnyObject {
+        return factory() as! AnyObject
+    }
+}
+
+/// ´Environment´is the central class that collects bean infromations and takes care of their lifecycle
 public class Environment: BeanFactory {
-    // local classes
+    // MARK: local classes
 
+    /// this factory calls the default constructor of the given class
     class DefaultConstructorFactory : BeanFactory {
         // static data
 
         static var instance = DefaultConstructorFactory()
 
-        // BeanFactory
+        // MARK: implement BeanFactory
 
         func create(declaration: BeanDeclaration) throws -> AnyObject {
             return try declaration.bean!.create()
         }
     }
 
+    /// this factory returns a fixed object
     class ValueFactory : BeanFactory {
-        // instance data
+        // MARK: instance data
 
         var object : AnyObject
 
@@ -35,7 +56,7 @@ public class Environment: BeanFactory {
             self.object = object
         }
 
-        // BeanFactory
+        // MARK: implement BeanFactory
 
         func create(bean : BeanDeclaration) throws -> AnyObject {
             return object
@@ -43,11 +64,11 @@ public class Environment: BeanFactory {
     }
     
     public class Declaration : NSObject, OriginAware {
-        // instance data
+        // MARK: instance data
         
         var _origin : Origin?
         
-        // OriginAware
+        // MARK: implement OriginAware
         
         var origin : Origin? {
             get {
@@ -58,9 +79,17 @@ public class Environment: BeanFactory {
             }
         }
     }
-    
+
+    /// An `BeanDeclaration` collects the necessary information to construct a particular instance.
+    /// This covers
+    /// - the class
+    /// - the scope: "singleton", "prototype" or custom. "singleton" is the default
+    /// - lazy attribute. The defualt is `false`
+    /// - optional id of a parent bean if, that defines common attributes that will be inherited
+    /// - properties
+    /// - the target class for factory beans
     public class BeanDeclaration : Declaration {
-        // instance data
+        // MARK: instance data
         
         var scope : BeanScope? = nil
         var lazy = false
@@ -77,66 +106,99 @@ public class Environment: BeanFactory {
         var singleton : AnyObject? = nil
         
         // init
-        
+
+        /// create a new `BeanDeclaration`
+        /// - Parameter id:  the id
         init(id : String) {
             self.id = id
         }
-        
+
+        /// create a new `BeanDeclaration`
+        /// - Parameter instance:  a fixed instance
         init(instance : AnyObject) {
             self.factory = ValueFactory(object: instance)
-            //self.singleton = instance
+            //self.singleton = instance // this is not done on purpose since we want the post processors to run!
             self.bean = try! BeanDescriptor.forClass(instance.dynamicType)
         }
-        
+
+        /// create a new `BeanDeclaration`
         override init() {
             super.init()
         }
         
-        // fluent stuff
+        // MARK: fluent stuff
 
+        /// set the class of this bean declaration
+        /// - Parameter clazz: the class name
+        /// - Returns: self
         public func clazz(clazz : String) throws -> BeanDeclaration {
             self.bean = try BeanDescriptor.forClass(clazz)
 
             return self
         }
 
-
+        /// set the id of this bean declaration
+        /// - Parameter id: the id
+        /// - Returns: self
         public func id(id : String) -> BeanDeclaration {
             self.id = id
 
             return self
         }
 
+        /// set the `lazy' attribute of this bean declaration
+        /// - Parameter lazy: if `true`, the instance will be created whenever it is requested for the first time
+        /// - Returns: self
         public func lazy(lazy : Bool = true) -> BeanDeclaration {
             self.lazy = lazy
 
             return self
         }
 
+        /// set the `abstract' attribute of this bean declaration
+        /// - Parameter abstract: if `true`, the instance will not be craeted but serves only as a template for inherited beans
+        /// - Returns: self
         public func abstract(abstract : Bool = true) -> BeanDeclaration {
             self.abstract = abstract
 
             return self
         }
 
+        /// set the scope of this bean declaration
+        /// - Parameter scope: the scope
+        /// - Returns: self
         public func scope(scope : BeanScope) -> BeanDeclaration {
             self.scope = scope
 
             return self
         }
 
+        /// specifies that this bean needs to be constructed after another bean
+        /// - Parameter depends: the id of the bean which needs to be constructed first
+        /// - Returns: self
         public func dependsOn(depends : String) -> BeanDeclaration {
             self.dependsOn = BeanDeclaration(id: depends)
 
             return self
         }
 
+        /// specifies a bean that will serve as a template
+        /// - Parameter parent: the id of the parent bean
+        /// - Returns: self
         public func parent(parent : String) -> BeanDeclaration {
             self.parent = BeanDeclaration(id: parent)
 
             return self
         }
 
+        /// create a new property given its name and one of possible parameters
+        /// - Parameter name: the name of the property
+        /// - Parameter value: a fixed value
+        /// - Parameter ref: the id of a referenced bean
+        /// - Parameter resolve: a placeholder that will be evaluated in the current configuration context and possibly transformed in rhe required type
+        /// - Parameter bean: an embedded bean defining the value
+        /// - Parameter inject: an `InjectBean` instance that defines how the injection shuld be carried out ( by id or by type )
+        /// - Returns: self
         public func property(name: String, value : Any? = nil, ref : String? = nil, resolve : String? = nil, bean : BeanDeclaration? = nil, inject : InjectBean? = nil) -> BeanDeclaration {
             let property = PropertyDeclaration()
 
@@ -164,6 +226,9 @@ public class Environment: BeanFactory {
             return self
         }
 
+        /// specifies a target class of a factory bean
+        /// - Parameter clazz: the class that this factory beans creates
+        /// - Returns: self
         public func target(clazz : AnyClass) throws -> BeanDeclaration {
             self.target = try BeanDescriptor.forClass(clazz)
 
@@ -176,7 +241,7 @@ public class Environment: BeanFactory {
             return self
         }
         
-        // func
+        // MARK: internal
 
         func report(builder : StringBuilder) {
             builder.append(Classes.className(bean!.clazz))
@@ -320,7 +385,7 @@ public class Environment: BeanFactory {
                 Tracer.trace("inject.runtime", level: .HIGH, message: "create instance of \(bean!.clazz)")
             }
             
-            let result = try factory.create(self) // constructor, value, etc
+            let result = try factory.create(self) // MARK: constructor, value, etc
             
             // set properties
             
@@ -387,7 +452,7 @@ public class Environment: BeanFactory {
     }
 
     class BeanReference : ValueHolder {
-        // instance data
+        // MARK: instance data
 
         var ref : BeanDeclaration
 
@@ -416,7 +481,7 @@ public class Environment: BeanFactory {
     }
 
     class InjectedBean : ValueHolder {
-        // instance data
+        // MARK: instance data
 
         var inject : InjectBean
         var bean : BeanDeclaration?
@@ -450,7 +515,7 @@ public class Environment: BeanFactory {
     }
 
     class EmbeddedBean : ValueHolder {
-        // instance data
+        // MARK: instance data
 
         var bean : BeanDeclaration
 
@@ -480,7 +545,7 @@ public class Environment: BeanFactory {
     }
 
     class Value : ValueHolder {
-        // instance data
+        // MARK: instance data
 
         var value : Any
 
@@ -573,7 +638,7 @@ public class Environment: BeanFactory {
     }
 
     class PlaceHolder : ValueHolder {
-        // instance data
+        // MARK: instance data
 
         var value : String
 
@@ -614,7 +679,7 @@ public class Environment: BeanFactory {
     }
     
     public class PropertyDeclaration : Declaration {
-        // instance data
+        // MARK: instance data
         
         var name  : String = ""
         var value : ValueHolder?
@@ -713,7 +778,7 @@ public class Environment: BeanFactory {
     }
 
     class BeanFactoryScope : BeanScope {
-        // instance data
+        // MARK: instance data
 
         let declaration : Environment.BeanDeclaration
         let context: Environment
@@ -754,7 +819,7 @@ public class Environment: BeanFactory {
         // local classes
 
         class Dependency : Equatable {
-            // instance data
+            // MARK: instance data
 
             var declaration : Environment.BeanDeclaration
             var successors : [Dependency] = []
@@ -776,7 +841,7 @@ public class Environment: BeanFactory {
             }
         }
 
-        // instance data
+        // MARK: instance data
 
         var context: Environment
         var loading = false
@@ -790,7 +855,7 @@ public class Environment: BeanFactory {
             self.context = context
         }
 
-        // public
+        // MARK: public
 
         func resolve(string : String) throws -> String {
             var result = string
@@ -851,7 +916,7 @@ public class Environment: BeanFactory {
             resolver =  resolveConfiguration
         }
 
-        // internal
+        // MARK: internal
 
         func getDependency(bean : Environment.BeanDeclaration) -> Dependency {
             var dependency = dependencies[bean]
@@ -1059,7 +1124,7 @@ public class Environment: BeanFactory {
     }
 
     class EnvironmentPostProcessor: NSObject, EnvironmentAware, BeanPostProcessor {
-        // instance data
+        // MARK: instance data
 
         var injector : Injector
         var _environment: Environment?
@@ -1119,7 +1184,7 @@ public class Environment: BeanFactory {
         }
     }
 
-    // instance data
+    // MARK: instance data
 
     var name : String = ""
     var loader : Loader?
@@ -1134,7 +1199,7 @@ public class Environment: BeanFactory {
 
     var singletonScope : BeanScope
     
-    // init
+    // MARK: init
     
     init(name: String, parent : Environment? = nil) throws {
         self.name = name
@@ -1185,8 +1250,10 @@ public class Environment: BeanFactory {
         }
     }
 
-    // public
+    // MARK: public
 
+    /// load a xl configuration file
+    /// - Parameter data: a `NSData` object referencing the config file
     public func loadXML(data : NSData) throws -> Environment {
         try XMLEnvironmentLoader(environment: self)
            .parse(data)
@@ -1194,6 +1261,9 @@ public class Environment: BeanFactory {
         return self
     }
 
+    /// refresh validates all defined beans and creates all singletons in advance
+    /// - Returns: self
+    /// - Throws: any errors during setup
     public func refresh() throws -> Environment  {
         if loader != nil {
             // check parent
@@ -1218,52 +1288,84 @@ public class Environment: BeanFactory {
         return self
     }
 
+    /// register a named scope
+    // - Parameter scope: the ``BeanScope
     public func registerScope(scope : BeanScope) -> Void {
         scopes[scope.name] = scope
     }
 
-    // fluent
+    // MARK: fluent interface
 
+    /// Return a named scope
+    /// - Parameter scope: the scope name
+    /// - Throws: an error if the scope is not defined
     public func scope(scope : String) throws -> BeanScope {
         return try getScope(scope)
     }
 
-    public func bean(instance : AnyObject, id : String? = nil, scope :  String = "singleton") throws -> Environment.BeanDeclaration {
+    /// create a `BeanDeclaration` based on a already constructed object
+    /// - Parameter instance: the corresponding instance
+    /// - Parameter id: an optional id
+    /// - Returns: the new `BeanDeclaration`
+    public func bean(instance : AnyObject, id : String? = nil) -> Environment.BeanDeclaration {
         let result = Environment.BeanDeclaration(instance: instance)
 
         if id != nil {
             result.id = id
         }
 
-        //result.scope = try self.scope(scope)
-
         return result
     }
 
-    public func bean(className : String, id : String? = nil) throws -> Environment.BeanDeclaration {
+    /// create a `BeanDeclaration
+    /// - Parameter className: the name of the bean class
+    /// - Parameter id: an optional id
+    /// - Parameter lazy: the lazy attribute. default is ´false´
+    /// - Parameter abstract:t he abstract attribute. default is ´false´
+    /// - Returns: the new `BeanDeclaration`
+    public func bean(className : String, id : String? = nil, lazy : Bool = false, abstract : Bool = false) throws -> Environment.BeanDeclaration {
         let result = Environment.BeanDeclaration()
 
         if id != nil {
             result.id = id
         }
+
+        result.lazy = lazy
+        result.abstract = abstract
 
         result.bean = try BeanDescriptor.forClass(className)
 
         return result
     }
 
-    public func bean(clazz : AnyClass, id : String? = nil) throws -> Environment.BeanDeclaration {
+    /// create a `BeanDeclaration
+    /// - Parameter clazz: the bean class
+    /// - Parameter id: an optional id
+    /// - Parameter lazy: the lazy attribute. default is ´false´
+    /// - Parameter abstract:t he abstract attribute. default is ´false´
+    /// - Parameter factory: a factory funtion that will return a new instance of the specific type
+    /// - Returns: the new `BeanDeclaration`
+    public func bean<T>(clazz : T.Type, id : String? = nil, lazy : Bool = false, abstract : Bool = false, factory : (() -> T)? = nil) throws -> Environment.BeanDeclaration {
         let result = Environment.BeanDeclaration()
 
         if id != nil {
             result.id = id
         }
 
-        result.bean = try BeanDescriptor.forClass(clazz)
+        result.lazy = lazy
+        result.abstract = abstract
+
+        if factory != nil {
+            result.factory = FactoryFactory<T>(factory: factory!)
+        }
+
+        result.bean = try BeanDescriptor.forClass(clazz as! AnyClass)
 
         return result
     }
 
+    /// defines the specified ´BeanDeclaration´
+    /// - Returns: self
     public func define(declaration : Environment.BeanDeclaration) throws -> Environment {
         // fix scope if not available
 
@@ -1301,7 +1403,7 @@ public class Environment: BeanFactory {
         return self
     }
 
-    // internal
+    // MARK: internal
 
     func inheritFrom(parent : Environment) {
         if (Tracer.ENABLED) {
@@ -1322,19 +1424,6 @@ public class Environment: BeanFactory {
                 environmentAware.environment = self
             }
         }
-    }
-
-
-    public func report() -> String {
-        let builder = StringBuilder()
-
-        builder.append("### ENVIRONMENT \(name) REPORT\n")
-
-        for bean in localBeans {
-            bean.report(builder)
-        }
-
-        return builder.toString()
     }
 
     func validate() throws {
@@ -1409,7 +1498,7 @@ public class Environment: BeanFactory {
     }
 
     func getCandidate(clazz : AnyClass) throws -> Environment.BeanDeclaration {
-        let candidates = getBeansByType(try BeanDescriptor.forClass(clazz))
+        let candidates = getBeanDeclarationsByType(try BeanDescriptor.forClass(clazz))
         
         if candidates.count == 0 {
             throw EnvironmentErrors.NoCandidateForType(type: clazz)
@@ -1448,18 +1537,16 @@ public class Environment: BeanFactory {
         return declaration!
     }
 
-    // public
-
-    public func getBeansByType(clazz : AnyClass) -> [Environment.BeanDeclaration] {
-        return getBeansByType(try! BeanDescriptor.forClass(clazz))
+    public func getBeanDeclarationsByType(clazz : AnyClass) -> [Environment.BeanDeclaration] {
+        return getBeanDeclarationsByType(try! BeanDescriptor.forClass(clazz))
     }
 
-    public func getBeansByType(bean : BeanDescriptor) -> [Environment.BeanDeclaration] {
+    public func getBeanDeclarationsByType(bean : BeanDescriptor) -> [Environment.BeanDeclaration] {
         // local func
-        
+
         func collect(bean : BeanDescriptor, inout candidates : [Environment.BeanDeclaration]) -> Void {
             let localCandidates = byType[bean.clazz]
-            
+
             if localCandidates != nil {
                 for candidate in localCandidates! {
                     if !candidate.abstract {
@@ -1467,21 +1554,59 @@ public class Environment: BeanFactory {
                     }
                 }
             }
-            
+
             // check subclasses
-            
+
             for subBean in bean.directSubBeans {
                 collect(subBean, candidates: &candidates)
             }
         }
-        
+
         var result : [Environment.BeanDeclaration] = []
-        
+
         collect(bean, candidates: &result)
-        
+
         return result
     }
 
+    // MARK: public
+
+    /// Create a string report of all registered bean definitions
+    /// - Returns: the report
+    public func report() -> String {
+        let builder = StringBuilder()
+
+        builder.append("### ENVIRONMENT \(name) REPORT\n")
+
+        for bean in localBeans {
+            bean.report(builder)
+        }
+
+        return builder.toString()
+    }
+
+    /// return an array of all bean instances of a given type
+    /// - Parameter clazz: the bean class
+    /// - Returns: the array of instances
+    /// - Throws: any errors
+
+    public func getBeansByType(clazz : AnyClass) throws -> [AnyObject] {
+        let declarations = getBeanDeclarationsByType(clazz)
+        var result : [AnyObject] = []
+        for declaration in declarations {
+            if !declaration.abstract {
+                result.append(try declaration.getInstance(self))
+            }
+        }
+
+        return result
+    }
+
+    /// return a bean given the type and an optional id
+    /// - Parameter type: the type
+    /// - Parameter id: an optional id
+    /// - Returns: the instance
+    /// - Throws: Any error
     public func getBean<T>(type : T.Type, byId id : String? = nil) throws -> T {
         try validate()
 
@@ -1494,7 +1619,7 @@ public class Environment: BeanFactory {
             }
         }
         else {
-            let result = getBeansByType(try BeanDescriptor.forClass(type as! AnyClass))
+            let result = getBeanDeclarationsByType(try BeanDescriptor.forClass(type as! AnyClass))
             
             if result.count == 0 {
                 throw EnvironmentErrors.UnknownBeanByType(type: type as! AnyClass)
@@ -1509,7 +1634,11 @@ public class Environment: BeanFactory {
         }
     }
 
-    // without generics...this sucks
+    /// return a bean given the type and an optional id ( without generic parameters )
+    /// - Parameter type: the type
+    /// - Parameter id: an optional id
+    /// - Returns: the instance
+    /// - Throws: Any error
     public func getBean(type : AnyClass, byId id : String? = nil) throws -> AnyObject {
         try validate()
 
@@ -1522,7 +1651,7 @@ public class Environment: BeanFactory {
             }
         }
         else {
-            let result = getBeansByType(try BeanDescriptor.forClass(type ))
+            let result = getBeanDeclarationsByType(try BeanDescriptor.forClass(type ))
 
             if result.count == 0 {
                 throw EnvironmentErrors.UnknownBeanByType(type: type )
@@ -1542,12 +1671,26 @@ public class Environment: BeanFactory {
 
         try injector.inject(object, context: self)
     }
-    
+
+    /// return the ´ConfigurationManager´ of this environment
+    /// - Returns: the ´ConfigurationManager´
     public func getConfigurationManager() -> ConfigurationManager {
         return configurationManager
     }
+
+    /// return a configuration value
+    /// - Parameter type: the expected type
+    /// - Parameter namespace: the namespace
+    /// - Parameter key: the key
+    /// - Parameter defaultValue: the optional default value
+    /// - Parameter scope: the optional scope
+    /// - Returns: the value
+    /// - Throws: any possible error
+    public func getValue<T>(type : T.Type, namespace : String, key : String, defaultValue: T? = nil, scope : Scope? = nil) throws -> T {
+        return try configurationManager.getValue(type, namespace: namespace, key: key, defaultValue: defaultValue, scope: scope)
+    }
     
-    // BeanFactory
+    // MARK: implement BeanFactory
     
     public func create(bean : Environment.BeanDeclaration) throws -> AnyObject {
         return try bean.create(self)

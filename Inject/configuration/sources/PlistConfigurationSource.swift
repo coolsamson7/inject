@@ -8,7 +8,7 @@
 
 
 public class PlistConfigurationSource : AbstractConfigurationSource {
-    // instance data
+    // MARK: instance data
 
     var name : String? {
         didSet {

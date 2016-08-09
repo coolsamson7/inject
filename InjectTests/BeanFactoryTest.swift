@@ -171,15 +171,13 @@ class BeanFactoryTests: XCTestCase {
            //.define(parent.bean(ProcessInfoConfigurationSource.self)
            //   .id("x1"))
 
-           .define(parent.bean(Data.self)
-              .id("b0")
+           .define(parent.bean(Data.self, id: "b0")
               .property("string", value: "b0")
               .property("int", value: 1)
               .property("float", value: Float(-1.1))
               .property("double", value: -2.2))
 
-           .define(parent.bean(FooBean.self)
-               .id("foo")
+           .define(parent.bean(FooBean.self, id: "foo")
                .property("name", resolve: "${andi=Andreas?}")
                .property("age", resolve: "${SIMULATOR_MAINSCREEN_HEIGHT=51}")) // TODO?
 

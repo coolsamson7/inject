@@ -6,7 +6,7 @@
 import Foundation
 
 public class Condition {
-    // instance data
+    // MARK: instance data
 
     private var cond = pthread_cond_t()
     private var mutex : Mutex
@@ -23,7 +23,7 @@ public class Condition {
         pthread_cond_destroy(&cond)
     }
 
-    // public
+    // MARK: public
 
     func broadcast(){
         pthread_cond_broadcast(&cond)

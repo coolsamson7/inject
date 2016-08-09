@@ -17,7 +17,7 @@ public class BeanDescriptor : CustomStringConvertible {
     
     private static var beans = IdentityMap<AnyObject, BeanDescriptor>();
     
-    // class methods
+    // MARK: class methods
     
     ///Return the
     /// - Parameter clazz: the corresponding class
@@ -42,10 +42,10 @@ public class BeanDescriptor : CustomStringConvertible {
         return try forClass(try Classes.class4Name(clazz))
     }
     
-    // inner classes
+    // MARK: inner classes
     
     public class PropertyDescriptor : CustomStringConvertible {
-        // instance data
+        // MARK: instance data
         
         var bean: BeanDescriptor;
         var name: String;
@@ -56,7 +56,7 @@ public class BeanDescriptor : CustomStringConvertible {
         var autowired = false
         var inject : Inject?
         
-        // constructor
+        // MARK: constructor
         
         init(bean: BeanDescriptor, name: String, index: Int, overallIndex: Int, type: Any.Type, optional : Bool) {
             self.bean = bean
@@ -67,7 +67,7 @@ public class BeanDescriptor : CustomStringConvertible {
             self.overallIndex = overallIndex
         }
         
-        // public
+        // MARK: public
         
         public func getPropertyType() -> Any.Type {
             return type;
@@ -128,7 +128,7 @@ public class BeanDescriptor : CustomStringConvertible {
             }
         }
 
-        // internal
+        // MARK: internal
 
         // take car of boxing...ugh
 
@@ -186,7 +186,7 @@ public class BeanDescriptor : CustomStringConvertible {
     }
     
     public class RelationDescriptor : PropertyDescriptor {
-        // instance data
+        // MARK: instance data
         
         var target: BeanDescriptor;
         
@@ -204,7 +204,7 @@ public class BeanDescriptor : CustomStringConvertible {
         
     }
     
-    // instance data
+    // MARK: instance data
     
     internal var clazz: AnyClass;
     internal var superBean: BeanDescriptor?;
@@ -213,7 +213,7 @@ public class BeanDescriptor : CustomStringConvertible {
     internal var properties: [String:PropertyDescriptor]! = [String: PropertyDescriptor]();
     internal var directSubBeans = [BeanDescriptor]()
     
-    // constructor
+    // MARK: constructor
     
     init(clazz: AnyClass) {
         self.clazz = clazz
@@ -297,7 +297,7 @@ public class BeanDescriptor : CustomStringConvertible {
         //print(self)
     }
     
-    // public
+    // MARK: public
     
     public func getBeanClass() -> AnyClass {
         return clazz

@@ -6,7 +6,7 @@
 import Foundation
 
 public class Mutex : Lock {
-    // instance data
+    // MARK: instance data
 
     internal var mutex = pthread_mutex_t()
 

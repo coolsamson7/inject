@@ -7,7 +7,7 @@
 //
 
 public class AbstractConfigurationSource : NSObject, ConfigurationSource, Bean, ClassInitializer  {
-    // instance data
+    // MARK: instance data
     
     var _url : String
     var _mutable = false

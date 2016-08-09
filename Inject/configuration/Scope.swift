@@ -10,7 +10,7 @@
 public class Scope : Hashable, CustomStringConvertible {
     static var WILDCARD = Scope()
     
-    // instance data
+    // MARK: instance data
     
     var path : [String]
     

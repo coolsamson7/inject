@@ -13,7 +13,7 @@ public class XMLParser: NSObject {
         // local class Name {
         
         class PropertyDefinition {
-            // instance data
+            // MARK: instance data
             
             var property  : BeanDescriptor.PropertyDescriptor
             var xml: String
@@ -33,7 +33,7 @@ public class XMLParser: NSObject {
                 }
             }
             
-            // internal
+            // MARK: internal
             
             func set(object : AnyObject, value : String) throws -> Void {
                 var val : Any = value;
@@ -45,7 +45,7 @@ public class XMLParser: NSObject {
             }
         }
         
-        // instance data
+        // MARK: instance data
         
         var clazz : BeanDescriptor
         var element  : String
@@ -58,7 +58,7 @@ public class XMLParser: NSObject {
             self.element = element
         }
         
-        // internal
+        // MARK: internal
         
         // fluent
         
@@ -71,7 +71,7 @@ public class XMLParser: NSObject {
         }
     }
     
-    // internal
+    // MARK: internal
     
     class State : NSObject, NSXMLParserDelegate {
         // MARK: locales classes
@@ -97,7 +97,7 @@ public class XMLParser: NSObject {
         }
         
         class ClassOperation : Operation {
-            // instance data
+            // MARK: instance data
             
             var definition : ClassDefinition
             var instance : AnyObject
@@ -158,7 +158,7 @@ public class XMLParser: NSObject {
         }
         
         class PropertyOperation : Operation {
-            // instance data
+            // MARK: instance data
             
             var definition : ClassDefinition.PropertyDefinition
             var parent: ClassOperation
@@ -177,7 +177,7 @@ public class XMLParser: NSObject {
             }
         }
         
-        // instance data
+        // MARK: instance data
         
         var parser : XMLParser
         var operations = [Operation]()
@@ -192,7 +192,7 @@ public class XMLParser: NSObject {
             self.parser = parser
         }
         
-        // internal
+        // MARK: internal
         
         func reportError(error : XMLParserErrors) {
             if self._error == nil {
@@ -305,7 +305,7 @@ public class XMLParser: NSObject {
         }
     }
     
-    // instance data
+    // MARK: instance data
     
     var classes = [String:ClassDefinition]()
     
@@ -317,7 +317,7 @@ public class XMLParser: NSObject {
         }
     }
     
-    // public
+    // MARK: public
     
     func parse(data : NSData) throws -> AnyObject? {
         let parser = NSXMLParser(data: data)

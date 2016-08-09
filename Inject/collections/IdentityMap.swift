@@ -9,7 +9,7 @@
 import Foundation
 
 public class ObjectIdentityKey: Hashable {
-    // instance data
+    // MARK: instance data
     
     private var object: AnyObject
     private var hash: Int;
@@ -36,11 +36,11 @@ public func ==(lhs: ObjectIdentityKey, rhs: ObjectIdentityKey) -> Bool {
 
 public class IdentitySet<T:AnyObject> {
     // local classes
-    // instance data
+    // MARK: instance data
     
     private var set = Set<ObjectIdentityKey>();
     
-    // public
+    // MARK: public
     
     public func insert(object: T) -> Void {
         set.insert(ObjectIdentityKey(object: object))
@@ -52,11 +52,11 @@ public class IdentitySet<T:AnyObject> {
 }
 
 public class IdentityMap<K:AnyObject, V:AnyObject> {
-    // instance data
+    // MARK: instance data
     
     private var map = [ObjectIdentityKey: V]();
     
-    // public
+    // MARK: public
     
     subscript(key: K) -> V? {
         get {

@@ -7,7 +7,7 @@
 //
 
 public class ArrayOf<T : Equatable> : SequenceType {
-    // instance data
+    // MARK: instance data
     
     private var values : [T]; // cannot put an array in a map!
     

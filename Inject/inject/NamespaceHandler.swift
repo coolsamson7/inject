@@ -24,7 +24,7 @@ public class NamespaceHandler {
         }
     }
 
-    // instance data
+    // MARK: instance data
     
     var namespace : String
     var environment: Environment? = nil

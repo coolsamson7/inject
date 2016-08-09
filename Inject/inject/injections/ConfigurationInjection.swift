@@ -6,7 +6,7 @@
 //  Copyright © 2016 Andreas Ernst. All rights reserved.
 //
 public class ConfigurationValueInjection : Injection {
-    // instance data
+    // MARK: instance data
     
     var configurationManager : ConfigurationManager?
     
@@ -31,15 +31,15 @@ public class ConfigurationValueInjection : Injection {
 
 @objc(InjectConfigurationValue)
 public class InjectConfigurationValue : Inject {
-    // instance data
+    // MARK: instance data
     
     var namespace : String
     var key        : String
-    var defaultValue : AnyObject?
+    var defaultValue : Any?
     
     // init
     
-    init(namespace : String, key : String, defaultValue : AnyObject) {
+    init(namespace : String, key : String, defaultValue : Any?) {
         self.namespace = namespace
         self.key = key
         self.defaultValue = defaultValue

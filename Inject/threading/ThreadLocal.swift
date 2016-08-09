@@ -11,19 +11,19 @@ public class ThreadLocal<T> {
     
     typealias Generator = () -> T
     
-    // instance data
+    // MARK: instance data
     
     var id : String
     var generator : Generator;
     
-    // constructor
+    // MARK: constructor
     
     init(generator : Generator) {
         self.generator = generator
         self.id =  NSUUID().UUIDString
     }
     
-    // public
+    // MARK: public
     
     public func get() -> T {
         let threadDictionary = NSThread.currentThread().threadDictionary;

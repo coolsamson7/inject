@@ -10,7 +10,7 @@ public class XMLEnvironmentLoader: XMLParser {
     // local classes
     
     public class Declaration : NSObject, OriginAware {
-        // instance data
+        // MARK: instance data
         
         var _origin : Origin?
         
@@ -27,7 +27,7 @@ public class XMLEnvironmentLoader: XMLParser {
     }
     
     class Beans : Declaration, Ancestor, AttributeContainer {
-        // instance data
+        // MARK: instance data
         
         var declarations : [OriginAware] = []
         
@@ -52,7 +52,7 @@ public class XMLEnvironmentLoader: XMLParser {
     }
     
     public class Bean : Declaration, Ancestor {
-        // instance data
+        // MARK: instance data
         
         var scope = "singleton"
         var lazy = false
@@ -70,7 +70,7 @@ public class XMLEnvironmentLoader: XMLParser {
             super.init()
         }
         
-        // public
+        // MARK: public
         
         public func convert(environment: Environment) throws -> Environment.BeanDeclaration {
             let bean = Environment.BeanDeclaration()
@@ -132,7 +132,7 @@ public class XMLEnvironmentLoader: XMLParser {
     }
     
     class Property : Declaration, Ancestor {
-        // instance data
+        // MARK: instance data
         
         var name  : String = ""
         var value : String?
@@ -140,7 +140,7 @@ public class XMLEnvironmentLoader: XMLParser {
         
         var declaration : Bean?
         
-        // public
+        // MARK: public
         
         internal func convert(environment: Environment) throws -> Environment.PropertyDeclaration {
             let property = Environment.PropertyDeclaration()
@@ -171,7 +171,7 @@ public class XMLEnvironmentLoader: XMLParser {
         }
     }
     
-    // instance data
+    // MARK: instance data
     
     var environment: Environment
     
@@ -185,7 +185,7 @@ public class XMLEnvironmentLoader: XMLParser {
         try setupParser()
     }
     
-    // public
+    // MARK: public
     
     func setupParser() throws -> Void {
         try register(

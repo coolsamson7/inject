@@ -6,9 +6,9 @@
 import Foundation
 
 struct Timer : CustomStringConvertible {
-    // class methods
+    // MARK: class methods
 
-    static func measure(block: () throws -> AnyObject?, times : Int = 1) throws -> Void {
+    static func measure(block: (() throws -> AnyObject?), times : Int = 1) throws -> Void {
         var timer = Timer();
 
         timer.start()
@@ -22,12 +22,12 @@ struct Timer : CustomStringConvertible {
         print("\(times) loops in \(timer)")
     }
 
-    // instance data
+    // MARK: instance data
 
     var begin : CFAbsoluteTime
     var end   : CFAbsoluteTime
 
-    // constructor
+    // MARK: constructor
 
     init() {
         begin = CFAbsoluteTimeGetCurrent()

@@ -10,7 +10,7 @@ public class StandardConversionFactory : ConversionFactory {
     // local classes
     
     public class Key : Hashable {
-        // instance data
+        // MARK: instance data
         
         var sourceType : Any.Type
         var targetType : Any.Type
@@ -35,11 +35,11 @@ public class StandardConversionFactory : ConversionFactory {
     
     static var instance = StandardConversionFactory()
     
-    // instance data
+    // MARK: instance data
     
     var registry = [Key:Conversion]()
     
-    // constructor
+    // MARK: constructor
 
 
     init() {

@@ -12,7 +12,7 @@ public class ConfigurationNamespaceHandler : NamespaceHandler {
     // the source
     
     class ConfigurationNamespaceHandlerSource : AbstractConfigurationSource {
-        // instance data
+        // MARK: instance data
         
         var items : [ConfigurationItem] = []
         
@@ -40,7 +40,7 @@ public class ConfigurationNamespaceHandler : NamespaceHandler {
     // nodes
 
     class Configuration : NSObject, Ancestor, NamespaceAware, OriginAware {
-        // instance data
+        // MARK: instance data
         
         var _namespace : String?
         var _origin : Origin?
@@ -80,7 +80,7 @@ public class ConfigurationNamespaceHandler : NamespaceHandler {
     }
 
     class Define : NSObject {
-        // instance data
+        // MARK: instance data
         
         var namespace : String?
         var key : String?

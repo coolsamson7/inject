@@ -7,7 +7,7 @@
 //
 
 public class FQN : Hashable, CustomStringConvertible {
-    // instance data
+    // MARK: instance data
     
     var namespace : String
     var key : String

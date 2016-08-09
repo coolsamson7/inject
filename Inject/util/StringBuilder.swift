@@ -9,7 +9,7 @@
 import Foundation
 
 public class StringBuilder {
-    // instance data
+    // MARK: instance data
     
     private var stringValue: String
     
@@ -23,7 +23,7 @@ public class StringBuilder {
         self.stringValue = string
     }
     
-    // public
+    // MARK: public
     
     /**
      Return the String object

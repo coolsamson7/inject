@@ -6,7 +6,7 @@
 import Foundation
 
 public class Future<T> {
-    // instance data
+    // MARK: instance data
 
     var resolved = false
     var mutex : Mutex
@@ -21,7 +21,7 @@ public class Future<T> {
         condition = Condition(mutex: mutex)
     }
 
-    // public
+    // MARK: public
 
     func getResult() throws -> T {
         mutex.synchronized({

@@ -6,7 +6,7 @@
 //  Copyright © 2016 Andreas Ernst. All rights reserved.
 //
 public class Injection : NSObject, Bean, ClassInitializer {
-    // instance data
+    // MARK: instance data
     
     var injector : Injector?
     var clazz : AnyClass;
@@ -23,7 +23,7 @@ public class Injection : NSObject, Bean, ClassInitializer {
         self.clazz = clazz
     }
     
-    // public
+    // MARK: public
     
     func computeValue(inject : Inject, property: BeanDescriptor.PropertyDescriptor, environment: Environment) throws -> Any {
         return self// implement!

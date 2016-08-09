@@ -11,7 +11,7 @@ public class ConfigurationManager : NSObject, ConfigurationAdministration, Confi
     // local class
     
     class ScopeAndName : Hashable {
-        // instance data
+        // MARK: instance data
         
         var scope : Scope
         var fqn : FQN
@@ -33,7 +33,7 @@ public class ConfigurationManager : NSObject, ConfigurationAdministration, Confi
     }
     
     class ConfigurationListenerData : Equatable {
-        // instance data
+        // MARK: instance data
         
         var scope : Scope
         var fqn : FQN
@@ -54,7 +54,7 @@ public class ConfigurationManager : NSObject, ConfigurationAdministration, Confi
     
     static var NOT_FOUND : ConfigurationItem = ConfigurationItem(fqn: FQN(namespace: "", key: ""), type: Any.self, value: "", source: "", scope : Scope.WILDCARD)
     
-    // instance data
+    // MARK: instance data
     
     var scope : Scope
     var sources  = [ConfigurationSource]()

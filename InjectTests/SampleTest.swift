@@ -138,7 +138,7 @@ class SampleTest: XCTestCase {
         ConfigurationNamespaceHandler(namespace: "configuration")
     }
 
-    // internal funcs
+    // MARK: internal funcs
 
     func getResource(name : String, suffix : String = "xml") -> NSData {
         return NSData(contentsOfURL: NSBundle(forClass: self.dynamicType).URLForResource(name, withExtension: suffix)!)!
@@ -165,42 +165,37 @@ class SampleTest: XCTestCase {
         try! environment.getConfigurationManager().addSource(ProcessInfoConfigurationSource())
 
         try! environment
+           .define(environment.bean(Foo.self, id: "foo-by-factory", factory: {return Foo()}))
+
            .define(environment.bean(SamplePostProcessor.self))
 
-           .define(environment.bean(Foo.self)
-               .id("foo-1")
+           .define(environment.bean(Foo.self, id: "foo-1")
                .property("id", value: "foo-1")
                .property("number", resolve: "${dunno=1}"))
 
-           .define(environment.bean(Foo.self)
-              .id("foo-prototype")
+           .define(environment.bean(Foo.self, id: "foo-prototype")
               .scope(environment.scope("prototype"))
               .property("id", value: "foo-prototype")
               .property("number", resolve: "${com.foo:bar=1}"))
 
-           .define(environment.bean(Bar.self)
-               .id("bar-parent")
+           .define(environment.bean(Bar.self, id: "bar-parent")
                .abstract()
                .property("magic", value: 4711))
 
-            .define(environment.bean(Bar.self)
-               .id("bar")
+            .define(environment.bean(Bar.self, id: "bar")
                .parent("bar-parent")
                .property("id", value: "bar"))
 
-             .define(environment.bean(BazFactory.self)
+             .define(environment.bean(BazFactory.self, id: "baz")
                 .target(Baz.self)
-                .id("baz")
                 .property("name", value: "factory")
                 .property("id", value: "id"))
 
-             .define(environment.bean(Bazong.self)
-                .id("bazong-1")
+             .define(environment.bean(Bazong.self, id: "bazong-1")
                 .property("id", value: "id")
                 .property("foo", ref: "foo-1"))
 
-             .define(environment.bean(Bazong.self)
-                .id("bazong-2")
+             .define(environment.bean(Bazong.self, id: "bazong-2")
                 .property("id", value: "id")
                 .property("foo", bean: environment.bean(Foo.self)
                      .property("id", value: "foo-3")
@@ -209,6 +204,8 @@ class SampleTest: XCTestCase {
             .refresh()
 
        print(environment.report())
+
+       var foos = try! environment.getBeansByType(Foo.self)
 
        var baz = try! environment.getBean(Baz.self)
     }

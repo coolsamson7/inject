@@ -6,7 +6,7 @@
 //  Copyright © 2016 Andreas Ernst. All rights reserved.
 //
 public class Origin {
-    // instance data
+    // MARK: instance data
     
     var line : Int
     var column : Int

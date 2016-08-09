@@ -7,7 +7,7 @@
 //
 
 public class ConfigurationItem {
-    // instance data
+    // MARK: instance data
     
     var fqn : FQN
     var type : Any.Type

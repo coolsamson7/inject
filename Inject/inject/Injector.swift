@@ -10,7 +10,7 @@ public class Injector : NSObject {
     // local classes
     
     class ClassInjections {
-        // instance data
+        // MARK: instance data
         
         var injections : [(inject: Inject, property: BeanDescriptor.PropertyDescriptor, injection: Injection)] = []
         
@@ -43,14 +43,14 @@ public class Injector : NSObject {
         }
     }
     
-    // instance data
+    // MARK: instance data
     
     var injections = IdentityMap<AnyObject,Injection>()
     var cachedInjections = IdentityMap<AnyObject,ClassInjections>()
     
-    // internal
+    // MARK: internal
     
-    // public
+    // MARK: public
     
     func register(injections : Injection...) {
         for injection in injections {

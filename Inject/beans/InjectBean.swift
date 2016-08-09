@@ -10,7 +10,7 @@ import Foundation
 
 @objc(InjectBean)
 public class InjectBean : Inject {
-    // instance data
+    // MARK: instance data
     
     var id : String?
     

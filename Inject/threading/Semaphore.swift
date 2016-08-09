@@ -6,7 +6,7 @@
 import Foundation
 
 public class Semaphore {
-    // instance data
+    // MARK: instance data
 
     let semaphore: dispatch_semaphore_t
 
