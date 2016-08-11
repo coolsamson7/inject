@@ -255,7 +255,12 @@ In addition to the core implementation there are quite a number of classes that 
 * threading classes ( locks, conditions, futures, thread local, ... )
 * tracing classes
 * full blown logging framework
- 
+
+# Documentation
+
+* Check the Wiki
+* API Docs [here](http://cocoadocs.org/docsets/inject/0.9.2/)
+
 # Missing
 
 What is still missing ( mainly due to the crappy Swift support for reflection )
