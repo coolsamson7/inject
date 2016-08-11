@@ -7,6 +7,46 @@
 //
 
 public class LogFormatter {
+    // MARK: local classes
+
+    struct Color {
+        // MARK: Instance data
+
+        var r : Int
+        var g : Int
+        var b : Int
+
+        init(r : Int, g : Int, b : Int) {
+            self.r = r
+            self.g = g
+            self.b = b
+        }
+    }
+
+    // MARK: static data
+
+    static var colors: [Color] = [
+            Color(r: 120, g: 120, b: 120),
+            Color(r: 0,   g: 180, b: 180),
+            Color(r: 0,   g: 150, b: 0),
+            Color(r: 255, g: 190, b: 0),
+            Color(r: 255, g: 0,   b: 0),
+            Color(r: 160, g: 32,  b: 240)
+    ]
+
+    static let ESCAPE = "\u{001b}["
+    static let RESET_FG = ESCAPE + "fg;" // Clear any foreground color
+    static let RESET_BG = ESCAPE + "bg;" // Clear any background color
+    static let RESET = ESCAPE + ";"      // Clear any foreground or background color
+
+    // class funcs
+
+    public static func colorize<T>(object: T, level: LogManager.Level) -> String {
+        let color = colors[level.rawValue - 1] // starts with OFF
+
+        return "\(ESCAPE)fg\(color.r),\(color.g),\(color.b);\(object)\(RESET)"
+    }
+
     // formatting api
 
     public class func string(value : String) -> LogFormatter{
@@ -14,7 +54,7 @@ public class LogFormatter {
     }
 
     public class func level() -> LogFormatter {
-        return LogFormatter { $0.level }
+        return LogFormatter { $0.level.description }
     }
 
     public class func logger() -> LogFormatter {
@@ -102,7 +142,7 @@ public class LogManager {
     public class LogEntry {
         // MARK: instance data
 
-        var level    : String
+        var level    : Level
         var logger   : String
         var message  : String
         var thread: String
@@ -114,7 +154,7 @@ public class LogManager {
 
         // MARK: init
 
-        init(logger: String, level : String, message: String, thread: String, file: String, function: String, line: Int, column: Int, timestamp : NSDate) {
+        init(logger: String, level : Level, message: String, thread: String, file: String, function: String, line: Int, column: Int, timestamp : NSDate) {
             self.logger   = logger
             self.level    = level
             self.message  = message
@@ -202,7 +242,7 @@ public class LogManager {
         public func log<T>(level : Level, @autoclosure message: () -> T, file: String = #file, function: String = #function, line: Int = #line, column: Int = #column) -> Void {
             if isApplicable(level) {
                 let msg = message()
-                let entry = LogEntry(logger: path, level : level.description, message: "\(msg)", thread: currentThreadName(), file: file, function: function, line: line, column: column, timestamp : NSDate())
+                let entry = LogEntry(logger: path, level : level, message: "\(msg)", thread: currentThreadName(), file: file, function: function, line: line, column: column, timestamp : NSDate())
 
                 for destination in allDestinations {
                     destination.log(entry)
@@ -250,6 +290,12 @@ public class LogManager {
             self.name = name
             self.formatter = formatter
         }
+
+        // TEST
+
+
+        // TEST
+
 
         // MARK: public
 
