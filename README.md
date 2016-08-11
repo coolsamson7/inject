@@ -259,7 +259,7 @@ In addition to the core implementation there are quite a number of classes that 
 # Documentation
 
 * Check the Wiki
-* API Docs [here](http://cocoadocs.org/docsets/inject/0.9.2/)
+* API Docs [here](http://cocoadocs.org/docsets/inject/0.9.4/)
 
 # Missing
 
