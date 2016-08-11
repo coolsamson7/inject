@@ -6,9 +6,12 @@
 //  Copyright © 2016 Andreas Ernst. All rights reserved.
 //
 
+/// A ´LogManager´ is singleton that collects different log specifications and to return them
+
 public class LogManager {
     // MARK: inner classes
 
+    /// ´Level´ describes the different severity levels of a log entry
     public enum Level : Int , Comparable, CustomStringConvertible {
         case OFF = 0
         case DEBUG
@@ -41,6 +44,7 @@ public class LogManager {
         }
     }
 
+    // ´LogEntry´ is an internal class that contains the log payload and is used by ´LogManager.Log´ implementations
     public class LogEntry {
         // MARK: instance data
 
@@ -70,6 +74,10 @@ public class LogManager {
         }
     }
 
+    /// A ´Logger´ is used to emit log methods and is basically defined  by
+    /// * a dot separated path
+    /// * a severity level
+    /// * a list of ´Log´ instances
     public class Logger {
         // MARK: instance data
 
@@ -141,6 +149,9 @@ public class LogManager {
 
         // MARK: public api
 
+        /// create a log entry
+        /// - Parameter level: the severity level
+        /// - Parameter message: the message - auto - closure
         public func log<T>(level : Level, @autoclosure message: () -> T, file: String = #file, function: String = #function, line: Int = #line, column: Int = #column) -> Void {
             if isApplicable(level) {
                 let msg = message()
@@ -154,27 +165,38 @@ public class LogManager {
 
         // convenience funcs
 
+        /// create a log entry with severity info
+        /// - Parameter message: the message - auto - closure
         public func info<T>(@autoclosure message: () -> T, file: String = #file, function: String = #function, line: Int = #line, column: Int = #column) -> Void {
             log(.INFO, message: message, file: file, function: function, line: line, column: column)
         }
 
+        /// create a log entry with severity warn
+        /// - Parameter message: the message - auto - closure
         public func warn<T>(@autoclosure message: () -> T, file: String = #file, function: String = #function, line: Int = #line, column: Int = #column) -> Void {
             log(.WARN, message: message, file: file, function: function, line: line, column: column)
         }
 
+        /// create a log entry with severity debug
+        /// - Parameter message: the message - auto - closure
         public func debug<T>(@autoclosure message: () -> T, file: String = #file, function: String = #function, line: Int = #line, column: Int = #column) -> Void {
             log(.DEBUG, message: message, file: file, function: function, line: line, column: column)
         }
 
+        /// create a log entry with severity error
+        /// - Parameter message: the message - auto - closure
         public func error<T>(@autoclosure message: () -> T, file: String = #file, function: String = #function, line: Int = #line, column: Int = #column) -> Void {
             log(.ERROR, message: message, file: file, function: function, line: line, column: column)
         }
 
+        /// create a log entry with severity fatal
+        /// - Parameter message: the message - auto - closure
         public func fatal<T>(@autoclosure message: () -> T, file: String = #file, function: String = #function, line: Int = #line, column: Int = #column) -> Void {
             log(.FATAL, message: message, file: file, function: function, line: line, column: column)
         }
     }
 
+    /// A ´Log´ is an endpoint that will store log entries ( e.g. console, file, etc. )
     public class Log {
         // MARK: instance data
 
@@ -195,6 +217,9 @@ public class LogManager {
 
         // MARK: public
 
+        /// format the given entry with the corresponding format
+        /// - Parameter entry: the log entry
+        /// - Returns: the formatted entry
         public func format(entry : LogManager.LogEntry) -> String {
             return formatter.format(entry)
         }
@@ -202,7 +227,7 @@ public class LogManager {
         // MARK: abstract
 
         func log(entry : LogManager.LogEntry) -> Void {
-            // implement
+            precondition(false, "\(self.dynamicType).log must be implemented")
         }
     }
 
@@ -212,10 +237,16 @@ public class LogManager {
 
     // MARK: class funcs
 
+    /// Return a ´Logger´ given a specific class. This function will build the fully qualified class name and try to find an appropriate logger
+    /// - Parameter forClass: the specific class
+    /// - Returns a Logger
     public static func getLogger(forClass clazz : AnyClass) -> Logger {
         return instance!.getLogger(forClass: clazz)
     }
 
+    /// Return a ´Logger´ given a name. This will either return a direct matching logger or the next parent logger by stripping the last legs of the name
+    /// - Parameter forName: the logger name
+    /// - Returns a Logger
     public static func getLogger(forName name : String) -> Logger {
         return instance!.getLogger(forName: name)
     }
@@ -295,6 +326,11 @@ public class LogManager {
         return self
     }
 
+    /// Register a logger
+    /// - Parameter path: the path
+    /// - Parameter level: the severity level
+    /// - Parameter logs: a list of associated logs
+    /// - Parameter inherit: if ´true´, all ´Log´s of the parent are inherited
     public func registerLogger(path : String, level : Level, logs: [Log] = [], inherit : Bool = true) -> LogManager {
         mutex.synchronized {
             self.modifications += 1
@@ -305,10 +341,16 @@ public class LogManager {
         return self
     }
 
+    /// Return a ´Logger´ given a specific class. This function will build the fully qualified class name and try to find an appropriate logger
+    /// - Parameter forClass: the specific class
+    /// - Returns a Logger
     public func getLogger(forClass clazz : AnyClass) -> Logger {
         return getLogger(forName: Classes.className(clazz, qualified: true))
     }
 
+    /// Return a ´Logger´ given a name. This will either return a direct matching logger or the next parent logger by stripping the last legs of the name
+    /// - Parameter forName: the logger name
+    /// - Returns a Logger
     public func getLogger(forName path : String) -> Logger {
         var logger : Logger?
 
@@ -347,16 +389,6 @@ public class LogManager {
 
         return logger!
     }
-}
-
-// LogFormatter
-
-func + (left: LogFormatter, right: LogFormatter) -> LogFormatter {
-    return LogFormatter {left.format($0) + right.format($0)}
-}
-
-func + (left: LogFormatter, right: String) -> LogFormatter {
-    return LogFormatter {left.format($0) + right}
 }
 
 // Level

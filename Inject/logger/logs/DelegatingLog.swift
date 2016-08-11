@@ -1,11 +1,12 @@
 //
-//  DelegatingDestination.swift
+//  DelegatingLog.swift
 //  Inject
 //
 //  Created by Andreas Ernst on 18.07.16.
 //  Copyright © 2016 Andreas Ernst. All rights reserved.
 //
 
+/// A ´DelegatingLog´ simply delegates all calls to a delegate
 public class DelegatingLog: LogManager.Log {
     // MARK: instance data
 

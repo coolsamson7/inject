@@ -6,6 +6,7 @@
 //  Copyright © 2016 Andreas Ernst. All rights reserved.
 //
 
+/// This log calls 'NSLog'
 public class NSLogLog: LogManager.Log {
     // MARK: init
 
