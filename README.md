@@ -38,11 +38,11 @@ Here is a sample configuration file `sample.xml` that will demonstrate most of t
     
     <!-- the current process info values, e.g. "PATH" -->
     
-    <bean class="ProcessInfoConfigurationSource"/>
+    <bean class="Inject.ProcessInfoConfigurationSource"/>
     
     <!-- a plist -->
 
-    <bean class="PlistConfigurationSource">
+    <bean class="Inject.PlistConfigurationSource">
         <property name="name" value="Info"/>
     </bean>
     
@@ -144,7 +144,7 @@ let baz = try environment.getBean(Baz.self)
 
 // by id
 
-let foo = try environment(Foo.self, byId: "foo-1")
+let foo = try environment.getBean(Foo.self, byId: "foo-1")
 
 ```
 
@@ -160,44 +160,38 @@ try environment.getConfigurationManager().addSource(PlistConfigurationSource(nam
 
 try environment
     .define(environment.bean(SamplePostProcessor.self))
-    
-    .define(environment.bean(Foo.self)
-        .id("foo-1")
+
+    .define(environment.bean(Foo(), id: "constructed foo")) // plain object
+
+    .define(environment.bean(Foo.self, id: "foo-by-factory", factory: {return Foo()})) // closure factory
+     
+    .define(environment.bean(Foo.self, id: "foo-1")
         .property("id", value: "foo-1")
         //.property("bar", inject: InjectBean()) the injection is expressed in the class itself, so this is not needed!
         .property("number", resolve: "${dunno=1}"))
 
-    .define(environment.bean(Foo.self)
-        .id("foo-prototype")
+    .define(environment.bean(Foo.self, id: "foo-prototype")
         .scope(environment.scope("prototype"))
         .property("id", value: "foo-prototype")
         //.property("bar", inject: InjectBean()) the injection is expressed in the class itself, so this is not needed!
         .property("number", resolve: "${com.foo:bar=1}"))
 
-    .define(environment.bean(Bar.self)
-        .id("bar-parent")
-        .abstract()
+    .define(environment.bean(Bar.self, id: "bar-parent", abstract: true)
         .property("magic", value: 4711))
 
-    .define(environment.bean(Bar.self)
-        .id("bar")
-        .lazy()
+    .define(environment.bean(Bar.self, id: "bar", lazy: true)
         .parent("bar-parent")
         .property("id", value: "bar"))
 
-    .define(environment.bean(BazFactory.self)
-        .target(Baz.self)
-        .id("baz")
+    .define(environment.bean(BazFactory.self, id: "baz")
         .property("name", value: "factory")
         .property("id", value: "id"))
 
-    .define(environment.bean(Bazong.self)
-        .id("bazong-1")
+    .define(environment.bean(Bazong.self, id: "bazong-1")
         .property("id", value: "id")
         .property("foo", ref: "foo-1"))
 
-    .define(environment.bean(Bazong.self)
-        .id("bazong-2")
+    .define(environment.bean(Bazong.self, id: "bazong-2")
         .property("id", value: "id")
         .property("foo", bean: environment.bean(Foo.self)
             .property("id", value: "foo-3")
@@ -223,7 +217,14 @@ Here is a summary of the supported features
 * support for placeholder resolution ( e.g. `${property=<default>}`) referencing possible configuration values that are retrieved by different providers ( e.g. process info, plists, etc. )
 * support for custom namespace handlers that are much more easy to handle than in the spring world
 
-
+In addition to the core implementation there are quite a number of classes that are interesting
+* additional containers ( identity set and map )
+* conversion factories
+* an easy to use xml parser
+* threading classes ( locks, conditions, futures, thread local, ... )
+* tracing classes
+* full blown logging framework
+ 
 # Missing
 
 What is still missing ( mainly due to the crappy Swift support for reflection )
