@@ -34,7 +34,7 @@ public class ConsoleDestination : LogManager.Destination {
     override func log(entry : LogManager.LogEntry) -> Void {
         if let mutex = self.mutex {
             mutex.synchronized {
-                print(self.format(entry))
+                print(LogFormatter.colorize(self.format(entry), level: entry.level))
             }
         }
         else {

@@ -67,8 +67,13 @@ public class Classes {
         throw ClassesErrors.Exception(message: "no class named \"\(className)\"")
     }
 
-    public class func className(clazz : AnyClass) -> String {
-        return "\(clazz)" // TODO bundle?
+    public class func className(clazz : AnyClass, qualified : Bool = false) -> String {
+        if !qualified {
+            return "\(clazz)"
+        }
+        else {
+            return bundleName(NSBundle(forClass: clazz)) + ".\(clazz)"
+        }
     }
     
     // prevent

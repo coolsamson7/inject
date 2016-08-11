@@ -13,8 +13,14 @@ public class AsyncDestination : DelegatingDestination {
 
     // MARK: init
 
-    override init(name : String, delegate : LogManager.Destination) {
-        queue = dispatch_queue_create("logging-queue", DISPATCH_QUEUE_SERIAL)
+    init(name : String, delegate : LogManager.Destination, queue : dispatch_queue_t? = nil) {
+        if queue != nil {
+            self.queue = queue!
+
+        }
+        else {
+            self.queue = dispatch_queue_create("logging-queue", DISPATCH_QUEUE_SERIAL)
+        }
 
         super.init(name: name, delegate: delegate)
     }
