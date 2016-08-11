@@ -22,7 +22,7 @@
 		28D358A20E53E3B4AA057FBF /* LoggerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D3526C1C94BE24A955AFDD /* LoggerTest.swift */; };
 		28D3591BD2FA8399CD0C926C /* Array.extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D35F661D4C3673FD61424B /* Array.extension.swift */; };
 		28D35928AF40530049A81A27 /* Synchronized.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D3575B01494DF267926589 /* Synchronized.swift */; };
-		28D3593FA0F59A85DC8C36F7 /* DelegatingDestination.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D35F31EF83C48D663996E3 /* DelegatingDestination.swift */; };
+		28D3593FA0F59A85DC8C36F7 /* DelegatingLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D35F31EF83C48D663996E3 /* DelegatingLog.swift */; };
 		28D35B32992669F931AA5F25 /* Mutex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D3575E22AAD939D050ACAE /* Mutex.swift */; };
 		28D35C7540DA6069D4696114 /* Optional.extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D3559793F614E3502B5A0F /* Optional.extension.swift */; };
 		28D35C949BC967BAD019A928 /* XMLEnvironmentLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D35754F0C89ABFA9A702C2 /* XMLEnvironmentLoader.swift */; };
@@ -120,7 +120,7 @@
 		28D35CA5F6CA55C378348E63 /* Timer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Timer.swift; sourceTree = "<group>"; };
 		28D35D492457692B206D2C34 /* Semaphore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Semaphore.swift; sourceTree = "<group>"; };
 		28D35EA05D3041A74BA7B450 /* Future.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Future.swift; sourceTree = "<group>"; };
-		28D35F31EF83C48D663996E3 /* DelegatingDestination.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DelegatingDestination.swift; sourceTree = "<group>"; };
+		28D35F31EF83C48D663996E3 /* DelegatingLog.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DelegatingLog.swift; sourceTree = "<group>"; };
 		28D35F661D4C3673FD61424B /* Array.extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Array.extension.swift; sourceTree = "<group>"; };
 		28D35FCF12F48608C278B618 /* LogFormatter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LogFormatter.swift; sourceTree = "<group>"; };
 		B0546D9E1D54B4580034BA3F /* PlistConfigurationSource.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlistConfigurationSource.swift; sourceTree = "<group>"; };
@@ -206,7 +206,7 @@
 			isa = PBXGroup;
 			children = (
 				28D351549DD74CAAF6CC46BA /* ConsoleLog.swift */,
-				28D35F31EF83C48D663996E3 /* DelegatingDestination.swift */,
+				28D35F31EF83C48D663996E3 /* DelegatingLog.swift */,
 				28D35642B7DF1451A896E977 /* NSLogLog.swift */,
 				28D357DF49CC2EF0EDFA2D76 /* QueuedLog.swift */,
 				28D352B193F5E05451D7E927 /* FileLog.swift */,
@@ -608,7 +608,7 @@
 				28D35C949BC967BAD019A928 /* XMLEnvironmentLoader.swift in Sources */,
 				28D35DEE4D681F77A74E3576 /* Logger.swift in Sources */,
 				28D35863788157A66EFF1760 /* ConsoleLog.swift in Sources */,
-				28D3593FA0F59A85DC8C36F7 /* DelegatingDestination.swift in Sources */,
+				28D3593FA0F59A85DC8C36F7 /* DelegatingLog.swift in Sources */,
 				28D3516EA418FC264A33CB2A /* NSLogLog.swift in Sources */,
 				28D3513EDD0281E1E8A22424 /* QueuedLog.swift in Sources */,
 				28D35512D09CB21E1E8FD911 /* FileLog.swift in Sources */,
