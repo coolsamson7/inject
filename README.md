@@ -200,6 +200,37 @@ try environment
     .refresh()
 ```
 
+In addition to the injection container, a logging framework has been implemented - and integrated - as well.  
+
+Once the singleton is configured
+
+```swift
+// a composition of the different possible log entry constituents
+
+let formatter = LogFormatter.timestamp("dd/M/yyyy, H:mm:s") + " [" + LogFormatter.logger() + "] " + LogFormatter.level() + " - " + LogFormatter.message()
+let consoleLogger = ConsoleLog(name: "console", formatter: formatter, synchronize: false)
+
+LogManager() 
+           .registerLogger("", level : .OFF, logs: [QueuedLog(name: "console", delegate: consoleLogger)]) // root logger
+           .registerLogger("Inject", level : .WARN) // will inherit all log destinations
+           .registerLogger("Inject.Environment", level : .ALL)
+```
+
+the usual methods are provided
+
+```swift
+// this is usually a static var in a class!
+var logger = LogManager.getLogger(forClass: MyClass.self) // will build the fully qualified name
+
+logger.warn("och!") // this is a autoclosure!
+```
+Provided log destinations are
+* console
+* file
+* queued log destination
+
+The queueded log destination uses a dispatch queue. As a default a serial queue will be created whose purpose simply is to serialze the entries. In this case ´synchronize: false´ prevents that the console operations are synchronized with a Mutex
+
 # Features
 
 Here is a summary of the supported features
@@ -224,7 +255,12 @@ In addition to the core implementation there are quite a number of classes that 
 * threading classes ( locks, conditions, futures, thread local, ... )
 * tracing classes
 * full blown logging framework
- 
+
+# Documentation
+
+* Check the Wiki
+* API Docs [here](http://cocoadocs.org/docsets/inject/0.9.2/)
+
 # Missing
 
 What is still missing ( mainly due to the crappy Swift support for reflection )
