@@ -6,14 +6,14 @@
 //  Copyright © 2016 Andreas Ernst. All rights reserved.
 //
 
-public class DelegatingDestination : LogManager.Destination {
+public class DelegatingLog: LogManager.Log {
     // MARK: instance data
 
-    var delegate : LogManager.Destination
+    var delegate : LogManager.Log
 
     // MARK: init
 
-    init(name : String, delegate : LogManager.Destination) {
+    init(name : String, delegate : LogManager.Log) {
         self.delegate = delegate
 
         super.init(name: name)

@@ -1,19 +1,19 @@
 //
-//  AsyncDestination.swift
+//  QueuedLog.swift
 //  Inject
 //
 //  Created by Andreas Ernst on 18.07.16.
 //  Copyright © 2016 Andreas Ernst. All rights reserved.
 //
 
-public class AsyncDestination : DelegatingDestination {
+public class QueuedLog: DelegatingLog {
     // MARK: instance data
 
     var queue : dispatch_queue_t;
 
     // MARK: init
 
-    init(name : String, delegate : LogManager.Destination, queue : dispatch_queue_t? = nil) {
+    init(name : String, delegate : LogManager.Log, queue : dispatch_queue_t? = nil) {
         if queue != nil {
             self.queue = queue!
 

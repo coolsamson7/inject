@@ -78,17 +78,17 @@ public class LogManager {
         var inherit = true
         var parent : Logger? = nil
         var children : [Logger] = []
-        var destinations : [Destination] = []
+        var logs: [Log] = []
 
-        var allDestinations :  [Destination] = []
+        var allLogs:  [Log] = []
 
         // MARK: init
 
-        init(path : String, level : Level, destinations : [Destination], inherit : Bool = true) {
+        init(path : String, level : Level, logs: [Log], inherit : Bool = true) {
             self.path = path
             self.level = level
             self.inherit = inherit
-            self.destinations = destinations
+            self.logs = logs
         }
 
         // MARK: internal
@@ -96,7 +96,7 @@ public class LogManager {
         func reset() {
             parent = nil
 
-            allDestinations = destinations
+            allLogs = logs
         }
 
         func setup() {
@@ -115,8 +115,8 @@ public class LogManager {
 
         func inheritFrom(logger : Logger) {
             if inherit {
-                for destination in logger.allDestinations {
-                    self.allDestinations.append(destination)
+                for log in logger.allLogs {
+                    self.allLogs.append(log)
                 }
             }
         }
@@ -146,8 +146,8 @@ public class LogManager {
                 let msg = message()
                 let entry = LogEntry(logger: path, level : level, message: "\(msg)", thread: currentThreadName(), file: file, function: function, line: line, column: column, timestamp : NSDate())
 
-                for destination in allDestinations {
-                    destination.log(entry)
+                for log in allLogs {
+                    log.log(entry)
                 } // for
             } // if
         }
@@ -175,7 +175,7 @@ public class LogManager {
         }
     }
 
-    public class Destination {
+    public class Log {
         // MARK: instance data
 
         var name : String
@@ -193,12 +193,6 @@ public class LogManager {
             self.formatter = formatter
         }
 
-        // TEST
-
-
-        // TEST
-
-
         // MARK: public
 
         public func format(entry : LogManager.LogEntry) -> String {
@@ -212,14 +206,34 @@ public class LogManager {
         }
     }
 
+    // MARK: static data
+
+    static var instance : LogManager? // just to make sure that instance is never nil :-)
+
+    // MARK: class funcs
+
+    public static func getLogger(forClass clazz : AnyClass) -> Logger {
+        return instance!.getLogger(forClass: clazz)
+    }
+
+    public static func getLogger(forName name : String) -> Logger {
+        return instance!.getLogger(forName: name)
+    }
+
     // MARK: instance data
 
-    var destinations = [String:Destination]()
+    var logs = [String: Log]()
     var loggers = [String:Logger]();
 
     var cachedLoggers = [String:Logger]();
     var modifications = 0;
     var mutex = Mutex()
+
+    // MARK: init
+
+    init() {
+        LogManager.instance = self // simply override...good enough
+    }
 
     // MARK: internal
 
@@ -248,7 +262,7 @@ public class LogManager {
         // check for root logger
 
         if loggers[""] == nil {
-            loggers[""] = Logger(path: "", level: .ALL, destinations: [], inherit: false) // hmmm....
+            loggers[""] = Logger(path: "", level: .ALL, logs: [], inherit: false) // hmmm....
         }
 
         // link parents
@@ -267,25 +281,25 @@ public class LogManager {
 
     // MARK: public
 
-    public func destination(name : String) -> Destination {
-        return destinations[name]!
+    public func log(name : String) -> Log {
+        return logs[name]!
     }
 
-    public func registerDestination(destination : Destination) -> LogManager {
+    public func registerLog(log: Log) -> LogManager {
         mutex.synchronized {
             self.modifications += 1
 
-            self.destinations[destination.name] = destination
+            self.logs[log.name] = log
         }
 
         return self
     }
 
-    public func registerLogger(path : String, level : Level, destinations : [Destination] = [], inherit : Bool = true) -> LogManager {
+    public func registerLogger(path : String, level : Level, logs: [Log] = [], inherit : Bool = true) -> LogManager {
         mutex.synchronized {
             self.modifications += 1
 
-            self.loggers[path] = Logger(path: path, level: level, destinations: destinations, inherit: inherit)
+            self.loggers[path] = Logger(path: path, level: level, logs: logs, inherit: inherit)
         }
 
         return self

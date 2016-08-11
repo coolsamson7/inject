@@ -16,7 +16,7 @@
         <property name="name" value="Info"/>
     </bean-->
     
-    <bean id="x1" class="ProcessInfoConfigurationSource"/>
+    <bean id="x1" class="Inject.ProcessInfoConfigurationSource"/>
     
     <!-- yikes, a cycle -->
     

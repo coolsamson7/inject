@@ -15,11 +15,11 @@ class LoggerTests: XCTestCase {
         let logging = LogManager();
 
         let formatter = LogFormatter.timestamp("dd/M/yyyy, H:mm:s") + " [" + LogFormatter.logger() + "] " + LogFormatter.thread() + " " + LogFormatter.level() + " " + LogFormatter.file() + " " + LogFormatter.function() + " " + LogFormatter.line() + " - " + LogFormatter.message()
-        //let consoleLogger = try! FileDestination(name: "file", fileName: "/Users/andreasernst/Documents/Projects/inject/log.txt") // ConsoleDestination(name: "console", formatter: formatter)
-        let consoleLogger = ConsoleDestination(name: "console", formatter: formatter, synchronize: false)
+        //let consoleLogger = try! FileLog(name: "file", fileName: "/Users/andreasernst/Documents/Projects/inject/log.txt") // ConsoleDestination(name: "console", formatter: formatter)
+        let consoleLogger = ConsoleLog(name: "console", formatter: formatter, synchronize: false)
 
         logging
-           .registerLogger("", level : .OFF, destinations : [AsyncDestination(name: "console", delegate: consoleLogger)])
+           .registerLogger("", level : .OFF, logs: [QueuedLog(name: "console", delegate: consoleLogger)])
            .registerLogger("com", level : .WARN, inherit: true)
            .registerLogger("com.foo", level : .ALL, inherit: true)
 

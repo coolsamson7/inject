@@ -1,12 +1,12 @@
 //
-//  NSLogDestination.swift
+//  NSLogLog.swift
 //  Inject
 //
 //  Created by Andreas Ernst on 18.07.16.
 //  Copyright © 2016 Andreas Ernst. All rights reserved.
 //
 
-public class NSLogDestination : LogManager.Destination {
+public class NSLogLog: LogManager.Log {
     // MARK: init
 
     var mutex : Mutex?

@@ -1184,6 +1184,10 @@ public class Environment: BeanFactory {
         }
     }
 
+    // MARK: static data
+
+    static var LOGGER = LogManager.getLogger(forClass: Environment.self)
+
     // MARK: instance data
 
     var name : String = ""
@@ -1273,6 +1277,8 @@ public class Environment: BeanFactory {
 
                 inheritFrom(parent!)
             }
+
+            Environment.LOGGER.info("refresh environment \(name)")
 
             if (Tracer.ENABLED) {
                 Tracer.trace("inject.runtime", level: .HIGH, message: "refresh \(name)")
@@ -1662,7 +1668,6 @@ public class Environment: BeanFactory {
             else {
                 return try result[0].getInstance(self)
             }
-
         }
     }
     

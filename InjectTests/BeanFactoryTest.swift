@@ -95,7 +95,14 @@ class BeanFactoryTests: XCTestCase {
     override class func setUp() {
         Classes.setDefaultBundle(BeanFactoryTests.self)
 
+        // set tracing
+
         Tracer.setTraceLevel("inject", level: .FULL)
+
+        // set logging
+
+        LogManager()
+           .registerLogger("", level : .ALL, logs: [QueuedLog(name: "async-console", delegate: ConsoleLog(name: "console", synchronize: false))])
     }
 
     // tests

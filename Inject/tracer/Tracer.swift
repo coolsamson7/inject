@@ -34,7 +34,7 @@ public class Tracer {
     #if DEBUG
     static var ENABLED = true
     #else
-    static var ENABLED = true
+    static var ENABLED = false
     #endif
     // local classes
     

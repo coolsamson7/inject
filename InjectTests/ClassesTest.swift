@@ -8,20 +8,21 @@ import Foundation
 
 @testable import Inject
 
-class TestClass {
+func foo() -> Int {
+    print("called foo")
+    return 1
+}
 
+class TestClass {
+    static var i = foo()
+
+    func bar() {
+      var j = TestClass.i
+    }
 }
 
 class TestObjectClass : NSObject {
-    
-}
-
-class TestAnnotadedObjectClass : NSObject {
-    
-}
-
-class TestAnnotadedNamedObjectClass : NSObject {
-    
+    static var i = foo()
 }
 
 class ClassesTests: XCTestCase {
@@ -33,11 +34,17 @@ class ClassesTests: XCTestCase {
     func testClass4Name() {
         Classes.setDefaultBundle(ClassesTests.self)
 
+        print("create instance");
+
+        var tc = TestClass()
+
+        print("call bar");
+
+        tc.bar()
+
         for name in [
             "TestClass",
             "TestObjectClass",
-            "TestAnnotadedObjectClass",
-            "TestAnnotadedNamedObjectClass",
             "ClassesTests.LocalClass",
             "InjectTests.ClassesTests.LocalClass",
             "InjectTests.ClassesTests#LocalClass",
