@@ -160,7 +160,9 @@ try environment.getConfigurationManager().addSource(PlistConfigurationSource(nam
 
 try environment
     .define(environment.bean(SamplePostProcessor.self))
-    
+
+    .define(environment.bean(Foo(), id: "constructed foo")) // plain object
+
     .define(environment.bean(Foo.self, id: "foo-by-factory", factory: {return Foo()})) // closure factory
      
     .define(environment.bean(Foo.self, id: "foo-1")
