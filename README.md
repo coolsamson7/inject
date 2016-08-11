@@ -161,6 +161,8 @@ try environment.getConfigurationManager().addSource(PlistConfigurationSource(nam
 try environment
     .define(environment.bean(SamplePostProcessor.self))
     
+    .define(environment.bean(Foo.self, id: "foo-by-factory", factory: {return Foo()})) // closure factory
+     
     .define(environment.bean(Foo.self, id: "foo-1")
         .property("id", value: "foo-1")
         //.property("bar", inject: InjectBean()) the injection is expressed in the class itself, so this is not needed!
