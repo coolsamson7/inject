@@ -30,8 +30,6 @@ class ClassesTests: XCTestCase {
     class LocalClass : NSObject {
     }
 
-    // MARK: local classes
-
     func testClass4Name() {
         Classes.setDefaultBundle(ClassesTests.self)
 
