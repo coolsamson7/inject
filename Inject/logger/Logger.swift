@@ -13,13 +13,13 @@ public class LogManager {
 
     /// ´Level´ describes the different severity levels of a log entry
     public enum Level : Int , Comparable, CustomStringConvertible {
-        case OFF = 0
+        case ALL = 0
         case DEBUG
         case INFO
         case WARN
         case ERROR
         case FATAL
-        case ALL
+        case OFF
 
         // MARK: CustomStringConvertible
 
@@ -81,7 +81,7 @@ public class LogManager {
     public class Logger {
         // MARK: instance data
 
-        var path : String
+        internal var path : String
         var level : Level
         var inherit = true
         var parent : Logger? = nil
@@ -103,7 +103,7 @@ public class LogManager {
 
         func reset() {
             parent = nil
-
+            children = []
             allLogs = logs
         }
 
@@ -130,7 +130,7 @@ public class LogManager {
         }
 
         func isApplicable(level : Level) -> Bool {
-            return self.level.rawValue >= level.rawValue
+            return level.rawValue >= self.level.rawValue
         }
 
         func currentThreadName() -> String {
@@ -293,15 +293,14 @@ public class LogManager {
         // check for root logger
 
         if loggers[""] == nil {
-            loggers[""] = Logger(path: "", level: .ALL, logs: [], inherit: false) // hmmm....
+            loggers[""] = Logger(path: "", level: .OFF, logs: [])
         }
 
         // link parents
 
         for (_,logger) in loggers {
-            let parent = parentLogger(logger)
-            if parent != nil {
-                parent!.addChild(logger)
+            if let parent = parentLogger(logger) {
+                parent.addChild(logger)
             }
         }
 
