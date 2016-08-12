@@ -30,7 +30,7 @@ class LoggerTests: XCTestCase {
 
         logger.warn("ouch 3")
         logger.debug("ouch 3")
-        logger.error("ouch 3")
+        logger.error("ouch var logger = 3")
         logger.fatal("ouch 3")
 
         logger = logging.getLogger(forClass: LoggerTests.self)

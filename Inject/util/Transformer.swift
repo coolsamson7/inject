@@ -5,10 +5,10 @@
 
 import Foundation
 
-public class Property<C>: NSObject {
+public class Property<C> : CustomStringConvertible {
     // MARK: abstract
 
-    func get(object: AnyObject!, context: C) throws -> Any {
+    func get(object: AnyObject!, context: C) throws -> Any? {
         precondition(false, "\(self.dynamicType).get is not implemented")
     }
 
@@ -18,7 +18,7 @@ public class Property<C>: NSObject {
 
     // MARK: implement CustomStringConvertible
 
-    override public var description : String {
+    public var description : String {
         return "\(self.dynamicType)"
     }
 }
@@ -26,24 +26,24 @@ public class Property<C>: NSObject {
 public class Operation<C> : CustomStringConvertible {
     // instance data
 
-    var source: Property<C>;
-    var target: Property<C>;
+    var source: Property<C>
+    var target: Property<C>
 
     // init
 
     init(source: Property<C>, target: Property<C>) {
-        self.source = source;
-        self.target = target;
+        self.source = source
+        self.target = target
     }
 
     // methods
 
     func setTarget(from: AnyObject, to: AnyObject, context: C) throws -> Void {
-        try target.set(to, value: source.get(from, context: context), context: context);
+        try target.set(to, value: source.get(from, context: context), context: context)
     }
 
     func setSource(to: AnyObject, from: AnyObject, context: C) throws -> Void {
-        try source.set(from, value: target.get(to, context: context), context: context);
+        try source.set(from, value: target.get(to, context: context), context: context)
     }
 
     // MARK: implement CustomStringConvertible
@@ -56,48 +56,48 @@ public class Operation<C> : CustomStringConvertible {
 public class XFormer<C> {
     // MARK: instance data
 
-    var operations: [Operation<C>];
+    var operations: [Operation<C>]
 
     // MARK: init
 
     init(operations: [Operation<C>]) {
-        self.operations = operations;
+        self.operations = operations
     }
 
     // MARK: public
 
     public func xformTarget(source: AnyObject, target: AnyObject, context: C) throws -> Void {
         for operation in operations {
-            try operation.setTarget(source, to: target, context: context);
+            try operation.setTarget(source, to: target, context: context)
         }
     }
 
     public func xformSource(target: AnyObject, source: AnyObject, context: C) throws -> Void {
         for operation in operations {
-            try operation.setSource(target, from: source, context: context);
+            try operation.setSource(target, from: source, context: context)
         }
     }
 }
 
-public class BeanProperty<C>: Property<C> {
+public class BeanProperty<C> : Property<C> {
     // MARK: instance data
 
-    var property: BeanDescriptor.PropertyDescriptor;
+    var property: BeanDescriptor.PropertyDescriptor
 
     // MARK: init
 
     init(property: BeanDescriptor.PropertyDescriptor) {
-        self.property = property;
+        self.property = property
     }
 
     // MARK: override Property
 
-    override func get(object: AnyObject!, context: C) throws -> Any {
+    override func get(object: AnyObject!, context: C) throws -> Any? {
         if (Tracer.ENABLED) {
             Tracer.trace("beans", level: .HIGH, message: "get property \"\(property.name)\"")
         }
 
-        return property.get(object);
+        return property.get(object)
     }
 
     override func set(object: AnyObject!, value: Any?, context: C) throws -> Void {

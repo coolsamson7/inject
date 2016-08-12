@@ -1683,6 +1683,15 @@ public class Environment: BeanFactory {
         return configurationManager
     }
 
+    /// Add a new configuration source
+    /// - Parameter source: a ´ConfigurationSource´
+    /// - Returns: self
+    public func addConfigurationSource(source: ConfigurationSource) throws -> Environment {
+        try configurationManager.addSource(source)
+
+        return self
+    }
+
     /// return a configuration value
     /// - Parameter type: the expected type
     /// - Parameter namespace: the namespace

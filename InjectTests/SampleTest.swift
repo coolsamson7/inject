@@ -136,6 +136,12 @@ class SampleTest: XCTestCase {
         // register the namespace handler.
 
         ConfigurationNamespaceHandler(namespace: "configuration")
+
+        // logger
+
+        LogManager()
+            .registerLogger("", level : .ALL, logs: [ConsoleLog(name: "console", synchronize: true)])
+
     }
 
     // MARK: internal funcs
@@ -159,6 +165,7 @@ class SampleTest: XCTestCase {
         var baz = try! environment.getBean(Baz.self)
     }
 
+    // TODO: + explicit dependency + factory sample!
    func testFluent() {
         let environment = try! Environment(name: "fluent environment")
 

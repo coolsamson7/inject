@@ -5,23 +5,6 @@
 
 import Foundation
 
-public class Types {
-    // class funcs
-
-    // TODO: this is just a hack...
-    class func unwrapOptionalType(type: Any.Type) -> String {
-        var name = "\(type)"
-
-        if name.containsString("<") {
-            // e.g Swift.Optional<Foo>
-
-            name = name[name.indexOf("<") + 1 ..< name.lastIndexOf(">")]
-        }
-
-        return name;
-    }
-}
-
 public class JSON {
     // local classes
 
@@ -257,7 +240,7 @@ public class JSON {
 
             // override
 
-            override func get(object: AnyObject!, context: MappingContext) throws -> Any {
+            override func get(object: AnyObject!, context: MappingContext) throws -> Any? {
                 var result : AnyObject?;
                 if let data = object as? JSONContainer {
                     result = data.data[property]
@@ -284,7 +267,7 @@ public class JSON {
 
             // override
 
-            override func get(object: AnyObject!, context: MappingContext) throws -> Any {
+            override func get(object: AnyObject!, context: MappingContext) throws -> Any? {
                 var result = try super.get(object, context: context)
 
                 if let dictionary = result as? [String:AnyObject]  {
@@ -328,7 +311,7 @@ public class JSON {
 
         override func makeTransformerProperty(mode: MappingDefinition.Mode, expectedType: Any.Type?, transformerSourceProperty: Property<MappingContext>?) -> Property<MappingContext> {
             if _deep && expectedType != nil {
-                let mapper = mappers[Types.unwrapOptionalType(expectedType!)]; // TODO: FOO
+                let mapper = mappers[JSON.typeName(expectedType!)];
                 if (mapper == nil) {
                     fatalError("unknown mapper for type \(expectedType!)");
                 }
@@ -374,14 +357,8 @@ public class JSON {
     // get rid of Optional, etc. types...
     // what about Array?
 
-    class func className(clazz : Any.Type) -> String {
-        var name = "\(clazz)"
-
-        if name.containsString("<") {
-            // e.g Swift.Optional<Foo>
-
-            name = name[name.indexOf("<") + 1..<name.lastIndexOf(">")]
-        }
+    class func typeName(clazz : Any.Type) -> String {
+        var name = "\(clazz)" // bundle
 
         return name;
     }
@@ -427,7 +404,7 @@ public class JSON {
                 initialFromMapper = mapper
             }
 
-            mappers[Types.unwrapOptionalType(mapping.clazz)] = mapper
+            mappers[JSON.typeName(mapping.clazz)] = mapper
         }
 
         // initialize definitions
@@ -435,7 +412,7 @@ public class JSON {
         for mapping in mappings {
             // retrieve mapper
 
-            let mapper = mappers[Types.unwrapOptionalType(mapping.clazz)]!
+            let mapper = mappers[JSON.typeName(mapping.clazz)]!
             let mappingDefinition = mapper.definitions![0]
 
             // resolve

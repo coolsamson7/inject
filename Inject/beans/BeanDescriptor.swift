@@ -94,7 +94,7 @@ public class BeanDescriptor : CustomStringConvertible {
             return true;
         }
         
-        public func get(object: AnyObject!) -> Any {
+        public func get(object: AnyObject!) -> Any? {
             return object.valueForKey(name)
         }
         

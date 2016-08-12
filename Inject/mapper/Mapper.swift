@@ -126,7 +126,7 @@ public class Accessor: CustomStringConvertible {
         fatalError("Accessor.makeTransformerProperty is abstract");
     }
 
-    public func getValue(instance: AnyObject) throws -> Any {
+    public func getValue(instance: AnyObject) throws -> Any? {
         fatalError("Accessor.getValue is abstract");
     }
 
@@ -376,7 +376,7 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
             return BeanProperty<MappingContext>(property: property!);
         }
 
-        override public func getValue(instance: AnyObject) throws -> Any {
+        override public func getValue(instance: AnyObject) throws -> Any? {
             return property!.get(instance);
         }
 
@@ -868,33 +868,33 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
     public class ConvertSource : Property<MappingContext> {
         // instance data
 
-        private var  property : Property<MappingContext>;
-        private var  conversion : MappingConversion;
-        private var sourceAllowNull = true;
+        private var  property : Property<MappingContext>
+        private var  conversion : MappingConversion
+        private var sourceAllowNull = true
 
         // constructor
 
         init(property : Property<MappingContext>, conversion: MappingConversion) {
-            self.property = property;
-            self.conversion = conversion;
+            self.property = property
+            self.conversion = conversion
 
         }
 
         // implement Property
 
-        public func get(object : AnyObject, context : MappingContext ) throws -> Any {
+        public override func get(object : AnyObject!, context : MappingContext ) throws -> Any? {
             let value = try property.get(object, context: context);
 
             // if (value == nil) {
             //     return sourceAllowNull ? conversion.convertTarget(value) : nil;
             //}
             //else {
-            return try conversion.convertTarget(value);
+            return try conversion.convertTarget(value)
             //}
         }
 
 
-        public func set(object : AnyObject, value : Any?, context : MappingContext ) throws -> Void {
+        override public func set(object : AnyObject!, value : Any?, context : MappingContext ) throws -> Void {
             //if (value == nil) {
             //    value = sourceAllowNull ? conversion.convertSource(nil) : nil;
             //}
@@ -902,7 +902,7 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
             //   value = conversion.convertSource(value);
             //}
 
-            try property.set(object, value: conversion.convertSource(value), context: context);
+            try property.set(object, value: conversion.convertSource(value), context: context)
         }
 
         // CustomStringConvertible
@@ -912,7 +912,7 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
             //    return "cast(" + ((ConversionFactory.DefaultConversion) conversion).getTargetClass().getSimpleName() + ") " + property.toString();
             //}
 //else {
-            return "convert(\(conversion)) \(property) ";
+            return "convert(\(conversion)) \(property) "
 //}
         }
     }
@@ -922,9 +922,9 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
     public class ConvertTarget : Property<MappingContext> {
         // instance data
 
-        private var property : Property<MappingContext>;
-        private var conversion : MappingConversion;
-        private var sourceAllowNull = true;
+        private var property : Property<MappingContext>
+        private var conversion : MappingConversion
+        private var sourceAllowNull = true
 
         // constructor
 
@@ -936,7 +936,7 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
 
         // implement Property
 
-        public func get(object : AnyObject, context : MappingContext ) throws -> Any {
+        override public func get(object : AnyObject!, context : MappingContext) throws -> Any? {
             let value = try property.get(object, context: context);
 
             // if (value == nil) {
@@ -948,7 +948,7 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
         }
 
 
-        public func set(object : AnyObject, value : Any?, context : MappingContext ) throws -> Void {
+        override public func set(object : AnyObject!, value : Any?, context : MappingContext ) throws -> Void {
             //if (value == nil) {
             //    value = sourceAllowNull ? conversion.convertSource(nil) : nil;
             //}
@@ -956,7 +956,7 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
             //   value = conversion.convertSource(value);
             //}
 
-            try property.set(object, value: conversion.convertTarget(value), context: context);
+            try property.set(object, value: conversion.convertTarget(value), context: context)
         }
 
         // CustomStringConvertible
@@ -966,7 +966,7 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
             //    return "cast(" + ((ConversionFactory.DefaultConversion) conversion).getTargetClass().getSimpleName() + ") " + property.toString();
             //}
 //else {
-            return "convert(\(conversion)) \(property) ";
+            return "convert(\(conversion)) \(property) "
 //}
         }
     }
@@ -979,10 +979,10 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
         public class PathNode {
             // instance data
 
-            var accessor: Accessor;
-            var match: Match?; // only leaf nodes will reference the original match ( a path )
-            var parent: PathNode?;
-            var children = [PathNode]();
+            var accessor: Accessor
+            var match: Match? // only leaf nodes will reference the original match ( a path )
+            var parent: PathNode?
+            var children = [PathNode]()
 
             // constructor
 
@@ -2628,7 +2628,7 @@ public class Mapping: XFormer<MappingContext>, CustomStringConvertible {
 
             // implement Property
 
-            override public func get(object: AnyObject!, context: MappingContext) throws -> Any {
+            override public func get(object: AnyObject!, context: MappingContext) throws -> Any? {
                 let value =  try sourceProperty.get(object, context: context);
 
                 Mapping.trace("get \(sourceProperty) = \(value)");
@@ -3041,7 +3041,7 @@ public class AccessorValue<CONTEXT:MappingContext>: Property<CONTEXT> {
     // public
 
 
-    override public func get(object: AnyObject!, context: CONTEXT) throws -> Any {
+    public override func get(object: AnyObject!, context: CONTEXT) throws -> Any? {
         return try accessor.getValue(object);
     }
 
@@ -3140,7 +3140,7 @@ public class PeekValue: Property<MappingContext> {
 
     // implement Property
 
-    override public func get(object: AnyObject!, context: MappingContext) throws -> Any {
+    override public func get(object: AnyObject!, context: MappingContext) throws -> Any? {
         return context.peek(index);
     }
 
@@ -3170,7 +3170,7 @@ public class PeekValueProperty: PeekValue {
 
     // implement Property
 
-    override public func get(object: AnyObject!, context: MappingContext) throws -> Any {
+    override public func get(object: AnyObject!, context: MappingContext) throws -> Any? {
         let value = try super.get(object, context: context);
 
         return try property.get(value as! AnyObject, context: context) // TODO FOO value != nil ? try property.get(value!, context: context) : nil;
@@ -3200,7 +3200,7 @@ public class PushValueProperty: Property<MappingContext> {
 
     // implement Property
 
-    override public func get(object: AnyObject!, context: MappingContext) -> Any {
+    override public func get(object: AnyObject!, context: MappingContext) -> Any? {
         fatalError("not possible");
     }
 
@@ -3235,7 +3235,7 @@ public class SetCompositeArgument: Property<MappingContext> {
 
     // implement Property
 
-    override public func get(instance: AnyObject!, context: MappingContext) throws -> Any {
+    override public func get(instance: AnyObject!, context: MappingContext) throws -> Any? {
         fatalError("wrong direction"); // return property.getValue(instance);
     }
 

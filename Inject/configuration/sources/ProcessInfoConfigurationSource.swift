@@ -19,7 +19,7 @@ public class ProcessInfoConfigurationSource : AbstractConfigurationSource {
 
     // override
 
-    override func load(configurationManager : ConfigurationManager) throws -> Void {
+    override public func load(configurationManager : ConfigurationManager) throws -> Void {
         let dict = NSProcessInfo.processInfo().environment
 
         // noop

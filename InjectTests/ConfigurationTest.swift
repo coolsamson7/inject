@@ -11,12 +11,25 @@ import Foundation
 
 
 class ConfigurationTest: XCTestCase {
+    // life cycle
 
+    override class func setUp() {
+        Classes.setDefaultBundle(ConfigurationTest.self)
 
-    func testConfiguration() {
-        Tracer.setTraceLevel("inject", level: .FULL)
+        // set tracing
+
+        Tracer.setTraceLevel("inject", level: .OFF)
         Tracer.setTraceLevel("configuration", level: .FULL)
 
+        // set logging
+
+        LogManager()
+           .registerLogger("", level : .ALL, logs: [ConsoleLog(name: "console", synchronize: true)])
+    }
+
+    // test
+
+    func testConfiguration() {
         let parentData = NSData(contentsOfURL: NSBundle(forClass: ConfigurationTest.self).URLForResource("configuration", withExtension: "xml")!)!
 
         ConfigurationNamespaceHandler(namespace: "configuration")
@@ -40,8 +53,6 @@ class ConfigurationTest: XCTestCase {
         XCTAssert(string == "hello")
         XCTAssert(int == 1)
         XCTAssert(bool == true)
-
-
     }
 }
 

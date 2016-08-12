@@ -42,27 +42,27 @@ public class AbstractConfigurationSource : NSObject, ConfigurationSource, Bean, 
     
     // ConfigurationSource
     
-    func load(configurationManager : ConfigurationManager) throws -> Void {
+    public func load(configurationManager : ConfigurationManager) throws -> Void {
         // noop
     }
-    
-    func startListening(configurationManager : ConfigurationManager, seconds : Int) -> Void {
+
+    public func startListening(configurationManager : ConfigurationManager, seconds : Int) -> Void {
         // noop
     }
-    
-    var url : String {
+
+    public var url : String {
         get {
             return _url
         }
     }
-    
-    var mutable : Bool {
+
+    public var mutable : Bool {
         get {
             return _mutable
         }
     }
-    
-    var canOverrule : Bool {
+
+    public var canOverrule : Bool {
         get {
             return _canOverrule
         }

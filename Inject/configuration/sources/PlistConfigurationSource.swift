@@ -28,7 +28,7 @@ public class PlistConfigurationSource : AbstractConfigurationSource {
 
     // override
 
-    override func load(configurationManager : ConfigurationManager) throws -> Void {
+    override public func load(configurationManager : ConfigurationManager) throws -> Void {
         let dict = NSDictionary(contentsOfFile: url) as! [String: AnyObject]
 
         // noop

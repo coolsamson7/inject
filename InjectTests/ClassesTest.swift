@@ -8,39 +8,32 @@ import Foundation
 
 @testable import Inject
 
-func foo() -> Int {
-    print("called foo")
-    return 1
-}
-
 class TestClass {
-    static var i = foo()
-
-    func bar() {
-      var j = TestClass.i
-    }
 }
 
 class TestObjectClass : NSObject {
-    static var i = foo()
 }
 
 class ClassesTests: XCTestCase {
+
     // how about a local class Name
 
     class LocalClass : NSObject {
     }
 
     func testClass4Name() {
+
+
+        func foo(o : Any?) -> Any? {
+            if o != nil {
+                print(o!.dynamicType)
+            }
+            return nil
+        }
+
+        foo(nil)
+
         Classes.setDefaultBundle(ClassesTests.self)
-
-        print("create instance");
-
-        var tc = TestClass()
-
-        print("call bar");
-
-        tc.bar()
 
         for name in [
             "TestClass",

@@ -6,7 +6,7 @@
 //  Copyright © 2016 Andreas Ernst. All rights reserved.
 //
 
-protocol ConfigurationSource {
+public protocol ConfigurationSource {
     func load(configurationManager : ConfigurationManager) throws -> Void
     func startListening(configurationManager : ConfigurationManager, seconds : Int) -> Void
     
