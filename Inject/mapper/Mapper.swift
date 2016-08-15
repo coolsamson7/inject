@@ -1531,7 +1531,7 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
                     do {
                         try insertMatch(m);
                     }
-                            catch MapperError.Definition(let message, let definition, let match, let accessor) {
+                    catch MapperError.Definition(let message, let definition, let match, let accessor) {
                         throw MapperError.Definition(message: message, definition: definition, match: m, accessor: accessor)
                     }
                 }
@@ -1546,7 +1546,7 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
                     do {
                         try (node as! TargetNode).makeOperations(direction, sourceTree: sourceTree, mapper: mapper, definition: definition, operations: &operations);
                     }
-                            catch MapperError.Definition(let message, let definition, let match, let accessor) {
+                    catch MapperError.Definition(let message, let definition, let match, let accessor) {
                         throw MapperError.Definition(message: message, definition: definition, match: node.match, accessor: accessor)
                     }
                 }
@@ -1566,7 +1566,7 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
                             match: match
                             );
                 }
-                        catch MapperError.Definition(let message, let definition, let _, let accessor) {
+                catch MapperError.Definition(let message, let definition, let _, let accessor) {
                     throw MapperError.Definition(message: message, definition: definition, match: match, accessor: step)
                 }
             }
@@ -2808,7 +2808,7 @@ public class Mapping: XFormer<MappingContext>, CustomStringConvertible {
                             do {
                                 try accessors[i]!.setValue(composite!, value: arguments[i]!, mappingContext: mappingContext);
                             }
-                                    catch {
+                            catch {
                                 throw MapperError.Operation(message: "could not set composite value \(arguments[i]) in the class \(composite)", mapping: nil, operation : nil, source: nil, target : nil);
                             }
                         }
@@ -2827,7 +2827,7 @@ public class Mapping: XFormer<MappingContext>, CustomStringConvertible {
                     do {
                         try rootProperty.setValue(instance, value: composite!, mappingContext: mappingContext);
                     }
-                            catch {
+                    catch {
                         throw MapperError.Operation(message: "could not set composite value \(composite) in \(instance)", mapping: nil, operation : nil, source: nil, target : nil);
                     }
                 } // else
@@ -2988,10 +2988,10 @@ public class Mapping: XFormer<MappingContext>, CustomStringConvertible {
 
                 try operation.target.set(target, value: value, context: context);
             }
-                    catch MapperError.Operation(let message, let mapping, let operation, let source, let target) {
+            catch MapperError.Operation(let message, let mapping, let operation, let source, let target) {
                 throw MapperError.Operation(message: message, mapping: self, operation : operation, source: source, target : target);
             }
-                    catch  {
+            catch  {
                 throw MapperError.Operation(message: "mapping error", mapping: self, operation : operation as? MappingOperation, source: source, target : target);
             }
         } // for
