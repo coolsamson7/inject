@@ -10,9 +10,12 @@
 
 I wanted to learn Swift so i decided to try something easy as a start:-)
 
-`Inject` is a dependency injection container for Swift that picks up the basic `Spring` ideas as far as they are possible to be implemented ( mainly due to poor reflection support ) and adds a fluent interface for those who don't like xml.
+`Inject` is a dependency injection container for Swift that picks up the basic `Spring` ideas - as far as they are possible to be implemented due to missing reflection features - but in addition offers several configuration possibilities:
+* configuration with xml files
+* fluent interface depending on reflection features
+* fluent interface applying closure functions ( without the need for reflection anymore )
 
-Let's look at an example first ( included in the repository )
+Let's look at an xml example first ( included in the repository )
 
 Here is a sample configuration file `sample.xml` that will demonstrate most of the features
 ```xml
@@ -225,6 +228,8 @@ try environment
 ```
 As you see, the provided closure functions both create the object and set properties. In order to guarantee that all dependencies are available, dependencies explicitely nned to be declared by the `requires` function!
 
+Even in this case there is a small prerequisite for the used classes since an internal type registry that collects structural infromation on all object needs to crate a prototype object in order to analzye the properties: The classes need to implement a protocol `Initializable` that simply declares a function `init()`.
+
 In addition to the injection container, a logging framework has been implemented - and integrated - as well.  
 
 Once the singleton is configured
@@ -296,7 +301,7 @@ What is still missing ( mainly due to the crappy Swift support for reflection )
 # Limitations
 
 And there are also limitations ( darn )
-* all objects need to derive from `NSObject`
+* all reflection usage requires the corresponding objects need to derive from `NSObject` ( xml and fluent interface with property setters )
 * all objects need to have a default `init` function
 
 This limitation is due to the - missing - swift support for relection. As soon as the language evolves i would change that.. 
