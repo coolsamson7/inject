@@ -42,46 +42,6 @@ public class Promise<T> {
 
     typealias Listener = Promise<T> -> Void
 
-    // MARK: class funcs
-
-    public func when<T, U>(p1: Promise<T>, _ p2: Promise<U>) -> Promise<(T, U)> {
-        return when([p1.asVoid(), p2.asVoid()]).then() {
-            (p1.state.value(), p2.state.value())
-        }
-    }
-
-    public func when<T, U, V>(p1: Promise<T>, _ p2: Promise<U>, _ p3: Promise<V>) -> Promise<(T, U, V)> {
-        return when([p1.asVoid(), p2.asVoid(), p3.asVoid()]).then() {
-            (p1.state.value(), p2.state.value(), p3.state.value())
-        }
-    }
-
-    private func when(promises: [Promise<Void>]) -> Promise<Void> {
-        let masterPromise = Promise<Void>()
-
-        var (total, resolved) = (promises.count, 0)
-
-        for promise in promises {
-            promise
-            .onSuccess({
-                value in
-
-                resolved += 1
-                if resolved == total {
-                    masterPromise.resolve()
-                }
-
-            })
-            .onError({
-                error in
-
-                masterPromise.reject(error)
-            })
-        }
-
-        return masterPromise
-    }
-
     // MARK: instance data
 
     var state     : PromiseState<T>
@@ -211,4 +171,42 @@ public class Promise<T> {
 
         update(state: .Resolved(value: value))
     }
+}
+
+public func all<T, U>(p1: Promise<T>, _ p2: Promise<U>) -> Promise<(T, U)> {
+    return all([p1.asVoid(), p2.asVoid()]).then() {
+        (p1.state.value(), p2.state.value())
+    }
+}
+
+public func all<T, U, V>(p1: Promise<T>, _ p2: Promise<U>, _ p3: Promise<V>) -> Promise<(T, U, V)> {
+    return all([p1.asVoid(), p2.asVoid(), p3.asVoid()]).then() {
+        (p1.state.value(), p2.state.value(), p3.state.value())
+    }
+}
+
+private func all(promises: [Promise<Void>]) -> Promise<Void> {
+    let masterPromise = Promise<Void>()
+
+    var (total, resolved) = (promises.count, 0)
+
+    for promise in promises {
+        promise
+        .onSuccess({
+            value in
+
+            resolved += 1
+            if resolved == total {
+                masterPromise.resolve()
+            }
+
+        })
+        .onError({
+            error in
+
+            masterPromise.reject(error)
+        })
+    }
+
+    return masterPromise
 }
