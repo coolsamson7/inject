@@ -5,8 +5,9 @@
 
 import Foundation
 
+/// `JSON` is a class that is able to convert swift objects in json strings and vice versa
 public class JSON {
-    // local classes
+    // MARK: local classes
 
     class JSONOperation {
         func resolveWrite(definition : MappingDefinition, last : Bool) throws -> Void {
@@ -16,7 +17,7 @@ public class JSON {
         }
     }
 
-    class JSONBuilder : NSObject {
+    class JSONBuilder {
         var level = 0
         var builder = StringBuilder()
 
@@ -47,13 +48,15 @@ public class JSON {
         // instance data
 
         var property : String
+        var json : String
         var deep : Bool
 
         // init
 
-        init(property : String, deep : Bool = false) {
+        init(property : String, json: String, deep : Bool = false) {
             self.deep = deep
             self.property = property
+            self.json = json
         }
 
         // override
@@ -64,7 +67,7 @@ public class JSON {
             let prop = bean.findProperty(property)
 
             if prop != nil {
-                definition.map([MappingDefinition.BeanPropertyAccessor(propertyName: property)], target: [JSONWriteAccessor(propertyName: property, type: prop!.getPropertyType(), deep: deep, last: last)])
+                definition.map([MappingDefinition.BeanPropertyAccessor(propertyName: property)], target: [JSONWriteAccessor(propertyName: json, type: prop!.getPropertyType(), deep: deep, last: last)])
             }
         }
 
@@ -74,43 +77,83 @@ public class JSON {
             let prop = bean.findProperty(property)
 
             if prop != nil {
-                mappingDefinition.map([JSONReadAccessor(mappers: mappers, propertyName: property, type: prop!.getPropertyType(), deep: deep)], target: [MappingDefinition.BeanPropertyAccessor(propertyName: property)])
+                mappingDefinition.map([JSONReadAccessor(mappers: mappers, propertyName: property, json: json, type: prop!.getPropertyType(), deep: deep)], target: [MappingDefinition.BeanPropertyAccessor(propertyName: property)])
             }
         }
     }
 
-    class Definition {
-        // instance data
+    public class Wildcard {
+        func makeOperations(definition : Definition) throws -> Void {
+            precondition(false, "\(self.dynamicType).makeOperations() is not implemented")
+        }
+    }
+
+    public class Properties : Wildcard {
+        // MARK: instance data
+
+        var except : [String] = []
+
+        // MARK: public
+
+        public func except(exceptions : String...) -> Self {
+            for exception in exceptions {
+                except.append(exception)
+            }
+
+            return self
+        }
+
+        // MARK: implement Qualifier
+
+        override func makeOperations(definition : Definition) throws -> Void {
+            let bean = try BeanDescriptor.forClass(definition.clazz)
+
+            for property in bean.getAllProperties() {
+                if !except.contains(property.getName()) {
+                    definition.operations.append(JSONProperty(property: property.getName(), json: property.getName(), deep : false))
+                }
+            }
+        }
+    }
+
+    public class Definition {
+        // MARK: instance data
 
         var clazz : AnyClass
         var operations = [JSONOperation]()
 
-        // init
+        // MARK: init
 
         init(clazz : AnyClass) {
             self.clazz = clazz
         }
 
-        // fluent
+        // MARK: fluent
 
-        func map(property: String, deep: Bool = false) -> Definition {
-            operations.append(JSONProperty(property: property, deep : deep))
+        func map(wildcard : Wildcard) throws -> Definition {
+            try wildcard.makeOperations(self)
+
+            return self
+        }
+
+        func map(property: String, json: String? = nil, deep: Bool = false) -> Definition {
+            operations.append(JSONProperty(property: property, json: json != nil ? json! : property, deep : deep))
 
             return self
         }
     }
 
     class JSONWriteAccessor : Accessor {
-        // local classes
+        // MARK: local classes
 
         class WriteProperty: Property<MappingContext> {
-            // instance data
+            // MARK: instance data
 
             var property : String
             var deep : Bool
             var last : Bool
 
-            // init
+            // MARK: init
 
             init(property: String, deep : Bool, last : Bool) {
                 self.property = property
@@ -118,7 +161,7 @@ public class JSON {
                 self.last = last
             }
 
-            // override
+            // MARK: override
 
             override func set(object: AnyObject!, value: Any?, context: MappingContext) throws -> Void {
                 if let builder = object as? JSONBuilder {
@@ -152,13 +195,13 @@ public class JSON {
             }
         }
 
-        // instance data
+        // MARK: instance data
 
         var propertyName: String;
         var _deep: Bool
         var last : Bool
 
-        // constructor
+        // MARK: init
 
         init(propertyName: String, type: Any.Type, deep: Bool,  last : Bool) {
             self.propertyName = propertyName;
@@ -168,7 +211,7 @@ public class JSON {
             super.init(overrideType: type);
         }
 
-        // implement Accessor
+        // MARK: implement Accessor
 
         override func getName() -> String {
             return "\(propertyName)"
@@ -202,7 +245,7 @@ public class JSON {
             }
         }
 
-        // CustomStringConvertible
+        // MARK: implement CustomStringConvertible
 
         override var description: String {
             return propertyName
@@ -211,11 +254,11 @@ public class JSON {
     }
 
     class JSONContainer {
-        // instance data
+        // MARK: instance data
 
         var data : [String:AnyObject];
 
-        // init
+        // MARK: init
 
         init(data : [String:AnyObject]) {
             self.data = data
@@ -223,49 +266,49 @@ public class JSON {
     }
 
     class JSONReadAccessor : Accessor {
-        // local classes
+        // MARK: local classes
 
         class ReadProperty: Property<MappingContext> {
-            // instance data
+            // MARK: instance data
 
             var property : String
+            var json : String
             var type : Any.Type?
 
-            // init
+            // MARK: init
 
-            init(type : Any.Type?, property: String) {
+            init(type : Any.Type?, property: String, json: String) {
                 self.type = type
                 self.property = property
+                self.json = json
             }
 
-            // override
+            // MARK: override
 
             override func get(object: AnyObject!, context: MappingContext) throws -> Any? {
-                var result : AnyObject?;
                 if let data = object as? JSONContainer {
-                    result = data.data[property]
+                    return data.data[json]
                 }
-
-                print("read \(result) of type \(result.dynamicType)");
-
-                return result
+                else {
+                    precondition(false, "expected container")
+                }
             }
         }
 
         class ReadDeepProperty : ReadProperty {
-            // instance data
+            // MARK: instance data
 
             var mapper : Mapper
 
-            // init
+            // MARK: init
 
-            init(mapper : Mapper, type : Any.Type?, property: String) {
+            init(mapper : Mapper, type : Any.Type?, property: String, json : String) {
                 self.mapper = mapper
 
-                super.init(type : type, property: property);
+                super.init(type : type, property: property, json: json)
             }
 
-            // override
+            // MARK: override
 
             override func get(object: AnyObject!, context: MappingContext) throws -> Any? {
                 var result = try super.get(object, context: context)
@@ -280,23 +323,25 @@ public class JSON {
             }
         }
 
-        // instance data
+        // MARK: instance data
 
-        var propertyName: String;
+        var propertyName: String
+        var json : String
         var _deep: Bool
         var mappers : [String:Mapper]
 
-        // constructor
+        // MARK: init
 
-        init(mappers : [String:Mapper], propertyName: String, type: Any.Type, deep: Bool) {
-            self.propertyName = propertyName;
+        init(mappers : [String:Mapper], propertyName: String, json: String, type: Any.Type, deep: Bool) {
+            self.propertyName = propertyName
+            self.json = json
             self._deep = deep
             self.mappers = mappers
 
             super.init(overrideType: type);
         }
 
-        // implement Accessor
+        // MARK: implement Accessor
 
         override func getName() -> String {
             return "\(propertyName)"
@@ -311,20 +356,20 @@ public class JSON {
 
         override func makeTransformerProperty(mode: MappingDefinition.Mode, expectedType: Any.Type?, transformerSourceProperty: Property<MappingContext>?) -> Property<MappingContext> {
             if _deep && expectedType != nil {
-                let mapper = mappers[JSON.typeName(expectedType!)];
+                let mapper = mappers[JSON.typeName(expectedType!)]
                 if (mapper == nil) {
-                    fatalError("unknown mapper for type \(expectedType!)");
+                    fatalError("unknown mapper for type \(expectedType!)")
                 }
 
-                return ReadDeepProperty(mapper: mapper!, type: expectedType, property: propertyName);
+                return ReadDeepProperty(mapper: mapper!, type: expectedType, property: propertyName, json: json)
             }
             else {
-                return ReadProperty(type: expectedType, property: propertyName);
+                return ReadProperty(type: expectedType, property: propertyName, json: json)
             }
         }
 
         override func isReadOnly() -> Bool {
-            return false;
+            return false
         }
 
         override func deep() -> Bool {
@@ -340,7 +385,7 @@ public class JSON {
             }
         }
 
-        // CustomStringConvertible
+        // MARK: implement CustomStringConvertible
 
         override var description: String {
             return propertyName
@@ -348,10 +393,14 @@ public class JSON {
 
     }
 
-    // class functions
+    // MARK: class functions
 
-    class func mapping(clazz : AnyClass) -> Definition {
+    public class func mapping(clazz : AnyClass) -> Definition {
         return Definition(clazz: clazz);
+    }
+
+    public class func properties() -> Properties {
+        return Properties();
     }
 
     // get rid of Optional, etc. types...
@@ -363,13 +412,12 @@ public class JSON {
         return name;
     }
 
-    // instance data
+    // MARK: instance data
 
     var toJSON : Mapper;
     var initialFromMapper : Mapper?;
 
-
-    // init
+    // MARK: init
 
     init(mappings: Definition...) throws {
         // write
@@ -423,7 +471,10 @@ public class JSON {
         }
     }
 
-    func asJSON(source : AnyObject) throws -> String {
+    /// convert the specified object into a json string
+    /// - Parameter source: the object
+    /// - Returns: the json representation
+    public func asJSON(source : AnyObject) throws -> String {
         let result = JSONBuilder();
 
         result.append("{")
@@ -437,11 +488,25 @@ public class JSON {
         return result.builder.toString()
     }
 
-    func fromJSON(json : String) throws -> AnyObject {
+    /// convert a json string into an object
+    /// - Parameter json: the json string
+    /// - Returns: the object
+    public func fromJSON(json : String) throws -> AnyObject {
         let data = json.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false)!
 
         let jsonData = try JSONContainer(data: NSJSONSerialization.JSONObjectWithData(data, options: NSJSONReadingOptions()) as! [String:AnyObject]);
 
         return try initialFromMapper!.map(jsonData, direction: .SOURCE_2_TARGET)!
+    }
+
+    /// convert a json string into an object
+    /// - Parameter json: the json string
+    /// - Returns: the object
+    public func fromJSON<T>(type : T.Type, json : String) throws -> T {
+        let data = json.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false)!
+
+        let jsonData = try JSONContainer(data: NSJSONSerialization.JSONObjectWithData(data, options: NSJSONReadingOptions()) as! [String:AnyObject]);
+
+        return try initialFromMapper!.map(jsonData, direction: .SOURCE_2_TARGET) as! T
     }
 }

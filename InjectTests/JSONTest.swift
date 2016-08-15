@@ -36,7 +36,7 @@ class JSONTests: XCTestCase {
     // lifecycle
 
     override class func setUp() {
-        Tracer.setTraceLevel("mapper", level: .OFF)
+        Tracer.setTraceLevel("mapper", level: .FULL)
     }
 
     // test
@@ -53,16 +53,18 @@ class JSONTests: XCTestCase {
         // define mapper
 
         let jsonMapper = try! JSON(mappings:
-        JSON.mapping(Person.self)
-        .map("name")
-        .map("age")
-        .map("price", deep: true)
-        .map("weight"),
+           // Person
 
-                JSON.mapping(Money.self)
-                .map("currency")
-                .map("value")
-                )
+           JSON.mapping(Person.self)
+              .map("name", json: "json-name")
+              .map("age")
+              .map("price", deep: true)
+              .map("weight"),
+
+            // Money
+
+            JSON.mapping(Money.self)
+               .map(JSON.properties().except("bar", "baz")))
 
         // bean -> json
 
@@ -72,7 +74,7 @@ class JSONTests: XCTestCase {
 
         // json -> bean
 
-        let jsonPerson = try! jsonMapper.fromJSON(res) as! Person
+        let jsonPerson = try! jsonMapper.fromJSON(Person.self, json: res)
 
         XCTAssert(person.name == jsonPerson.name)
         XCTAssert(person.price!.currency == jsonPerson.price!.currency)
