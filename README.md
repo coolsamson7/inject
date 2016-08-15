@@ -155,8 +155,8 @@ Here is the - more or less - equivalent
 ```swift
 let environment = try Environment(name: "fluent environment")
 
-try environment.getConfigurationManager().addSource(ProcessInfoConfigurationSource())
-try environment.getConfigurationManager().addSource(PlistConfigurationSource(name: "Info"))
+try environment.addConfigurationSource(ProcessInfoConfigurationSource())
+try environment.addConfigurationSource(PlistConfigurationSource(name: "Info"))
 
 try environment
     .define(environment.bean(SamplePostProcessor.self))
@@ -199,6 +199,31 @@ try environment
 
     .refresh()
 ```
+Both mechanisms heavily rely in reflection which is used to create instances and set properties. The drawback is that - at least in the current version - the corresponding objects need to derive from `NSObject` in order to use the corresponding low level methods. It is possible to avoid that, if 
+* property setters are avoided, and
+* "constructors" are realized by closure functions
+
+Let's look at another example ( assuming two plain swift classes `Swift` and `AnotherSwift` ):
+
+```swift
+let environment = try Environment(name: "closure environment")
+
+try environment
+     .define(environment.bean(Swift.self, factory: {
+            let swift = Swift(name:  try environment.getValue(String.self, key: "dunno", defaultValue: "default")) // access configuration values
+
+            // set additional properties
+            
+            swift.other = try environment.getBean(AnotherSwift.self) // must be constructed first!
+
+            return swift
+        }).requires(class: AnotherSwift.self))
+
+        .define(environment.bean(AnotherSwift.self, factory: {
+            AnotherSwift(name: "other swift")
+        }))
+```
+As you see, the provided closure functions both create the object and set properties. In order to guarantee that all dependencies are available, dependencies explicitely nned to be declared by the `requires` function!
 
 In addition to the injection container, a logging framework has been implemented - and integrated - as well.  
 
@@ -222,7 +247,7 @@ the usual methods are provided
 // this is usually a static var in a class!
 var logger = LogManager.getLogger(forClass: MyClass.self) // will build the fully qualified name
 
-logger.warn("och!") // this is a autoclosure!
+logger.warn("ouch!") // this is a autoclosure!
 ```
 Provided log destinations are
 * console
