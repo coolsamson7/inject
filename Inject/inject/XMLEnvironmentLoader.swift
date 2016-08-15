@@ -82,7 +82,9 @@ public class XMLEnvironmentLoader: XMLParser {
             bean.abstract = abstract
             bean.parent = parent != nil ? Environment.BeanDeclaration(id: parent!) : nil
             bean.id = id
-            bean.dependsOn = dependsOn != nil ? Environment.BeanDeclaration(id: dependsOn!) : nil
+            if let dependsOn = self.dependsOn {
+                bean.requires(id: dependsOn)
+            }
             bean.bean = clazz != nil ? try BeanDescriptor.forClass(clazz!) : nil
             bean.target =  target != nil ? try BeanDescriptor.forClass(target!) : nil
             

@@ -12,18 +12,18 @@ public typealias Resolver = (key : String) throws -> String?
 class FactoryFactory<T> : BeanFactory {
     // MARK: instance data
 
-    var factory : () -> T
+    var factory : () throws -> T
 
     // MARK: init
 
-    init(factory : () -> T ) {
+    init(factory : () throws -> T ) {
         self.factory = factory
     }
 
     // MARK: implement BeanFactory
 
     func create(bean : Environment.BeanDeclaration) throws -> AnyObject {
-        return factory() as! AnyObject
+        return try factory() as! AnyObject
     }
 }
 
@@ -89,6 +89,20 @@ public class Environment: BeanFactory {
     /// - properties
     /// - the target class for factory beans
     public class BeanDeclaration : Declaration {
+        // MARK: local classes
+
+        class Require {
+            var clazz : AnyClass?
+            var id    : String?
+            var bean  : BeanDeclaration?
+
+            init(clazz : AnyClass? = nil, id : String? = nil, bean  : BeanDeclaration? = nil) {
+                self.clazz = clazz
+                self.id    = id
+                self.bean  = bean
+            }
+        }
+
         // MARK: instance data
         
         var scope : BeanScope? = nil
@@ -97,7 +111,7 @@ public class Environment: BeanFactory {
         var parent: BeanDeclaration? = nil
 
         var id : String?
-        var dependsOn : BeanDeclaration?
+        var requires : [Require] = []
         var bean: BeanDescriptor?
         var target: BeanDescriptor?
         var properties = [PropertyDeclaration]()
@@ -177,7 +191,34 @@ public class Environment: BeanFactory {
         /// - Parameter depends: the id of the bean which needs to be constructed first
         /// - Returns: self
         public func dependsOn(depends : String) -> BeanDeclaration {
-            self.dependsOn = BeanDeclaration(id: depends)
+            requires(id: depends)
+
+            return self
+        }
+
+        /// specifies that this bean needs to be constructed after another bean
+        /// - Parameter id: the id of the bean which needs to be constructed first
+        /// - Returns: self
+        public func requires(id id: String) -> BeanDeclaration {
+            requires.append(Require(id: id))
+
+            return self
+        }
+
+        /// specifies that this bean needs to be constructed after another bean
+        /// - Parameter class: the class of the bean which needs to be constructed first
+        /// - Returns: self
+        public func requires(class clazz: AnyClass) -> BeanDeclaration {
+            requires.append(Require(clazz: clazz))
+
+            return self
+        }
+
+        /// specifies that this bean needs to be constructed after another bean
+        /// - Parameter bean: the bean which needs to be constructed first
+        /// - Returns: self
+        public func requires(bean bean : BeanDeclaration) -> BeanDeclaration {
+            requires.append(Require(bean: bean))
 
             return self
         }
@@ -303,11 +344,18 @@ public class Environment: BeanFactory {
         }
         
         func connect(loader : Environment.Loader) throws -> Void {
-            if dependsOn != nil {
-                dependsOn = try loader.context.getDeclarationById(dependsOn!.id!)
-                
-                loader.dependency(dependsOn!, before: self)
-            }
+            for require in requires {
+                let dependency : BeanDeclaration
+                if let bean = require.bean {
+                    loader.dependency(bean, before: self)
+                }
+                else if let id = require.id {
+                    loader.dependency(try loader.context.getDeclarationById(id), before: self)
+                }
+                else if let clazz = require.clazz {
+                    loader.dependency(try loader.context.getCandidate(clazz), before: self)
+                }
+            } // for
             
             if parent != nil {
                 parent = try loader.context.getDeclarationById(parent!.id!)
@@ -1351,7 +1399,7 @@ public class Environment: BeanFactory {
     /// - Parameter abstract:t he abstract attribute. default is ´false´
     /// - Parameter factory: a factory funtion that will return a new instance of the specific type
     /// - Returns: the new `BeanDeclaration`
-    public func bean<T>(clazz : T.Type, id : String? = nil, lazy : Bool = false, abstract : Bool = false, factory : (() -> T)? = nil) throws -> Environment.BeanDeclaration {
+    public func bean<T>(clazz : T.Type, id : String? = nil, lazy : Bool = false, abstract : Bool = false, factory : (() throws -> T)? = nil) throws -> Environment.BeanDeclaration {
         let result = Environment.BeanDeclaration()
 
         if id != nil {
@@ -1484,7 +1532,7 @@ public class Environment: BeanFactory {
             let bean = BeanDeclaration()
 
             bean.scope = BeanFactoryScope(declaration : declaration, context: self)
-            bean.dependsOn = declaration
+            bean.requires(bean: declaration)
             bean.bean = target
 
             // remember
@@ -1700,7 +1748,7 @@ public class Environment: BeanFactory {
     /// - Parameter scope: the optional scope
     /// - Returns: the value
     /// - Throws: any possible error
-    public func getValue<T>(type : T.Type, namespace : String, key : String, defaultValue: T? = nil, scope : Scope? = nil) throws -> T {
+    public func getValue<T>(type : T.Type, namespace : String = "", key : String, defaultValue: T? = nil, scope : Scope? = nil) throws -> T {
         return try configurationManager.getValue(type, namespace: namespace, key: key, defaultValue: defaultValue, scope: scope)
     }
     

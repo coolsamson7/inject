@@ -169,7 +169,7 @@ class SampleTest: XCTestCase {
    func testFluent() {
         let environment = try! Environment(name: "fluent environment")
 
-        try! environment.getConfigurationManager().addSource(ProcessInfoConfigurationSource())
+        try! environment.addConfigurationSource(ProcessInfoConfigurationSource())
 
         try! environment
            .define(environment.bean(Foo.self, id: "foo-by-factory", factory: {return Foo()}))
@@ -215,5 +215,56 @@ class SampleTest: XCTestCase {
        var foos = try! environment.getBeansByType(Foo.self)
 
        var baz = try! environment.getBean(Baz.self)
+    }
+
+    class Swift : Initializable {
+        var name : String?
+        var number : Int = 0
+        var other : AnotherSwift?
+
+        // Initializable
+
+        required init() {
+        }
+    }
+
+    class AnotherSwift : Initializable {
+        var name : String?
+        var number : Int = 0
+
+        // Initializable
+
+        required init() {
+        }
+    }
+
+    func testNoReflection() {
+        let environment = try! Environment(name: "no reflection environment")
+
+        try! environment.addConfigurationSource(ProcessInfoConfigurationSource())
+
+        try! environment
+           .define(environment.bean(Swift.self, factory: {
+            let swift = Swift()
+
+            swift.name = try environment.getValue(String.self, key: "dunno", defaultValue: "default")
+            swift.other = try environment.getBean(AnotherSwift.self)
+
+            return swift
+        }).requires(class: AnotherSwift.self))
+
+        .define(environment.bean(AnotherSwift.self, factory: {
+            let swift = AnotherSwift()
+
+            swift.name = "other swift"
+
+            return swift
+        }))
+
+        // fetch
+
+        let swift = try! environment.getBean(Swift.self)
+
+        print(swift)
     }
 }

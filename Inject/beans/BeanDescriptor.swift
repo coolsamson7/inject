@@ -8,6 +8,12 @@
 //
 import Foundation
 
+/// We need this protocol in order to create non NSObject classes....wtf
+
+public protocol Initializable : class {
+    init()
+}
+
 /// `BeanDescriptor` stores information on the internal structure of classes, covering
 /// - super- and subclasses
 /// - properties including their types
@@ -16,6 +22,8 @@ public class BeanDescriptor : CustomStringConvertible {
     // MARK: static data
     
     private static var beans = IdentityMap<AnyObject, BeanDescriptor>();
+
+    private static var SWIFT_OBJECT_CLASS = try! Classes.class4Name("SwiftObject")
     
     // MARK: class methods
     
@@ -244,7 +252,7 @@ public class BeanDescriptor : CustomStringConvertible {
         // check superclass
         
         if let superClass = clazz.superclass() {
-            if superClass != NSObject.self {
+            if superClass != NSObject.self &&  superClass != BeanDescriptor.SWIFT_OBJECT_CLASS {
                 superBean = try BeanDescriptor.forClass(superClass)
                 
                 superBean!.directSubBeans.append(self)
@@ -307,8 +315,11 @@ public class BeanDescriptor : CustomStringConvertible {
         if let objectClass = clazz as? NSObject.Type {
             return objectClass.init()
         }
+        else if let initializable = clazz as? Initializable.Type {
+            return initializable.init()
+        }
         else {
-            throw EnvironmentErrors.Exception(message: "expected \(Classes.className(clazz)) to be a NSObject subclass")
+            throw EnvironmentErrors.Exception(message: "cannot create a \(Classes.className(clazz))")
         }
     }
     
