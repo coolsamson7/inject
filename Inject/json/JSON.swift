@@ -235,7 +235,7 @@ public class JSON {
                     builder.append("\n").indent().append("\"\(property)\": ")
 
                     if value == nil {
-                        builder.append("nil")
+                        builder.append("null")
                     }
                     else {
                         if (deep) {

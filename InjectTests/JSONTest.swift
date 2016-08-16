@@ -47,7 +47,7 @@ class JSONTests: XCTestCase {
         let person = Person();
 
         person.name = "FOO";
-        person.price = Money();
+        //person.price = Money();
         person.prices.append(Money())
 
         // define mapper
@@ -80,7 +80,7 @@ class JSONTests: XCTestCase {
         let jsonPerson = try! jsonMapper.fromJSON(Person.self, json: res)
 
         XCTAssert(person.name == jsonPerson.name)
-        XCTAssert(person.price!.currency == jsonPerson.price!.currency)
-        XCTAssert(person.price!.value == jsonPerson.price!.value)
+        //XCTAssert(person.price?.currency == jsonPerson.price?.currency)
+        //XCTAssert(person.price?.value == jsonPerson.price?.value)
     }
 }
