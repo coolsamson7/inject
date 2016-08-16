@@ -233,7 +233,7 @@ public class LogManager {
 
     // MARK: static data
 
-    static var instance : LogManager? // just to make sure that instance is never nil :-)
+    static var instance = LogManager(initial: true) // just to make sure that instance is never nil :-)
 
     // MARK: class funcs
 
@@ -241,14 +241,20 @@ public class LogManager {
     /// - Parameter forClass: the specific class
     /// - Returns a Logger
     public static func getLogger(forClass clazz : AnyClass) -> Logger {
-        return instance!.getLogger(forClass: clazz)
+        return instance.getLogger(forClass: clazz)
     }
 
     /// Return a `Logger` given a name. This will either return a direct matching logger or the next parent logger by stripping the last legs of the name
     /// - Parameter forName: the logger name
     /// - Returns a Logger
     public static func getLogger(forName name : String) -> Logger {
-        return instance!.getLogger(forName: name)
+        return instance.getLogger(forName: name)
+    }
+
+    /// Return the singleton
+    /// Returns: the singleton
+    public static func getSingleton() -> LogManager {
+        return instance
     }
 
     // MARK: instance data
@@ -262,6 +268,12 @@ public class LogManager {
 
     // MARK: init
 
+    // this is the initial log manager
+    private init(initial : Bool) {
+        registerLogger("", level: .OFF, logs: [])
+    }
+
+    /// Create a new `LogManager` which will overwrite the singleton!
     init() {
         LogManager.instance = self // simply override...good enough
     }
@@ -315,7 +327,7 @@ public class LogManager {
         return logs[name]!
     }
 
-    public func registerLog(log: Log) -> LogManager {
+    public func registerLog(log: Log) -> Self {
         mutex.synchronized {
             self.modifications += 1
 
@@ -330,7 +342,8 @@ public class LogManager {
     /// - Parameter level: the severity level
     /// - Parameter logs: a list of associated logs
     /// - Parameter inherit: if `true`, all `Log`s of the parent are inherited
-    public func registerLogger(path : String, level : Level, logs: [Log] = [], inherit : Bool = true) -> LogManager {
+    /// - Returns: Self
+    public func registerLogger(path : String, level : Level, logs: [Log] = [], inherit : Bool = true) -> Self {
         mutex.synchronized {
             self.modifications += 1
 
@@ -342,14 +355,14 @@ public class LogManager {
 
     /// Return a `Logger` given a specific class. This function will build the fully qualified class name and try to find an appropriate logger
     /// - Parameter forClass: the specific class
-    /// - Returns a Logger
+    /// - Returns: a Logger
     public func getLogger(forClass clazz : AnyClass) -> Logger {
         return getLogger(forName: Classes.className(clazz, qualified: true))
     }
 
     /// Return a `Logger` given a name. This will either return a direct matching logger or the next parent logger by stripping the last legs of the name
     /// - Parameter forName: the logger name
-    /// - Returns a Logger
+    /// - Returns: a Logger
     public func getLogger(forName path : String) -> Logger {
         var logger : Logger?
 
@@ -390,7 +403,7 @@ public class LogManager {
     }
 }
 
-// Level
+// LogManager.Level
 
 public func ==(lhs: LogManager.Level, rhs: LogManager.Level) -> Bool {
     return lhs.rawValue == rhs.rawValue
