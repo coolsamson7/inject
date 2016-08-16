@@ -6,12 +6,12 @@
 //  Copyright © 2016 Andreas Ernst. All rights reserved.
 //
 
-/// A ´LogManager´ is singleton that collects different log specifications and to return them
+/// A `LogManager` is singleton that collects different log specifications and to return them
 
 public class LogManager {
     // MARK: inner classes
 
-    /// ´Level´ describes the different severity levels of a log entry
+    /// `Level` describes the different severity levels of a log entry
     public enum Level : Int , Comparable, CustomStringConvertible {
         case ALL = 0
         case DEBUG
@@ -44,7 +44,7 @@ public class LogManager {
         }
     }
 
-    // ´LogEntry´ is an internal class that contains the log payload and is used by ´LogManager.Log´ implementations
+    // `LogEntry` is an internal class that contains the log payload and is used by `LogManager.Log` implementations
     public class LogEntry {
         // MARK: instance data
 
@@ -74,10 +74,10 @@ public class LogManager {
         }
     }
 
-    /// A ´Logger´ is used to emit log methods and is basically defined  by
+    /// A `Logger` is used to emit log methods and is basically defined  by
     /// * a dot separated path
     /// * a severity level
-    /// * a list of ´Log´ instances
+    /// * a list of `Log` instances
     public class Logger {
         // MARK: instance data
 
@@ -196,7 +196,7 @@ public class LogManager {
         }
     }
 
-    /// A ´Log´ is an endpoint that will store log entries ( e.g. console, file, etc. )
+    /// A `Log` is an endpoint that will store log entries ( e.g. console, file, etc. )
     public class Log {
         // MARK: instance data
 
@@ -237,14 +237,14 @@ public class LogManager {
 
     // MARK: class funcs
 
-    /// Return a ´Logger´ given a specific class. This function will build the fully qualified class name and try to find an appropriate logger
+    /// Return a `Logger` given a specific class. This function will build the fully qualified class name and try to find an appropriate logger
     /// - Parameter forClass: the specific class
     /// - Returns a Logger
     public static func getLogger(forClass clazz : AnyClass) -> Logger {
         return instance!.getLogger(forClass: clazz)
     }
 
-    /// Return a ´Logger´ given a name. This will either return a direct matching logger or the next parent logger by stripping the last legs of the name
+    /// Return a `Logger` given a name. This will either return a direct matching logger or the next parent logger by stripping the last legs of the name
     /// - Parameter forName: the logger name
     /// - Returns a Logger
     public static func getLogger(forName name : String) -> Logger {
@@ -329,7 +329,7 @@ public class LogManager {
     /// - Parameter path: the path
     /// - Parameter level: the severity level
     /// - Parameter logs: a list of associated logs
-    /// - Parameter inherit: if ´true´, all ´Log´s of the parent are inherited
+    /// - Parameter inherit: if `true`, all `Log`s of the parent are inherited
     public func registerLogger(path : String, level : Level, logs: [Log] = [], inherit : Bool = true) -> LogManager {
         mutex.synchronized {
             self.modifications += 1
@@ -340,14 +340,14 @@ public class LogManager {
         return self
     }
 
-    /// Return a ´Logger´ given a specific class. This function will build the fully qualified class name and try to find an appropriate logger
+    /// Return a `Logger` given a specific class. This function will build the fully qualified class name and try to find an appropriate logger
     /// - Parameter forClass: the specific class
     /// - Returns a Logger
     public func getLogger(forClass clazz : AnyClass) -> Logger {
         return getLogger(forName: Classes.className(clazz, qualified: true))
     }
 
-    /// Return a ´Logger´ given a name. This will either return a direct matching logger or the next parent logger by stripping the last legs of the name
+    /// Return a `Logger` given a name. This will either return a direct matching logger or the next parent logger by stripping the last legs of the name
     /// - Parameter forName: the logger name
     /// - Returns a Logger
     public func getLogger(forName path : String) -> Logger {

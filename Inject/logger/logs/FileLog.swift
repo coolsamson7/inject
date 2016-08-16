@@ -6,7 +6,7 @@
 //  Copyright © 2016 Andreas Ernst. All rights reserved.
 //
 
-/// A ´FileLog´ logs entriues in a file
+/// A `FileLog` logs entriues in a file
 public class FileLog: LogManager.Log {
     // MARK: init
 
@@ -15,11 +15,11 @@ public class FileLog: LogManager.Log {
 
     // MARK: init
 
-    /// Create a new ´FileLog´
+    /// Create a new `FileLog`
     /// - Parameter name: the log nam
     /// - Parameter fileName: the file name
     /// - Parameter formatter: the corresponding formatter
-    /// - Parameter synchronize: if ´true´ the write operations is synchronized
+    /// - Parameter synchronize: if `true` the write operations is synchronized
     init(name : String, fileName : String, formatter: LogFormatter, synchronize : Bool = true) throws {
         if synchronize {
             mutex = Mutex()
@@ -30,10 +30,10 @@ public class FileLog: LogManager.Log {
         fileHandle = try openFile(fileName)
     }
 
-    /// Create a new ´FileLog´ with the defautl format
+    /// Create a new `FileLog` with the defautl format
     /// - Parameter name: the log nam
     /// - Parameter fileName: the file name
-    /// - Parameter synchronize: if ´true´ the write operations is synchronized
+    /// - Parameter synchronize: if `true` the write operations is synchronized
     init(name : String, fileName : String, synchronize : Bool = true) throws {
         if synchronize {
             mutex = Mutex()

@@ -14,10 +14,10 @@ public class ConsoleLog: LogManager.Log {
 
     // MARK: init
 
-    /// Create a new ´ConsoleLog´
+    /// Create a new `ConsoleLog`
     /// - Parameter name: the log nam
     /// - Parameter formatter: the corresponding formatter
-    /// - Parameter synchronize: if ´true´ the write operations is synchronized
+    /// - Parameter synchronize: if `true` the write operations is synchronized
     init(name : String, formatter: LogFormatter, synchronize : Bool = true) {
         if synchronize {
             mutex = Mutex()
@@ -26,10 +26,10 @@ public class ConsoleLog: LogManager.Log {
         super.init(name: name, formatter: formatter)
     }
 
-    /// Create a new ´ConsoleLog´ with the default format
+    /// Create a new `ConsoleLog` with the default format
     /// - Parameter name: the log nam
     /// - Parameter formatter: the corresponding formatter
-    /// - Parameter synchronize: if ´true´ the write operations is synchronized
+    /// - Parameter synchronize: if `true` the write operations is synchronized
     init(name : String, synchronize : Bool = true) {
         if synchronize {
             mutex = Mutex()

@@ -6,7 +6,7 @@
 //  Copyright © 2016 Andreas Ernst. All rights reserved.
 //
 
-/// ´LogFormatter´ is used to compose a format for a log entry. A number of funcs are provided that reference the individual parts of a log entry - level, message,timestamp, etc. -
+/// `LogFormatter` is used to compose a format for a log entry. A number of funcs are provided that reference the individual parts of a log entry - level, message,timestamp, etc. -
 /// The complete layout is achieved by simply concatenating the individual results with the '+' operator.  A second '+' operator will handle strings.
 public class LogFormatter {
     // MARK: local classes

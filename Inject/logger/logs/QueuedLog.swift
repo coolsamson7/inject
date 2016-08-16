@@ -6,7 +6,7 @@
 //  Copyright © 2016 Andreas Ernst. All rights reserved.
 //
 
-/// A ´QueuedLog´ is a delegating log that executes all log requests asynchronously by queuing to a dispatch queue
+/// A `QueuedLog` is a delegating log that executes all log requests asynchronously by queuing to a dispatch queue
 public class QueuedLog: DelegatingLog {
     // MARK: instance data
 
@@ -14,7 +14,7 @@ public class QueuedLog: DelegatingLog {
 
     // MARK: init
 
-    /// create a new ´QueuedLog´
+    /// create a new `QueuedLog`
     /// - Parameter name: the log name
     /// - Parameter delegate: the delegate log
     /// - Parameter queue: a specific queue which defaults to a serial queue named 'logging-queue'

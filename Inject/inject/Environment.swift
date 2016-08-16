@@ -27,7 +27,7 @@ class FactoryFactory<T> : BeanFactory {
     }
 }
 
-/// ´Environment´is the central class that collects bean infromations and takes care of their lifecycle
+/// `Environment`is the central class that collects bean infromations and takes care of their lifecycle
 public class Environment: BeanFactory {
     // MARK: local classes
 
@@ -1373,8 +1373,8 @@ public class Environment: BeanFactory {
     /// create a `BeanDeclaration
     /// - Parameter className: the name of the bean class
     /// - Parameter id: an optional id
-    /// - Parameter lazy: the lazy attribute. default is ´false´
-    /// - Parameter abstract:t he abstract attribute. default is ´false´
+    /// - Parameter lazy: the lazy attribute. default is `false`
+    /// - Parameter abstract:t he abstract attribute. default is `false`
     /// - Returns: the new `BeanDeclaration`
     public func bean(className : String, id : String? = nil, lazy : Bool = false, abstract : Bool = false) throws -> Environment.BeanDeclaration {
         let result = Environment.BeanDeclaration()
@@ -1394,8 +1394,8 @@ public class Environment: BeanFactory {
     /// create a `BeanDeclaration
     /// - Parameter clazz: the bean class
     /// - Parameter id: an optional id
-    /// - Parameter lazy: the lazy attribute. default is ´false´
-    /// - Parameter abstract:t he abstract attribute. default is ´false´
+    /// - Parameter lazy: the lazy attribute. default is `false`
+    /// - Parameter abstract:t he abstract attribute. default is `false`
     /// - Parameter factory: a factory funtion that will return a new instance of the specific type
     /// - Returns: the new `BeanDeclaration`
     public func bean<T>(clazz : T.Type, id : String? = nil, lazy : Bool = false, abstract : Bool = false, factory : (() throws -> T)? = nil) throws -> Environment.BeanDeclaration {
@@ -1417,7 +1417,7 @@ public class Environment: BeanFactory {
         return result
     }
 
-    /// defines the specified ´BeanDeclaration´
+    /// defines the specified `BeanDeclaration`
     /// - Returns: self
     public func define(declaration : Environment.BeanDeclaration) throws -> Environment {
         // fix scope if not available
@@ -1724,14 +1724,14 @@ public class Environment: BeanFactory {
         try injector.inject(object, context: self)
     }
 
-    /// return the ´ConfigurationManager´ of this environment
-    /// - Returns: the ´ConfigurationManager´
+    /// return the `ConfigurationManager` of this environment
+    /// - Returns: the `ConfigurationManager`
     public func getConfigurationManager() -> ConfigurationManager {
         return configurationManager
     }
 
     /// Add a new configuration source
-    /// - Parameter source: a ´ConfigurationSource´
+    /// - Parameter source: a `ConfigurationSource`
     /// - Returns: self
     public func addConfigurationSource(source: ConfigurationSource) throws -> Environment {
         try configurationManager.addSource(source)
