@@ -62,7 +62,7 @@ class JSONTests: XCTestCase {
               .map("name", json: "json-name")
               .map("age")
               .map("price", deep: true)
-              .map("weight"),
+              .map("weight", conversions: Conversions(toTarget: {"\($0)"}, toSource: {Float($0)!})),
 
             // Money
 

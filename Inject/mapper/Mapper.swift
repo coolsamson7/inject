@@ -175,8 +175,8 @@ public class MappingConversion {
      * @param source the source
      * @return the target format
      */
-    func convertSource(source: Any) throws -> Any? {
-        return sourceConversion != nil ? try sourceConversion!(object: source) : nil
+    func convertSource(source: Any?) throws -> Any? {
+        return sourceConversion != nil ? try sourceConversion!(object: source) : source
     }
 
     /**
@@ -186,7 +186,7 @@ public class MappingConversion {
      * @return the source format
      */
     func convertTarget(target: Any?) throws -> Any? {
-        return targetConversion != nil ? try targetConversion!(object: target) : nil
+        return targetConversion != nil ? try targetConversion!(object: target) : target
     }
 }
 

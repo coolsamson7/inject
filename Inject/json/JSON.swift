@@ -6,14 +6,64 @@
 import Foundation
 
 /// `JSON` is a class that is able to convert swift objects in json strings and vice versa
+
+public struct Conversions<S,T> {
+    // MARK: instance data
+
+    var source2Target : Conversion?
+    var target2Source : Conversion?
+
+    var sourceType : Any.Type
+    var targetType : Any.Type
+
+    // MARK: init
+
+    init(toTarget: (S) -> T, toSource: (T) -> S) {
+        source2Target = { value in toTarget(value as! S)}
+        target2Source = { value in toSource(value as! T)}
+
+        sourceType = S.self
+        targetType = T.self
+    }
+
+    // public
+
+    public func toTarget(source : Any) throws -> Any {
+        return source2Target != nil ? try source2Target!(object: source) : source
+    }
+
+    public func toSource(target : Any) throws -> Any {
+        return target2Source != nil ? try target2Source!(object: target) : target
+    }
+}
 public class JSON {
     // MARK: local classes
+
+    class TypeKey : Hashable {
+        // MARK: instance data
+
+        var type : Any.Type
+
+        // init
+
+        init(type : Any.Type) {
+            self.type = type
+        }
+
+        // MARK: implement Hashable
+
+        var hashValue: Int {
+            get {
+                return "\(type)".hashValue
+            }
+        }
+    }
 
     class JSONOperation {
         func resolveWrite(definition : MappingDefinition, last : Bool) throws -> Void {
         }
 
-        func resolveRead(mappers : [String:Mapper] , mappingDefinition : MappingDefinition) throws -> Void {
+        func resolveRead(mappers : [TypeKey:Mapper] , mappingDefinition : MappingDefinition) throws -> Void {
         }
     }
 
@@ -50,13 +100,17 @@ public class JSON {
         var property : String
         var json : String
         var deep : Bool
+        var source2Target : Conversion? = nil
+        var target2Source : Conversion? = nil
 
         // init
 
-        init(property : String, json: String, deep : Bool = false) {
+        init(property : String, json: String, deep : Bool = false, source2Target : Conversion? = nil, target2Source : Conversion? = nil) {
             self.deep = deep
             self.property = property
             self.json = json
+            self.source2Target = source2Target
+            self.target2Source = target2Source
         }
 
         // override
@@ -64,21 +118,28 @@ public class JSON {
         override func resolveWrite(definition : MappingDefinition, last: Bool) throws -> Void {
             let bean = try BeanDescriptor.forClass(definition.target[0])
 
-            let prop = bean.findProperty(property)
+            let prop = try bean.getProperty(property)
+            var conversion : MappingConversion? = nil
 
-            if prop != nil {
-                definition.map([MappingDefinition.BeanPropertyAccessor(propertyName: property)], target: [JSONWriteAccessor(propertyName: json, type: prop!.getPropertyType(), deep: deep, last: last)])
+            if source2Target != nil {
+                conversion = MappingConversion(sourceConversion: source2Target!, targetConversion: nil)
             }
+
+            definition.map([MappingDefinition.BeanPropertyAccessor(propertyName: property)], target: [JSONWriteAccessor(propertyName: json, type: prop.getPropertyType(), deep: deep, last: last)], conversion: conversion)
         }
 
-        override func resolveRead(mappers : [String:Mapper], mappingDefinition : MappingDefinition) throws -> Void {
+        override func resolveRead(mappers : [TypeKey:Mapper], mappingDefinition : MappingDefinition) throws -> Void {
             let bean = try BeanDescriptor.forClass(mappingDefinition.target[1])
 
-            let prop = bean.findProperty(property)
+            let prop = try bean.getProperty(property)
 
-            if prop != nil {
-                mappingDefinition.map([JSONReadAccessor(mappers: mappers, propertyName: property, json: json, type: prop!.getPropertyType(), deep: deep)], target: [MappingDefinition.BeanPropertyAccessor(propertyName: property)])
+            var conversion : MappingConversion? = nil
+
+            if target2Source != nil {
+                conversion = MappingConversion(sourceConversion: nil, targetConversion: target2Source!)
             }
+
+            mappingDefinition.map([JSONReadAccessor(mappers: mappers, propertyName: property, json: json, type: prop.getPropertyType(), deep: deep)], target: [MappingDefinition.BeanPropertyAccessor(propertyName: property)], conversion: conversion)
         }
     }
 
@@ -130,14 +191,20 @@ public class JSON {
 
         // MARK: fluent
 
-        func map(wildcard : Wildcard) throws -> Self {
+        public func map(wildcard : Wildcard) throws -> Self {
             try wildcard.makeOperations(self)
 
             return self
         }
 
-        func map(property: String, json: String? = nil, deep: Bool = false) -> Definition {
+        public func map(property: String, json: String? = nil, deep: Bool = false) -> Self {
             operations.append(JSONProperty(property: property, json: json != nil ? json! : property, deep : deep))
+
+            return self
+        }
+
+        public func map<S,T>(property: String, json: String? = nil, deep: Bool = false, conversions: Conversions<S,T>) -> Self {
+            operations.append(JSONProperty(property: property, json: json != nil ? json! : property, deep : deep, source2Target: conversions.source2Target, target2Source: conversions.target2Source))
 
             return self
         }
@@ -174,7 +241,7 @@ public class JSON {
                         if (deep) {
                             builder.append("{").increment()
 
-                            try context.mapper.map(value! as! AnyObject, context: context, target: builder)
+                            try context.mapper.map(value as? AnyObject, context: context, target: builder)
 
                             builder.append("\n").decrement().indent().append("}")
                         }
@@ -328,11 +395,11 @@ public class JSON {
         var propertyName: String
         var json : String
         var _deep: Bool
-        var mappers : [String:Mapper]
+        var mappers : [TypeKey:Mapper]
 
         // MARK: init
 
-        init(mappers : [String:Mapper], propertyName: String, json: String, type: Any.Type, deep: Bool) {
+        init(mappers : [TypeKey:Mapper], propertyName: String, json: String, type: Any.Type, deep: Bool) {
             self.propertyName = propertyName
             self.json = json
             self._deep = deep
@@ -356,7 +423,7 @@ public class JSON {
 
         override func makeTransformerProperty(mode: MappingDefinition.Mode, expectedType: Any.Type?, transformerSourceProperty: Property<MappingContext>?) -> Property<MappingContext> {
             if _deep && expectedType != nil {
-                let mapper = mappers[JSON.typeName(expectedType!)]
+                let mapper = mappers[TypeKey(type: expectedType!)]
                 if (mapper == nil) {
                     fatalError("unknown mapper for type \(expectedType!)")
                 }
@@ -403,15 +470,6 @@ public class JSON {
         return Properties();
     }
 
-    // get rid of Optional, etc. types...
-    // what about Array?
-
-    class func typeName(clazz : Any.Type) -> String {
-        let name = "\(clazz)" // bundle
-
-        return name;
-    }
-
     // MARK: instance data
 
     var toJSON : Mapper;
@@ -441,7 +499,7 @@ public class JSON {
 
         // read
 
-        var mappers = [String:Mapper]()
+        var mappers = [TypeKey:Mapper]()
 
         // create mappers first so we can pass them to deep mappings
 
@@ -454,7 +512,7 @@ public class JSON {
                 initialFromMapper = mapper
             }
 
-            mappers[JSON.typeName(mapping.clazz)] = mapper
+            mappers[TypeKey(type: mapping.clazz)] = mapper
         }
 
         // initialize definitions
@@ -462,7 +520,7 @@ public class JSON {
         for mapping in mappings {
             // retrieve mapper
 
-            let mapper = mappers[JSON.typeName(mapping.clazz)]!
+            let mapper = mappers[TypeKey(type: mapping.clazz)]!
             let mappingDefinition = mapper.definitions![0]
 
             // resolve
@@ -511,4 +569,8 @@ public class JSON {
 
         return try initialFromMapper!.map(jsonData, direction: .SOURCE_2_TARGET) as! T
     }
+}
+
+func ==(lhs: JSON.TypeKey, rhs: JSON.TypeKey) -> Bool {
+    return lhs.type == rhs.type
 }
