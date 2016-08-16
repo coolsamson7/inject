@@ -102,7 +102,7 @@ public class Promise<T> {
             listener(self)
         }
 
-        // clear local state
+        // clear variables
 
         onSuccess = nil
         onError   = nil
@@ -157,19 +157,15 @@ public class Promise<T> {
     // state
 
     public func reject(error: ErrorType) {
-        guard state.isPending else {
-            return
+        if !state.isPending {
+            update(state: .Rejected(error: error))
         }
-
-        update(state: .Rejected(error: error))
     }
 
     public func resolve(value: T) {
-        guard state.isPending else {
-            return
+        if !state.isPending {
+            update(state: .Resolved(value: value))
         }
-
-        update(state: .Resolved(value: value))
     }
 }
 

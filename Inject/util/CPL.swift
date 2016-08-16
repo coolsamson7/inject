@@ -219,7 +219,8 @@ class CPLSorter {
             // next
 
             for next in classNode.next {
-                if (--next.inDegree == 0) {
+                next.inDegree -= 1
+                if (next.inDegree == 0) {
                     queue.append(next);
                 }
             }

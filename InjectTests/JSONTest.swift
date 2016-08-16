@@ -52,10 +52,13 @@ class JSONTests: XCTestCase {
 
         // define mapper
 
+        let mapping = JSON.mapping
+        let properties = JSON.properties
+
         let jsonMapper = try! JSON(mappings:
            // Person
 
-           JSON.mapping(Person.self)
+           mapping(Person.self)
               .map("name", json: "json-name")
               .map("age")
               .map("price", deep: true)
@@ -63,8 +66,8 @@ class JSONTests: XCTestCase {
 
             // Money
 
-            JSON.mapping(Money.self)
-               .map(JSON.properties().except("bar", "baz")))
+            mapping(Money.self)
+               .map(properties().except("bar", "baz")))
 
         // bean -> json
 

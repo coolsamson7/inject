@@ -33,7 +33,7 @@ public class StandardConversionFactory : ConversionFactory {
     
     // constant
     
-    static var instance = StandardConversionFactory()
+    public static var instance = StandardConversionFactory()
     
     // MARK: instance data
     
@@ -160,15 +160,15 @@ public class StandardConversionFactory : ConversionFactory {
     
     // methods
     
-    func register(sourceType : Any.Type, targetType : Any.Type, conversion : Conversion) -> Void {
+    public func register(sourceType : Any.Type, targetType : Any.Type, conversion : Conversion) -> Void {
         registry[Key(sourceType : sourceType, targetType : targetType)] = conversion
     }
     
-    func hasConversion(sourceType : Any.Type, targetType : Any.Type) -> Bool {
+    public func hasConversion(sourceType : Any.Type, targetType : Any.Type) -> Bool {
         return registry[Key(sourceType : sourceType, targetType : targetType)] != nil
     }
     
-    func getConversion(sourceType : Any.Type, targetType : Any.Type) throws -> Conversion {
+    public func getConversion(sourceType : Any.Type, targetType : Any.Type) throws -> Conversion {
         if let conversion = registry[Key(sourceType : sourceType, targetType : targetType)] {
             return conversion
         }
@@ -177,7 +177,7 @@ public class StandardConversionFactory : ConversionFactory {
         }
     }
     
-    func findConversion(sourceType : Any.Type, targetType : Any.Type) -> Conversion? {
+    public func findConversion(sourceType : Any.Type, targetType : Any.Type) -> Conversion? {
         return registry[Key(sourceType : sourceType, targetType : targetType)]
     }
 }

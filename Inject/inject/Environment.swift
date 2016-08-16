@@ -345,7 +345,6 @@ public class Environment: BeanFactory {
         
         func connect(loader : Environment.Loader) throws -> Void {
             for require in requires {
-                let dependency : BeanDeclaration
                 if let bean = require.bean {
                     loader.dependency(bean, before: self)
                 }

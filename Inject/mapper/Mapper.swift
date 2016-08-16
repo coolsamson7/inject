@@ -2111,7 +2111,7 @@ public class MappingContext {
         // instance data
 
         private var compositeBuffers: [Mapping.CompositeBuffer]; // for every operation this field will be initialized by the corresponding mapper!
-        private var stack: [AnyObject?];
+        private var stack: [Any?];
 
         // constructor
 
@@ -2142,7 +2142,7 @@ public class MappingContext {
     internal var mapper: Mapper;
     private var mappedObjects = IdentityMap<AnyObject, AnyObject>()
     private var compositeBuffers: [Mapping.CompositeBuffer] = []; // for every mapping operation this field will be initialized by the corresponding mapper!
-    private var stack: [AnyObject?] = [];
+    private var stack: [Any?] = [];
     //private var List<ForeignKeyReference> references;
     private var origin: BeanDescriptor.PropertyDescriptor?;
     //private var Keywords keywords;
@@ -2213,17 +2213,17 @@ public class MappingContext {
     }
 
     public func setupComposites(buffers: [Mapping.CompositeBuffer]) -> [Mapping.CompositeBuffer] {
-        let saved = compositeBuffers; // TODO ARRAY COPY????
+        let saved = compositeBuffers
 
-        compositeBuffers = buffers;
+        compositeBuffers = buffers
 
-        return saved;
+        return saved
     }
 
     public func setup(compositeDefinitions: [MappingDefinition.CompositeDefinition], stackSize: Int) -> [Mapping.CompositeBuffer] {
         let buffers: [Mapping.CompositeBuffer] = compositeDefinitions.map({$0.makeCreator(getMapper())});
 
-        stack = [AnyObject?](count: stackSize, repeatedValue: nil);
+        stack = [Any?](count: stackSize, repeatedValue: nil);
 
         increment();
 
@@ -2277,12 +2277,12 @@ public class MappingContext {
         //} // if
     }
 
-    public func push(value: AnyObject?, index: Int) -> Void {
-        stack[index] = value;
+    public func push(value: Any?, index: Int) -> Void {
+        stack[index] = value
     }
 
-    public func peek(index: Int) -> AnyObject? {
-        return stack[index];
+    public func peek(index: Int) -> Any? {
+        return stack[index]
     }
 }
 
@@ -2540,7 +2540,7 @@ public class Mapper: ObjectFactory, CompositeFactory, ConversionFactory {
         };
 
         if (mapping == nil) {
-            let clonedMap = mappings[direction]; // TODO clone?
+            let clonedMap = mappings[direction]; // hmm... clone?
             mapping = slowFind(clonedMap, clazz: type);
 
             mappings[direction] = clonedMap;
@@ -2564,7 +2564,12 @@ public class Mapper: ObjectFactory, CompositeFactory, ConversionFactory {
     // ObjectFactory
 
     public func createBean(source: AnyObject, clazz: AnyClass) -> AnyObject {
-        return (clazz as! NSObject.Type).init(); // TODO
+        if let initializable = clazz as? Initializable.Type {
+            return initializable.init()
+        }
+        else {
+            precondition(false, "cannot create a \(Classes.className(clazz))")
+        }
     }
 
     // ConversionFactory
@@ -3141,11 +3146,11 @@ public class PeekValue: Property<MappingContext> {
     // implement Property
 
     override public func get(object: AnyObject!, context: MappingContext) throws -> Any? {
-        return context.peek(index);
+        return context.peek(index)
     }
 
     override public func set(object: AnyObject!, value: Any?, context: MappingContext) throws -> Void {
-        fatalError("not possible");
+        fatalError("not possible")
     }
 
     // override
@@ -3171,9 +3176,9 @@ public class PeekValueProperty: PeekValue {
     // implement Property
 
     override public func get(object: AnyObject!, context: MappingContext) throws -> Any? {
-        let value = try super.get(object, context: context);
+        let value = try super.get(object, context: context)
 
-        return try property.get(value as! AnyObject, context: context) // TODO FOO value != nil ? try property.get(value!, context: context) : nil;
+        return value != nil ? try property.get(value as! AnyObject, context: context)  :  nil
     }
 
     override public func set(object: AnyObject!, value: Any?, context: MappingContext) throws -> Void {
@@ -3206,7 +3211,7 @@ public class PushValueProperty: Property<MappingContext> {
 
 
     override public func set(object: AnyObject!, value: Any?, context: MappingContext) -> Void {
-        context.push(value as! AnyObject, index: index) // TODO FOO as! AnyObject
+        context.push(value, index: index)
     }
 
     // override

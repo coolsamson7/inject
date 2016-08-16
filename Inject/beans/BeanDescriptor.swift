@@ -14,6 +14,9 @@ public protocol Initializable : class {
     init()
 }
 
+extension NSObject : Initializable {
+}
+
 /// `BeanDescriptor` stores information on the internal structure of classes, covering
 /// - super- and subclasses
 /// - properties including their types
@@ -23,7 +26,7 @@ public class BeanDescriptor : CustomStringConvertible {
     
     private static var beans = IdentityMap<AnyObject, BeanDescriptor>();
 
-    private static var SWIFT_OBJECT_CLASS = try! Classes.class4Name("SwiftObject")
+    private static var SWIFT_OBJECT_CLASS : AnyClass = try! Classes.class4Name("SwiftObject")
     
     // MARK: class methods
     
@@ -312,10 +315,7 @@ public class BeanDescriptor : CustomStringConvertible {
     }
     
     public func create() throws -> AnyObject {
-        if let objectClass = clazz as? NSObject.Type {
-            return objectClass.init()
-        }
-        else if let initializable = clazz as? Initializable.Type {
+        if let initializable = clazz as? Initializable.Type {
             return initializable.init()
         }
         else {

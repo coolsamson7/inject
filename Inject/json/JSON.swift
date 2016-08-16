@@ -130,7 +130,7 @@ public class JSON {
 
         // MARK: fluent
 
-        func map(wildcard : Wildcard) throws -> Definition {
+        func map(wildcard : Wildcard) throws -> Self {
             try wildcard.makeOperations(self)
 
             return self
@@ -407,7 +407,7 @@ public class JSON {
     // what about Array?
 
     class func typeName(clazz : Any.Type) -> String {
-        var name = "\(clazz)" // bundle
+        let name = "\(clazz)" // bundle
 
         return name;
     }
@@ -429,7 +429,9 @@ public class JSON {
 
             var index = 0
             for operation in mapping.operations {
-                try operation.resolveWrite(mappingDefinition, last: index++ == mapping.operations.count - 1)
+                try operation.resolveWrite(mappingDefinition, last: index == mapping.operations.count - 1)
+
+                index += 1
             }
 
             mappingDefinitions.append(mappingDefinition)
