@@ -58,22 +58,24 @@ public class BeanDescriptor : CustomStringConvertible {
     public class PropertyDescriptor : CustomStringConvertible {
         // MARK: instance data
         
-        var bean: BeanDescriptor;
-        var name: String;
-        var type: Any.Type;
+        var bean: BeanDescriptor
+        var name: String
+        var type: Any.Type
+        var elementType : Any.Type?
         var optional = false
-        var index: Int;
-        var overallIndex: Int;
+        var index: Int
+        var overallIndex: Int
         var autowired = false
         var inject : Inject?
         
         // MARK: constructor
         
-        init(bean: BeanDescriptor, name: String, index: Int, overallIndex: Int, type: Any.Type, optional : Bool) {
+        init(bean: BeanDescriptor, name: String, index: Int, overallIndex: Int, type: Any.Type, elementType: Any.Type?, optional : Bool) {
             self.bean = bean
             self.name = name
-            self.type = type;
-            self.optional = optional;
+            self.type = type
+            self.elementType = elementType
+            self.optional = optional
             self.index = index
             self.overallIndex = overallIndex
         }
@@ -83,8 +85,7 @@ public class BeanDescriptor : CustomStringConvertible {
         public func getPropertyType() -> Any.Type {
             return type;
         }
-        
-        
+
         public func getBean() -> BeanDescriptor {
             return bean
         }
@@ -103,6 +104,14 @@ public class BeanDescriptor : CustomStringConvertible {
         
         public func isAttribute() -> Bool {
             return true;
+        }
+
+        public func isArray() -> Bool {
+            return elementType != nil // what about other container types: set, dictionary, etc.
+        }
+
+        public func getElementType() -> Any.Type {
+            return elementType!
         }
         
         public func get(object: AnyObject!) -> Any? {
@@ -191,8 +200,8 @@ public class BeanDescriptor : CustomStringConvertible {
     public class AttributeDescriptor: PropertyDescriptor {
         // override
         
-        override init(bean: BeanDescriptor, name: String, index: Int, overallIndex: Int, type: Any.Type, optional: Bool) {
-            super.init(bean: bean, name: name, index: index, overallIndex: overallIndex, type: type, optional: optional);
+        override init(bean: BeanDescriptor, name: String, index: Int, overallIndex: Int, type: Any.Type, elementType: Any.Type?, optional: Bool) {
+            super.init(bean: bean, name: name, index: index, overallIndex: overallIndex, type: type, elementType: elementType, optional: optional);
         }
     }
     
@@ -203,10 +212,10 @@ public class BeanDescriptor : CustomStringConvertible {
         
         // override
         
-        override init(bean: BeanDescriptor, name: String, index: Int, overallIndex: Int, type: Any.Type, optional: Bool)  {
+        init(bean: BeanDescriptor, name: String, index: Int, overallIndex: Int, type: Any.Type, optional: Bool)  {
             target = try! BeanDescriptor.forClass(type as! AnyClass)
             
-            super.init(bean: bean, name: name, index: index, overallIndex: overallIndex, type: type, optional: optional);
+            super.init(bean: bean, name: name, index: index, overallIndex: overallIndex, type: type, elementType: type /* TODO */, optional: optional);
         }
         
         override public func isAttribute() -> Bool {
@@ -236,6 +245,7 @@ public class BeanDescriptor : CustomStringConvertible {
         let mirror : Mirror  = Mirror(reflecting: value)
         var type = mirror.subjectType
         var optional = false
+        var elementType : Any.Type? = nil
         
         // what the hell?
 
@@ -244,11 +254,11 @@ public class BeanDescriptor : CustomStringConvertible {
             optional = true
         }
 
-        //if let array = value as? ArrayType {
-        //    print(array.elementType())
-        //}
+        if let array = value as? ArrayType {
+            elementType = array.elementType()
+        }
         
-        return AttributeDescriptor(bean: self, name: name, index: index, overallIndex: overallIndex, type: type, optional: optional)
+        return AttributeDescriptor(bean: self, name: name, index: index, overallIndex: overallIndex, type: type, elementType: elementType, optional: optional)
     }
     
     private func analyze() throws {
