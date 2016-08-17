@@ -10,9 +10,12 @@
 
 I wanted to learn Swift so i decided to try something easy as a start:-)
 
-`Inject` is a dependency injection container for Swift that picks up the basic `Spring` ideas as far as they are possible to be implemented ( mainly due to poor reflection support ) and adds a fluent interface for those who don't like xml.
+`Inject` is a dependency injection container for Swift that picks up the basic `Spring` ideas - as far as they are possible to be implemented due to missing reflection features - but in addition offers several configuration possibilities:
+* configuration with xml files
+* fluent interface depending on reflection features
+* fluent interface applying closure functions ( without the need for reflection anymore )
 
-Let's look at an example first ( included in the repository )
+Let's look at an xml example first ( included in the repository )
 
 Here is a sample configuration file `sample.xml` that will demonstrate most of the features
 ```xml
@@ -155,8 +158,8 @@ Here is the - more or less - equivalent
 ```swift
 let environment = try Environment(name: "fluent environment")
 
-try environment.getConfigurationManager().addSource(ProcessInfoConfigurationSource())
-try environment.getConfigurationManager().addSource(PlistConfigurationSource(name: "Info"))
+try environment.addConfigurationSource(ProcessInfoConfigurationSource())
+try environment.addConfigurationSource(PlistConfigurationSource(name: "Info"))
 
 try environment
     .define(environment.bean(SamplePostProcessor.self))
@@ -199,6 +202,33 @@ try environment
 
     .refresh()
 ```
+Both mechanisms heavily rely in reflection which is used to create instances and set properties. The drawback is that - at least in the current version - the corresponding objects need to derive from `NSObject` in order to use the corresponding low level methods. It is possible to avoid that, if 
+* property setters are avoided, and
+* "constructors" are realized by closure functions
+
+Let's look at another example ( assuming two plain swift classes `Swift` and `AnotherSwift` ):
+
+```swift
+let environment = try Environment(name: "closure environment")
+
+try environment
+     .define(environment.bean(Swift.self, factory: {
+            let swift = Swift(name:  try environment.getValue(String.self, key: "dunno", defaultValue: "default")) // access configuration values
+
+            // set additional properties
+            
+            swift.other = try environment.getBean(AnotherSwift.self) // must be constructed first!
+
+            return swift
+        }).requires(class: AnotherSwift.self))
+
+        .define(environment.bean(AnotherSwift.self, factory: {
+            AnotherSwift(name: "other swift")
+        }))
+```
+As you see, the provided closure functions both create the object and set properties. In order to guarantee that all dependencies are available, dependencies explicitely nned to be declared by the `requires` function!
+
+Even in this case there is a small prerequisite for the used classes since an internal type registry that collects structural infromation on all object needs to crate a prototype object in order to analzye the properties: The classes need to implement a protocol `Initializable` that simply declares a function `init()`.
 
 In addition to the injection container, a logging framework has been implemented - and integrated - as well.  
 
@@ -222,7 +252,7 @@ the usual methods are provided
 // this is usually a static var in a class!
 var logger = LogManager.getLogger(forClass: MyClass.self) // will build the fully qualified name
 
-logger.warn("och!") // this is a autoclosure!
+logger.warn("ouch!") // this is a autoclosure!
 ```
 Provided log destinations are
 * console
@@ -271,7 +301,7 @@ What is still missing ( mainly due to the crappy Swift support for reflection )
 # Limitations
 
 And there are also limitations ( darn )
-* all objects need to derive from `NSObject`
+* all reflection usage requires the corresponding objects need to derive from `NSObject` ( xml and fluent interface with property setters )
 * all objects need to have a default `init` function
 
 This limitation is due to the - missing - swift support for relection. As soon as the language evolves i would change that.. 
