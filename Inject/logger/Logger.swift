@@ -366,18 +366,23 @@ public class LogManager {
     public func getLogger(forName path : String) -> Logger {
         var logger : Logger?
 
-        func find(path : String) -> Logger? {
-            var logger = self.cachedLoggers[path]
+        func find(name: String) -> Logger? {
+            var logger = self.cachedLoggers[name]
             if logger == nil {
-                logger = self.loggers[path]
+                logger = self.loggers[name]
                 if logger == nil {
-                    let index = path.lastIndexOf(".")
-                    logger = index != -1 ? find(path[0 ..< index]) : find("") // recursion
+                    let index = name.lastIndexOf(".")
+                    logger = index != -1 ? find(name[0 ..< index]) : find("") // recursion
                 } // if
 
                 // and cache
 
-                self.cachedLoggers[path] = logger
+                let newLogger = Logger(path : path, level : logger!.level, logs: logger!.logs) // create an artificial logger since otherwise we would get the inherited path...
+                newLogger.inheritFrom(logger!)
+
+                self.cachedLoggers[name] = newLogger
+
+                logger = newLogger
             } // if
 
             return logger
