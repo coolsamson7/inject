@@ -10,6 +10,10 @@ import Foundation
 
 protocol ArrayType {
     func elementType() -> Any.Type
+
+    func factory() -> () -> Any
+
+    mutating func _append(value : Any) -> Void
 }
 
 extension Array : ArrayType {
@@ -17,6 +21,14 @@ extension Array : ArrayType {
 
     func elementType() -> Any.Type {
         return Element.self
+    }
+
+    func factory() -> () -> Any {
+        return {Array<Element>()}
+    }
+
+    mutating func _append(value : Any) -> Void {
+        self.append(value as! Element)
     }
 }
 

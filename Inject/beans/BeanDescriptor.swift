@@ -17,6 +17,8 @@ public protocol Initializable : class {
 extension NSObject : Initializable {
 }
 
+public typealias Factory = () -> Any
+
 /// `BeanDescriptor` stores information on the internal structure of classes, covering
 /// - super- and subclasses
 /// - properties including their types
@@ -62,6 +64,7 @@ public class BeanDescriptor : CustomStringConvertible {
         var name: String
         var type: Any.Type
         var elementType : Any.Type?
+        var factory : Factory = {preconditionFailure("not implemented")}
         var optional = false
         var index: Int
         var overallIndex: Int
@@ -70,12 +73,13 @@ public class BeanDescriptor : CustomStringConvertible {
         
         // MARK: constructor
         
-        init(bean: BeanDescriptor, name: String, index: Int, overallIndex: Int, type: Any.Type, elementType: Any.Type?, optional : Bool) {
+        init(bean: BeanDescriptor, name: String, index: Int, overallIndex: Int, type: Any.Type, elementType: Any.Type?, factory : Factory, optional : Bool) {
             self.bean = bean
             self.name = name
             self.type = type
             self.elementType = elementType
             self.optional = optional
+            self.factory = factory
             self.index = index
             self.overallIndex = overallIndex
         }
@@ -112,6 +116,10 @@ public class BeanDescriptor : CustomStringConvertible {
 
         public func getElementType() -> Any.Type {
             return elementType!
+        }
+
+        public func getFactory() -> Factory {
+            return factory
         }
         
         public func get(object: AnyObject!) -> Any? {
@@ -200,8 +208,8 @@ public class BeanDescriptor : CustomStringConvertible {
     public class AttributeDescriptor: PropertyDescriptor {
         // override
         
-        override init(bean: BeanDescriptor, name: String, index: Int, overallIndex: Int, type: Any.Type, elementType: Any.Type?, optional: Bool) {
-            super.init(bean: bean, name: name, index: index, overallIndex: overallIndex, type: type, elementType: elementType, optional: optional);
+        override init(bean: BeanDescriptor, name: String, index: Int, overallIndex: Int, type: Any.Type, elementType: Any.Type?, factory : Factory, optional: Bool) {
+            super.init(bean: bean, name: name, index: index, overallIndex: overallIndex, type: type, elementType: elementType, factory: factory, optional: optional);
         }
     }
     
@@ -212,10 +220,10 @@ public class BeanDescriptor : CustomStringConvertible {
         
         // override
         
-        init(bean: BeanDescriptor, name: String, index: Int, overallIndex: Int, type: Any.Type, optional: Bool)  {
+        init(bean: BeanDescriptor, name: String, index: Int, overallIndex: Int, type: Any.Type, factory : Factory, optional: Bool)  {
             target = try! BeanDescriptor.forClass(type as! AnyClass)
             
-            super.init(bean: bean, name: name, index: index, overallIndex: overallIndex, type: type, elementType: type /* TODO */, optional: optional);
+            super.init(bean: bean, name: name, index: index, overallIndex: overallIndex, type: type, elementType: type /* TODO */, factory: factory, optional: optional);
         }
         
         override public func isAttribute() -> Bool {
@@ -246,6 +254,7 @@ public class BeanDescriptor : CustomStringConvertible {
         var type = mirror.subjectType
         var optional = false
         var elementType : Any.Type? = nil
+        var factory : Factory = {preconditionFailure("no factory implemented")}
         
         // what the hell?
 
@@ -256,9 +265,10 @@ public class BeanDescriptor : CustomStringConvertible {
 
         if let array = value as? ArrayType {
             elementType = array.elementType()
+            factory = array.factory()
         }
         
-        return AttributeDescriptor(bean: self, name: name, index: index, overallIndex: overallIndex, type: type, elementType: elementType, optional: optional)
+        return AttributeDescriptor(bean: self, name: name, index: index, overallIndex: overallIndex, type: type, elementType: elementType, factory: factory, optional: optional)
     }
     
     private func analyze() throws {

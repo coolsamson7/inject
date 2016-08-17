@@ -22,6 +22,7 @@ class BeanDescriptorTests: XCTestCase {
         var int : Int = 0
         var float : Float = 0.0
         var double : Double = 0.0
+        var strings : [String] = []
     }
 
     func testProperties() throws {
@@ -36,10 +37,13 @@ class BeanDescriptorTests: XCTestCase {
 
         XCTAssert(bean["string"].get(foo) as! String == "hello")
 
-
         XCTAssert(foo.string == "hello")
         XCTAssert(foo.int == 1)
         XCTAssert(foo.float == 1.0)
         XCTAssert(foo.double == 1.0)
+
+        // test creator
+
+        let copy1 = bean["strings"].getFactory()()
     }
 }

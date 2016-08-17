@@ -94,6 +94,48 @@ public class JSON {
         }
     }
 
+    class BeanArrayAppenderAccessor : MappingDefinition.BeanPropertyAccessor {
+        // local classes
+
+        public class BeanArrayAppenderProperty : BeanProperty<MappingContext> {
+            // MARK: init
+
+            override init(property: BeanDescriptor.PropertyDescriptor) {
+                super.init(property: property)
+            }
+
+            // MARK: override Property
+
+            override func set(object: AnyObject!, value: Any?, context: MappingContext) throws -> Void {
+                if (Tracer.ENABLED) {
+                    Tracer.trace("beans", level: .HIGH, message: "set property \"\(property.name)\" to \(value)")
+                }
+
+                /*let array = value as! Array<Any>
+                var targetArray = property.get(object)// as! ArrayType
+
+                print(targetArray as? Array)
+                for element in array {
+                    //targetArray._append(element)
+                }*/
+
+                try property.set(object, value: value)
+            }
+        }
+
+        // init
+
+        override init(propertyName : String) {
+            super.init(propertyName: propertyName)
+        }
+
+        // override
+
+        override public func makeTransformerProperty(mode: MappingDefinition.Mode, expectedType: Any.Type?, transformerSourceProperty: Property<MappingContext>?) -> Property<MappingContext> {
+            return BeanArrayAppenderProperty(property: property!)
+        }
+    }
+
     class JSONProperty : JSONOperation {
         // instance data
 
@@ -125,7 +167,17 @@ public class JSON {
                 conversion = MappingConversion(sourceConversion: source2Target!, targetConversion: nil)
             }
 
-            definition.map([MappingDefinition.BeanPropertyAccessor(propertyName: property)], target: [JSONWriteAccessor(propertyName: json, type: prop.getPropertyType(), deep: deep, last: last)], conversion: conversion)
+            definition.map(
+                    [MappingDefinition.BeanPropertyAccessor(propertyName: property)],
+                    target: [
+                            JSONWriteAccessor(
+                               property: prop,
+                               propertyName: json,
+                               type: prop.getPropertyType(),
+                               deep: deep,
+                               last: last)
+                    ],
+                    conversion: conversion)
         }
 
         override func resolveRead(mappers : [TypeKey:Mapper], mappingDefinition : MappingDefinition) throws -> Void {
@@ -139,7 +191,20 @@ public class JSON {
                 conversion = MappingConversion(sourceConversion: nil, targetConversion: target2Source!)
             }
 
-            mappingDefinition.map([JSONReadAccessor(mappers: mappers, propertyName: property, json: json, type: prop.getPropertyType(), deep: deep)], target: [MappingDefinition.BeanPropertyAccessor(propertyName: property)], conversion: conversion)
+            if prop.isArray() {
+                mappingDefinition.map(
+                        [JSONReadAccessor(mappers: mappers, property: prop, propertyName: property, json: json, type: prop.getPropertyType(), deep: deep)],
+                        target: [ BeanArrayAppenderAccessor(propertyName: property) ],
+                        conversion: conversion
+                        )
+            }
+            else {
+                mappingDefinition.map(
+                        [JSONReadAccessor(mappers: mappers, property: prop, propertyName: property, json: json, type: prop.getPropertyType(), deep: deep)],
+                        target: [ MappingDefinition.BeanPropertyAccessor(propertyName: property) ],
+                        conversion: conversion
+                        )
+            }
         }
     }
 
@@ -216,14 +281,16 @@ public class JSON {
         class WriteProperty: Property<MappingContext> {
             // MARK: instance data
 
-            var property : String
+            var property : BeanDescriptor.PropertyDescriptor
+            var json : String
             var deep : Bool
             var last : Bool
 
             // MARK: init
 
-            init(property: String, deep : Bool, last : Bool) {
+            init(property : BeanDescriptor.PropertyDescriptor, json: String, deep : Bool, last : Bool) {
                 self.property = property
+                self.json = json
                 self.deep = deep
                 self.last = last
             }
@@ -232,18 +299,43 @@ public class JSON {
 
             override func set(object: AnyObject!, value: Any?, context: MappingContext) throws -> Void {
                 if let builder = object as? JSONBuilder {
-                    builder.append("\n").indent().append("\"\(property)\": ")
+                    builder.append("\n").indent().append("\"\(json)\": ")
 
                     if value == nil {
                         builder.append("null")
                     }
                     else {
                         if (deep) {
-                            builder.append("{").increment()
+                            if property.isArray() {
+                                builder.append("[").increment()
 
-                            try context.mapper.map(value as? AnyObject, context: context, target: builder)
+                                let array = value! as! Array<AnyObject> // hmmm is there a better way, generic magic?
+                                var first = true
+                                for element in array {
+                                    if !first {
+                                        builder.append(",\n").indent().append("{").increment()
+                                    }
+                                    else {
+                                        builder.append("\n").indent().append("{").increment()
+                                    }
 
-                            builder.append("\n").decrement().indent().append("}")
+                                    try context.mapper.map(element, context: context, target: builder)
+
+                                    builder.append("\n").decrement().indent().append("}")
+
+                                    first = false
+                                }
+
+
+                                builder.append("\n").decrement().indent().append("]")
+                            }
+                            else { // plain object
+                                builder.append("{").increment()
+
+                                try context.mapper.map(value as? AnyObject, context: context, target: builder)
+
+                                builder.append("\n").decrement().indent().append("}")
+                            }
                         }
                         else {
                             if let str: String = value as? String {
@@ -264,14 +356,16 @@ public class JSON {
 
         // MARK: instance data
 
-        var propertyName: String;
+        var propertyName: String
+        var property : BeanDescriptor.PropertyDescriptor
         var _deep: Bool
         var last : Bool
 
         // MARK: init
 
-        init(propertyName: String, type: Any.Type, deep: Bool,  last : Bool) {
-            self.propertyName = propertyName;
+        init(property : BeanDescriptor.PropertyDescriptor, propertyName: String, type: Any.Type, deep: Bool,  last : Bool) {
+            self.property = property
+            self.propertyName = propertyName
             self._deep = deep
             self.last = last
 
@@ -292,7 +386,7 @@ public class JSON {
         }
 
         override func makeTransformerProperty(mode: MappingDefinition.Mode, expectedType: Any.Type?, transformerSourceProperty: Property<MappingContext>?) -> Property<MappingContext> {
-            return WriteProperty(property: propertyName, deep: _deep, last: last);
+            return WriteProperty(property: property, json: propertyName, deep: _deep, last: last);
         }
 
         override func isReadOnly() -> Bool {
@@ -362,6 +456,39 @@ public class JSON {
             }
         }
 
+        class ReadArrayProperty : ReadProperty {
+            // MARK: instance data
+
+            var mapper : Mapper
+
+            // MARK: init
+
+            init(mapper : Mapper, type : Any.Type?, property: String, json : String) {
+                self.mapper = mapper
+
+                super.init(type : type, property: property, json: json)
+            }
+
+            // MARK: override
+
+            override func get(object: AnyObject!, context: MappingContext) throws -> Any? {
+                var result = try super.get(object, context: context)
+
+                var resultArray : [AnyObject] = []
+                if let array = result as? [[String:AnyObject]]  {
+                    for dictionary in array {
+                        let container = JSONContainer(data: dictionary)
+
+                        var element = try mapper.map(container, direction: .SOURCE_2_TARGET)!
+
+                        resultArray.append(element)
+                    } // for
+                } // if
+
+                return resultArray;
+            }
+        }
+
         class ReadDeepProperty : ReadProperty {
             // MARK: instance data
 
@@ -392,6 +519,7 @@ public class JSON {
 
         // MARK: instance data
 
+        var property : BeanDescriptor.PropertyDescriptor
         var propertyName: String
         var json : String
         var _deep: Bool
@@ -399,7 +527,8 @@ public class JSON {
 
         // MARK: init
 
-        init(mappers : [TypeKey:Mapper], propertyName: String, json: String, type: Any.Type, deep: Bool) {
+        init(mappers : [TypeKey:Mapper], property : BeanDescriptor.PropertyDescriptor, propertyName: String, json: String, type: Any.Type, deep: Bool) {
+            self.property = property
             self.propertyName = propertyName
             self.json = json
             self._deep = deep
@@ -423,12 +552,22 @@ public class JSON {
 
         override func makeTransformerProperty(mode: MappingDefinition.Mode, expectedType: Any.Type?, transformerSourceProperty: Property<MappingContext>?) -> Property<MappingContext> {
             if _deep && expectedType != nil {
-                let mapper = mappers[TypeKey(type: expectedType!)]
-                if (mapper == nil) {
-                    fatalError("unknown mapper for type \(expectedType!)")
-                }
+                if property.isArray() {
+                    let mapper = mappers[TypeKey(type: property.getElementType())]
+                    if (mapper == nil) {
+                        fatalError("unknown mapper for type \(expectedType!)")
+                    }
 
-                return ReadDeepProperty(mapper: mapper!, type: expectedType, property: propertyName, json: json)
+                    return ReadArrayProperty(mapper: mapper!, type: expectedType, property: propertyName, json: json)
+                }
+                else {
+                    let mapper = mappers[TypeKey(type: expectedType!)]
+                    if (mapper == nil) {
+                        fatalError("unknown mapper for type \(expectedType!)")
+                    }
+
+                    return ReadDeepProperty(mapper: mapper!, type: expectedType, property: propertyName, json: json)
+                }
             }
             else {
                 return ReadProperty(type: expectedType, property: propertyName, json: json)

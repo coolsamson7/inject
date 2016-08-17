@@ -118,6 +118,10 @@ public class Accessor: CustomStringConvertible {
         return false;
     }
 
+    public func isArray() -> Bool {
+        return false
+    }
+
     public func getType() -> Any.Type {
         fatalError("Accessor.getType is abstract");
     }
@@ -369,8 +373,13 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
         }
 
         override public func isAttribute() -> Bool {
-            return property!.isAttribute();
+            return property!.isAttribute()
         }
+
+        override public func isArray() -> Bool {
+            return property!.isArray()
+        }
+
 
         override public func makeTransformerProperty(mode: MappingDefinition.Mode, expectedType: Any.Type?, transformerSourceProperty: Property<MappingContext>?) -> Property<MappingContext> {
             return BeanProperty<MappingContext>(property: property!);
@@ -1355,10 +1364,10 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
             }
 
             func mapDeep(mapper: Mapper, source: Accessor, target: Accessor, targetProperty: Property<MappingContext>, conversion: MappingConversion?, int side: Int) throws -> Property<MappingContext> {
-                let sourceType: Any.Type = source.getType();
-                let targetType: Any.Type = target.getType();
-                let isSourceMultiValued = isContainerType(sourceType);
-                let isTargetMultiValued = isContainerType(targetType);
+                let sourceType: Any.Type = source.getType()
+                let targetType: Any.Type = target.getType()
+                let isSourceMultiValued = source.isArray()
+                let isTargetMultiValued = target.isArray()
 
                 if (isSourceMultiValued != isTargetMultiValued) {
                     throw MapperError.Definition(message: "relations must have the same cardinality", definition: nil, match: match, accessor: target);
@@ -1373,7 +1382,6 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
                 let origin: BeanDescriptor.PropertyDescriptor? = mapper.specificMapping(source, side: side);
 
                 if (isSourceMultiValued) {
-
                     if conversion != nil {
                         return MapCollection2Collection(sourceType: sourceType, targetType: targetType, accessor: target, origin: origin);//TODO MapAndConvertCollection2Collection(sourceType, targetType, target, conversion, origin);
                     }
@@ -1382,12 +1390,8 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
                     }
                 }
                 else {
-                    return MapDeep(property: target, origin: origin);
+                    return MapDeep(property: target, origin: origin)
                 }
-            }
-
-            private func isContainerType(type: Any.Type) -> Bool {
-                return "\(type)".containsString("Array") // AAAAAA TODO
             }
 
             private func needsConversion(fromType: Any.Type, toType: Any.Type) -> Bool {
@@ -2511,15 +2515,15 @@ public class Mapper: ObjectFactory, CompositeFactory, ConversionFactory {
     private func getMapping(type: AnyClass, direction: Int, origin: BeanDescriptor.PropertyDescriptor?) throws -> Mapping {
         // lazy initialization
 
-        if (definitions != nil) {
-            try setup();
+        if definitions != nil {
+            try setup()
         }
 
-        var mapping: Mapping?;
+        var mapping: Mapping?
 
         // find specific mapping
 
-        if (origin != nil) {
+        if origin != nil {
             /*
             //HashMap<Class,Mapping> matches = (HashMap<Class, Mapping>) mappings[direction].get(origin);
 
@@ -2537,13 +2541,13 @@ public class Mapper: ObjectFactory, CompositeFactory, ConversionFactory {
         }
         else {
             mapping = mappings[direction][type]
-        };
+        }
 
-        if (mapping == nil) {
-            let clonedMap = mappings[direction]; // hmm... clone?
-            mapping = slowFind(clonedMap, clazz: type);
+        if mapping == nil { print("no mapping for type \(type)")
+            let clonedMap = mappings[direction] // hmm... clone?
+            mapping = slowFind(clonedMap, clazz: type)
 
-            mappings[direction] = clonedMap;
+            mappings[direction] = clonedMap
         } // if
 
         if (mapping == nil) {

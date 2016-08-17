@@ -11,26 +11,30 @@ import Foundation
 class JSONTests: XCTestCase {
     // local classes
 
-    class Person : NSObject {
+    class Product: NSObject {
+        // instance data
+
         var name : String = "andi"
         var price : Money? = nil// Money()
         var prices : [Money] = [Money]()
-        var age : Int = 51
-        var weight : Int = 87
-
-    }
-
-    class OtherPerson : NSObject {
-        var name : String = "andi"
-        var age : Int = 0
-        var weight : Float = 87.1
-        var price : Money? = nil// Money()
-        var prices : [Money] = [Money]()
+        var id : Int = 1
+        var weight : Float = 100
     }
 
     class Money : NSObject {
+        // instance data
+
         var currency = "EU"
         var value = 1.0
+
+        override init() {
+            super.init()
+        }
+
+        init(currency: String, value : Double) {
+            self.currency = currency
+            self.value = value
+        }
     }
 
     // lifecycle
@@ -44,11 +48,12 @@ class JSONTests: XCTestCase {
     func testJSON() {
         // create a person
 
-        let person = Person();
+        let product = Product();
 
-        person.name = "FOO";
+        product.name = "FOO";
         //person.price = Money();
-        person.prices.append(Money())
+        product.prices.append(Money())
+        product.prices.append(Money())
 
         // define mapper
 
@@ -58,10 +63,11 @@ class JSONTests: XCTestCase {
         let jsonMapper = try! JSON(mappings:
            // Person
 
-           mapping(Person.self)
+           mapping(Product.self)
               .map("name", json: "json-name")
-              .map("age")
+              .map("id")
               .map("price", deep: true)
+              .map("prices", deep: true)
               .map("weight", conversions: Conversions(toTarget: {"\($0)"}, toSource: {Float($0)!})),
 
             // Money
@@ -71,16 +77,17 @@ class JSONTests: XCTestCase {
 
         // bean -> json
 
-        let res = try! jsonMapper.asJSON(person)
+        let res = try! jsonMapper.asJSON(product)
 
         print(res)
 
         // json -> bean
 
-        let jsonPerson = try! jsonMapper.fromJSON(Person.self, json: res)
+        let result = try! jsonMapper.fromJSON(Product.self, json: res)
 
-        XCTAssert(person.name == jsonPerson.name)
-        //XCTAssert(person.price?.currency == jsonPerson.price?.currency)
-        //XCTAssert(person.price?.value == jsonPerson.price?.value)
+        XCTAssert(product.name == result.name)
+        XCTAssert(product.prices.count == result.prices.count)
+        //XCTAssert(product.price?.currency == product.price?.currency)
+        //XCTAssert(product.price?.value == product.price?.value)
     }
 }
