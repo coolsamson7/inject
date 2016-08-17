@@ -38,7 +38,7 @@ class ConfigurationTest: XCTestCase {
 
         try! environment
            .loadXML(parentData)
-           .refresh()
+           .startup()
 
         print(environment.report())
 

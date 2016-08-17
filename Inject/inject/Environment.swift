@@ -1312,10 +1312,10 @@ public class Environment: BeanFactory {
         return self
     }
 
-    /// refresh validates all defined beans and creates all singletons in advance
+    /// startup validates all defined beans and creates all singletons in advance
     /// - Returns: self
     /// - Throws: any errors during setup
-    public func refresh() throws -> Environment  {
+    public func startup() throws -> Environment  {
         if loader != nil {
             // check parent
 
@@ -1481,7 +1481,7 @@ public class Environment: BeanFactory {
 
     func validate() throws {
         if loader != nil && !loader!.loading {
-            try refresh()
+            try startup()
         }
     }
 

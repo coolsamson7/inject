@@ -157,7 +157,7 @@ class SampleTest: XCTestCase {
 
         try! environment
            .loadXML(getResource("sample"))
-           .refresh()
+           .startup()
 
 
         print(environment.report())
@@ -208,7 +208,7 @@ class SampleTest: XCTestCase {
                      .property("id", value: "foo-3")
                      .property("number", value: 1)))
 
-            .refresh()
+            .startup()
 
        print(environment.report())
 
