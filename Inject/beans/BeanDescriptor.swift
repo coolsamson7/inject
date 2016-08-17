@@ -64,7 +64,7 @@ public class BeanDescriptor : CustomStringConvertible {
         var name: String
         var type: Any.Type
         var elementType : Any.Type?
-        var factory : Factory = {preconditionFailure("not implemented")}
+        var factory : Factory
         var optional = false
         var index: Int
         var overallIndex: Int

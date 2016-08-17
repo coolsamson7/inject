@@ -68,12 +68,12 @@ public class CPLRegistry<T> {
             cl = cl!.superclass();
         }
 
-        CPLSorter(classes: classes, objects: &objects);
+        CPLSorter(classes: classes, objects: &objects)
 
         // most to least!
 
         for i in 0..<objects.count {
-            let key = Key(clazz: objects[i] as! AnyClass);
+            let key = Key(clazz: objects[i] as! AnyClass)
             if let value = registry[key] {
                 cache![key] = value;
 

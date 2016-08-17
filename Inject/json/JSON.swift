@@ -97,7 +97,7 @@ public class JSON {
     class BeanArrayAppenderAccessor : MappingDefinition.BeanPropertyAccessor {
         // local classes
 
-        public class BeanArrayAppenderProperty : BeanProperty<MappingContext> {
+        class BeanArrayAppenderProperty : BeanProperty<MappingContext> {
             // MARK: init
 
             override init(property: BeanDescriptor.PropertyDescriptor) {
@@ -131,7 +131,7 @@ public class JSON {
 
         // override
 
-        override public func makeTransformerProperty(mode: MappingDefinition.Mode, expectedType: Any.Type?, transformerSourceProperty: Property<MappingContext>?) -> Property<MappingContext> {
+        override func makeTransformerProperty(mode: MappingDefinition.Mode, expectedType: Any.Type?, transformerSourceProperty: Property<MappingContext>?) -> Property<MappingContext> {
             return BeanArrayAppenderProperty(property: property!)
         }
     }
@@ -472,14 +472,14 @@ public class JSON {
             // MARK: override
 
             override func get(object: AnyObject!, context: MappingContext) throws -> Any? {
-                var result = try super.get(object, context: context)
+                let result = try super.get(object, context: context)
 
                 var resultArray : [AnyObject] = []
                 if let array = result as? [[String:AnyObject]]  {
                     for dictionary in array {
                         let container = JSONContainer(data: dictionary)
 
-                        var element = try mapper.map(container, direction: .SOURCE_2_TARGET)!
+                        let element = try mapper.map(container, direction: .SOURCE_2_TARGET)!
 
                         resultArray.append(element)
                     } // for
