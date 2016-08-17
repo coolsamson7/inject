@@ -8,7 +8,7 @@ Pod::Spec.new do |s|
 #
 
 s.name         = "inject"
-s.version      = "0.9.4"
+s.version      = "1.0.0"
 s.summary      = "iOS: Swift dependency injection container"
 s.description  = "Swift dependency injection container picking up te basic spring ideas"
 s.homepage     = "https://github.com/coolsamson7/inject"
