@@ -19,3 +19,9 @@ extension Array : ArrayType {
         return Element.self
     }
 }
+
+extension Array where Element : Any {
+    func newInstance() -> Array {
+        return Array<Element>()
+    }
+}
