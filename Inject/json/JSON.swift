@@ -451,7 +451,9 @@ public class JSON {
                     return data.data[json]
                 }
                 else {
-                    precondition(false, "expected container")
+                    fatalError("expected container")
+
+                    return nil
                 }
             }
         }

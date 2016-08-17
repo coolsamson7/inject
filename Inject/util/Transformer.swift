@@ -9,11 +9,11 @@ public class Property<C> : CustomStringConvertible {
     // MARK: abstract
 
     func get(object: AnyObject!, context: C) throws -> Any? {
-        precondition(false, "\(self.dynamicType).get is not implemented")
+        fatalError("\(self.dynamicType).get is not implemented")
     }
 
     func set(object: AnyObject!, value: Any?, context: C) throws -> Void {
-        precondition(false, "\(self.dynamicType).set is not implemented")
+        fatalError("\(self.dynamicType).set is not implemented")
     }
 
     // MARK: implement CustomStringConvertible

@@ -27,7 +27,7 @@ public enum PromiseState<T>{
             case let .Resolved(value):
                 return value
             default:
-                precondition(false, "should not happen")
+                fatalError("should not happen")
         }
     }
 }

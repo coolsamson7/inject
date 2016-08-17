@@ -2572,7 +2572,7 @@ public class Mapper: ObjectFactory, CompositeFactory, ConversionFactory {
             return initializable.init()
         }
         else {
-            precondition(false, "cannot create a \(Classes.className(clazz))")
+            fatalError("cannot create a \(Classes.className(clazz))")
         }
     }
 

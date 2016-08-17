@@ -254,7 +254,7 @@ public class BeanDescriptor : CustomStringConvertible {
         var type = mirror.subjectType
         var optional = false
         var elementType : Any.Type? = nil
-        var factory : Factory = {preconditionFailure("no factory implemented")}
+        var factory : Factory = {fatalError("no factory implemented")}
         
         // what the hell?
 
