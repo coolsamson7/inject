@@ -5,8 +5,9 @@
 [![CocoaPods](https://img.shields.io/cocoapods/v/inject.svg)](https://github.com/coolsamson7/inject)
 [![License][mit-badge]][mit-url]
 
-![needle](https://cloud.githubusercontent.com/assets/19403960/17474460/43a71bd6-5d56-11e6-9bcb-6d2aaa9ac466.png)
-
+<p align="center">
+  <img src="https://cloud.githubusercontent.com/assets/19403960/17474460/43a71bd6-5d56-11e6-9bcb-6d2aaa9ac466.png" width="40%">
+</p>
 
 I wanted to learn Swift so i decided to try something easy as a start:-)
 
@@ -286,10 +287,29 @@ In addition to the core implementation there are quite a number of classes that 
 * tracing classes
 * full blown logging framework
 
+## Requirements
+
+- iOS 8.0+
+- Xcode 7.0+
+
 # Documentation
 
-* Check the Wiki
+* Check the [Wiki](https://github.com/coolsamson7/inject/wiki)
 * API Docs [here](http://cocoadocs.org/docsets/inject/0.9.4/)
+
+# Installation
+
+## Cocoapods
+
+To install with CocoaPods, add `pod 'inject', '~> 1.0.0'`  to your `Podfile`, e.g.
+
+```ruby
+target 'MyApp' do
+  pod 'inject', '~> 1.0.0'
+end
+```
+
+Then run `pod install` command. For details of the installation and usage of CocoaPods, visit [its official website](https://cocoapods.org).
 
 # Missing
 
