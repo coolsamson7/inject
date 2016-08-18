@@ -8,7 +8,7 @@
 
 /// This protocol covers life cycle callbacks that will be called on constructed instances
 
-protocol Bean {
+public protocol Bean {
     /// called after the instance is constructed including all injections
     func postConstruct() throws -> Void ;
 }

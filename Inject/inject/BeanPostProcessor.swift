@@ -7,9 +7,9 @@
 //
 
 /// A `BeanPostProcessor` is responsible to take a constructed object and to modify it or completely replace it with another matching object
-protocol BeanPostProcessor {
+public protocol BeanPostProcessor {
     // post process the given object
-    // - Paramater bean: the bean
+    // - Parameter bean: the bean
     // - Returns: the possibly modified object
     // - Throws any error
     func process(bean : AnyObject) throws -> AnyObject

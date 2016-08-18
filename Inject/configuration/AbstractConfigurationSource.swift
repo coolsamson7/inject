@@ -36,7 +36,7 @@ public class AbstractConfigurationSource : NSObject, ConfigurationSource, Bean, 
     
     // Bean
     
-    func postConstruct() throws -> Void {
+    public func postConstruct() throws -> Void {
         try configurationManager!.addSource(self)
     }
     

@@ -337,8 +337,6 @@ public class BeanDescriptor : CustomStringConvertible {
         if let classInitializer = instance as? ClassInitializer {
             classInitializer.initializeClass()
         }
-
-        print(self)
     }
 
     private func analyzeProperty(name : String, value: Any, index : Int, overallIndex : Int) -> AttributeDescriptor {

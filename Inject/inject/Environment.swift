@@ -27,7 +27,7 @@ class FactoryFactory<T> : BeanFactory {
     }
 }
 
-/// `Environment`is the central class that collects bean infromations and takes care of their lifecycle
+/// `Environment`is the central class that collects bean informations and takes care of their lifecycle
 public class Environment: BeanFactory {
     // MARK: local classes
 
@@ -145,7 +145,7 @@ public class Environment: BeanFactory {
         /// set the class of this bean declaration
         /// - Parameter clazz: the class name
         /// - Returns: self
-        public func clazz(clazz : String) throws -> BeanDeclaration {
+        public func clazz(clazz : String) throws -> Self {
             self.bean = try BeanDescriptor.forClass(clazz)
 
             return self
@@ -154,7 +154,7 @@ public class Environment: BeanFactory {
         /// set the id of this bean declaration
         /// - Parameter id: the id
         /// - Returns: self
-        public func id(id : String) -> BeanDeclaration {
+        public func id(id : String) -> Self {
             self.id = id
 
             return self
@@ -163,7 +163,7 @@ public class Environment: BeanFactory {
         /// set the `lazy' attribute of this bean declaration
         /// - Parameter lazy: if `true`, the instance will be created whenever it is requested for the first time
         /// - Returns: self
-        public func lazy(lazy : Bool = true) -> BeanDeclaration {
+        public func lazy(lazy : Bool = true) -> Self {
             self.lazy = lazy
 
             return self
@@ -172,7 +172,7 @@ public class Environment: BeanFactory {
         /// set the `abstract' attribute of this bean declaration
         /// - Parameter abstract: if `true`, the instance will not be craeted but serves only as a template for inherited beans
         /// - Returns: self
-        public func abstract(abstract : Bool = true) -> BeanDeclaration {
+        public func abstract(abstract : Bool = true) -> Self {
             self.abstract = abstract
 
             return self
@@ -181,7 +181,7 @@ public class Environment: BeanFactory {
         /// set the scope of this bean declaration
         /// - Parameter scope: the scope
         /// - Returns: self
-        public func scope(scope : BeanScope) -> BeanDeclaration {
+        public func scope(scope : BeanScope) -> Self {
             self.scope = scope
 
             return self
@@ -190,7 +190,7 @@ public class Environment: BeanFactory {
         /// specifies that this bean needs to be constructed after another bean
         /// - Parameter depends: the id of the bean which needs to be constructed first
         /// - Returns: self
-        public func dependsOn(depends : String) -> BeanDeclaration {
+        public func dependsOn(depends : String) -> Self {
             requires(id: depends)
 
             return self
@@ -199,7 +199,7 @@ public class Environment: BeanFactory {
         /// specifies that this bean needs to be constructed after another bean
         /// - Parameter id: the id of the bean which needs to be constructed first
         /// - Returns: self
-        public func requires(id id: String) -> BeanDeclaration {
+        public func requires(id id: String) -> Self {
             requires.append(Require(id: id))
 
             return self
@@ -208,7 +208,7 @@ public class Environment: BeanFactory {
         /// specifies that this bean needs to be constructed after another bean
         /// - Parameter class: the class of the bean which needs to be constructed first
         /// - Returns: self
-        public func requires(class clazz: AnyClass) -> BeanDeclaration {
+        public func requires(class clazz: AnyClass) -> Self {
             requires.append(Require(clazz: clazz))
 
             return self
@@ -217,7 +217,7 @@ public class Environment: BeanFactory {
         /// specifies that this bean needs to be constructed after another bean
         /// - Parameter bean: the bean which needs to be constructed first
         /// - Returns: self
-        public func requires(bean bean : BeanDeclaration) -> BeanDeclaration {
+        public func requires(bean bean : BeanDeclaration) -> Self {
             requires.append(Require(bean: bean))
 
             return self
@@ -226,7 +226,7 @@ public class Environment: BeanFactory {
         /// specifies a bean that will serve as a template
         /// - Parameter parent: the id of the parent bean
         /// - Returns: self
-        public func parent(parent : String) -> BeanDeclaration {
+        public func parent(parent : String) -> Self {
             self.parent = BeanDeclaration(id: parent)
 
             return self
@@ -240,7 +240,7 @@ public class Environment: BeanFactory {
         /// - Parameter bean: an embedded bean defining the value
         /// - Parameter inject: an `InjectBean` instance that defines how the injection shuld be carried out ( by id or by type )
         /// - Returns: self
-        public func property(name: String, value : Any? = nil, ref : String? = nil, resolve : String? = nil, bean : BeanDeclaration? = nil, inject : InjectBean? = nil) -> BeanDeclaration {
+        public func property(name: String, value : Any? = nil, ref : String? = nil, resolve : String? = nil, bean : BeanDeclaration? = nil, inject : InjectBean? = nil) -> Self {
             let property = PropertyDeclaration()
 
             property.name = name
@@ -270,13 +270,13 @@ public class Environment: BeanFactory {
         /// specifies a target class of a factory bean
         /// - Parameter clazz: the class that this factory beans creates
         /// - Returns: self
-        public func target(clazz : AnyClass) throws -> BeanDeclaration {
+        public func target(clazz : AnyClass) throws -> Self {
             self.target = try BeanDescriptor.forClass(clazz)
 
             return self
         }
 
-        public func property(property: PropertyDeclaration) -> BeanDeclaration {
+        public func property(property: PropertyDeclaration) -> Self {
             properties.append(property)
 
             return self
@@ -1305,7 +1305,7 @@ public class Environment: BeanFactory {
 
     /// load a xl configuration file
     /// - Parameter data: a `NSData` object referencing the config file
-    public func loadXML(data : NSData) throws -> Environment {
+    public func loadXML(data : NSData) throws -> Self {
         try XMLEnvironmentLoader(environment: self)
            .parse(data)
 
@@ -1315,7 +1315,7 @@ public class Environment: BeanFactory {
     /// startup validates all defined beans and creates all singletons in advance
     /// - Returns: self
     /// - Throws: any errors during setup
-    public func startup() throws -> Environment  {
+    public func startup() throws -> Self  {
         if loader != nil {
             // check parent
 
@@ -1419,7 +1419,7 @@ public class Environment: BeanFactory {
 
     /// defines the specified `BeanDeclaration`
     /// - Returns: self
-    public func define(declaration : Environment.BeanDeclaration) throws -> Environment {
+    public func define(declaration : Environment.BeanDeclaration) throws -> Self {
         // fix scope if not available
 
         if declaration.scope == nil {

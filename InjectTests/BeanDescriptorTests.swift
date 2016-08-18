@@ -25,8 +25,27 @@ class BeanDescriptorTests: XCTestCase {
         var strings : [String] = []
     }
 
+    class Derived : Foo {
+        var bla : String = ""
+    }
+
+    class Bar : Initializable {
+        // instance data
+
+        var string : String = ""
+        var int : Int = 0
+        var float : Float = 0.0
+        var double : Double = 0.0
+        var strings : [String] = []
+
+        required init() {
+
+        }
+    }
+
     func testProperties() throws {
-        let bean = try BeanDescriptor.forClass(Foo.self)
+        let bean = try BeanDescriptor.forClass(Derived.self)
+        let bean1 = try BeanDescriptor.forClass(Bar.self)
 
         let foo = Foo()
         

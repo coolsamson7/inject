@@ -37,7 +37,7 @@ public class Injection : NSObject, Bean, ClassInitializer {
     
     // Bean
     
-    func postConstruct() -> Void {
+    public func postConstruct() -> Void {
         injector!.register(self)
     }
 }
