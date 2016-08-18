@@ -62,7 +62,7 @@ public class XMLParser: NSObject {
         
         // fluent
         
-        func property(property : String, xml : String? = nil, conversion : Conversion? = nil) throws -> ClassDefinition {
+        func property(property : String, xml : String? = nil, conversion : Conversion? = nil) throws -> Self {
             let definition = try PropertyDefinition(bean: clazz, propertyName: property, xml: xml, conversion: conversion)
             
             properties[definition.xml] = definition
@@ -304,22 +304,32 @@ public class XMLParser: NSObject {
             reportValidationError(validationError)
         }
     }
-    
+
+    // MARK: static funcs
+
+    public static func mapping(clazz: AnyClass, element: String) -> ClassDefinition {
+        let result = ClassDefinition(clazz: clazz, element: element)
+
+        return result
+    }
+
     // MARK: instance data
     
     var classes = [String:ClassDefinition]()
     
     // register stuff
     
-    func register(classes : ClassDefinition...) {
+    public func register(classes : ClassDefinition...) -> Self {
         for clazz in classes {
             self.classes[clazz.element] = clazz
         }
+
+        return self
     }
     
     // MARK: public
     
-    func parse(data : NSData) throws -> AnyObject? {
+    public func parse(data : NSData) throws -> AnyObject? {
         let parser = NSXMLParser(data: data)
         parser.shouldProcessNamespaces = true
         

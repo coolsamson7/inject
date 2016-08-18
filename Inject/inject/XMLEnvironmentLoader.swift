@@ -16,7 +16,7 @@ public class XMLEnvironmentLoader: XMLParser {
         
         // OriginAware
         
-        var origin : Origin? {
+        public var origin : Origin? {
             get {
                 return _origin
             }
@@ -107,7 +107,7 @@ public class XMLEnvironmentLoader: XMLParser {
         
         // Ancestor
         
-        func addChild(child : AnyObject) -> Void {
+        public func addChild(child : AnyObject) -> Void {
             if let property = child as? Property {
                 properties.append(property)
             }
@@ -218,7 +218,7 @@ public class XMLEnvironmentLoader: XMLParser {
     
     // override
     
-    override func parse(data : NSData) throws -> AnyObject? {
+    override public func parse(data : NSData) throws -> AnyObject? {
         if (Tracer.ENABLED) {
             Tracer.trace("inject.xml", level: .HIGH, message: "parse")
         }

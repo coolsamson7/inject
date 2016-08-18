@@ -6,7 +6,7 @@
 //  Copyright © 2016 Andreas Ernst. All rights reserved.
 //
 
-
+/// A configuration source based on plists
 public class PlistConfigurationSource : AbstractConfigurationSource {
     // MARK: instance data
 

@@ -6,6 +6,7 @@
 //  Copyright © 2016 Andreas Ernst. All rights reserved.
 //
 
-public  protocol ConfigurationListener {
+/// A `ConfigurationListener` will be informaed about configuration value changes
+public protocol ConfigurationListener {
     func onItemChanged(namespace : String, key : String, value : Any) -> Void
 }

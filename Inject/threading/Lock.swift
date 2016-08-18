@@ -5,7 +5,11 @@
 
 import Foundation
 
+/// base protocol for different lock kinds
 public protocol Lock {
-    func lock()
-    func unlock()
+    /// lock
+    func lock() -> Void
+
+    // unlock
+    func unlock() -> Void
 }

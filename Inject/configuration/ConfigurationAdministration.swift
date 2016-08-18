@@ -6,7 +6,8 @@
 //  Copyright © 2016 Andreas Ernst. All rights reserved.
 //
 
-protocol ConfigurationAdministration {
+/// the administrative protocol
+public protocol ConfigurationAdministration {
     func addSource(source : ConfigurationSource) throws -> Void
     
     func configurationAdded(item: ConfigurationItem , source : ConfigurationSource) throws -> Void

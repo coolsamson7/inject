@@ -5,6 +5,7 @@
 
 import Foundation
 
+/// A `Future`is a combination of a `Condition` and `Mutex` in order to exchange results between different threads
 public class Future<T> {
     // MARK: instance data
 
@@ -23,7 +24,10 @@ public class Future<T> {
 
     // MARK: public
 
-    func getResult() throws -> T {
+    /// block the current thread and wait until a result has been set with `setResult()`. After waking up this result is returned. In case of a `setError()` the correspondign error will be thrown
+    /// - Returns: the result as set by another thread
+    /// - Throws: any error set with `setError()`
+    public func getResult() throws -> T {
         mutex.synchronized({
             while !self.resolved  {
                 self.condition.wait()
@@ -38,6 +42,8 @@ public class Future<T> {
         }
     }
 
+    /// Set the result of this future
+    /// - Parameter result: the result
     public func setResult(result : T) {
         mutex.synchronized({
             self.resolved = true
@@ -47,6 +53,8 @@ public class Future<T> {
         })
     }
 
+    /// Set the error value of this future
+    /// - Parameter error: the error
     public func setError(error : ErrorType) {
         mutex.synchronized({
             self.resolved = true

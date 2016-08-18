@@ -32,6 +32,7 @@ public enum PromiseState<T>{
     }
 }
 
+// / Simple promise class.
 public class Promise<T> {
     // MARK: alias
 
@@ -117,6 +118,9 @@ public class Promise<T> {
 
     // MARK: public funcs
 
+    /// add a closure that will be called with the result of the previous promise
+    /// - Parameter body: the closure function
+    /// - Returns: the new promise with the generic type of the closure body return value
     public func then<U>(body: T throws -> U) -> Promise<U> {
         let promise = Promise<U>()
 
@@ -125,6 +129,9 @@ public class Promise<T> {
         return promise
     }
 
+    /// add a closure that will be called with the result of the previous promise. In contrast to the first function, this clusure returns another `Promise` which will be integrated in the overall chain.
+    /// - Parameter body: the closure function
+    /// - Returns: the new promise with the generic type of the closure body return value
     public func then<U>(body: T throws -> Promise<U>) -> Promise<U> {
         let promise = Promise<U>()
 
@@ -142,12 +149,18 @@ public class Promise<T> {
 
     // callbacks
 
+    /// register a callback that will be executed whenever the current promise has been resolved with a value
+    /// - Parameter handler: A `SuccessHandler`
+    /// - Returns: self
     public func onSuccess(handler: SuccessHandler) -> Self {
         onSuccess = handler
 
         return self
     }
 
+    /// register a callback that will be executed whenever the current promise has been rejected with an error
+    /// - Parameter handler: A `ErrorHandler`
+    /// - Returns: self
     public func onError(handler: ErrorHandler) -> Self {
         onError = handler
 
@@ -156,13 +169,17 @@ public class Promise<T> {
 
     // state
 
+    /// Reject the promise with the specified error
+    /// - Parameter error: the error
     public func reject(error: ErrorType) {
         if !state.isPending {
             update(state: .Rejected(error: error))
         }
     }
 
-    public func resolve(value: T) {
+    /// Resolve the promise with the specified value
+    /// - Parameter value: the value
+    public func resolve(value: T) -> Void {
         if !state.isPending {
             update(state: .Resolved(value: value))
         }

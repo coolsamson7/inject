@@ -6,6 +6,8 @@
 //  Copyright © 2016 Andreas Ernst. All rights reserved.
 //
 
-protocol NamespaceAware {
+// classes implementing this protocol will be informed about xml namespaces
+public protocol NamespaceAware {
+    /// the namespace
     var namespace : String? { get set }
 }

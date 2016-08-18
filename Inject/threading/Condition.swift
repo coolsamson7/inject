@@ -5,6 +5,7 @@
 
 import Foundation
 
+/// A wrapper for `pthread_cond_t`
 public class Condition {
     // MARK: instance data
 
@@ -13,6 +14,8 @@ public class Condition {
 
     // init
 
+    /// create a new `Condition`
+    /// - Parameter mutex: the corresponding `Mutex`
     public init(mutex : Mutex){
         self.mutex = mutex
 
@@ -25,15 +28,18 @@ public class Condition {
 
     // MARK: public
 
-    func broadcast(){
+    /// broadcast
+    public func broadcast(){
         pthread_cond_broadcast(&cond)
     }
 
-    func signal(){
+    /// Signal
+    public func signal(){
         pthread_cond_signal(&cond)
     }
 
-    func wait(){
+    /// wait on this condition
+    public func wait(){
         pthread_cond_wait(&cond, &mutex.mutex)
     }
 }

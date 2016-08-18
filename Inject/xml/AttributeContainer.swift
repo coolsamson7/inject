@@ -6,6 +6,6 @@
 //  Copyright © 2016 Andreas Ernst. All rights reserved.
 //
 
-protocol AttributeContainer {
+public protocol AttributeContainer {
     subscript(name: String) -> AnyObject { get set }
 }

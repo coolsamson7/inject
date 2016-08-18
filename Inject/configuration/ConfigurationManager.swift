@@ -6,7 +6,7 @@
 //  Copyright © 2016 Andreas Ernst. All rights reserved.
 //
 
-@objc(ConfigurationManager)
+/// central class that collects `ConfigurationSource`'s and is able to retieve configuration values.
 public class ConfigurationManager : NSObject, ConfigurationAdministration, ConfigurationProvider {
     // local class
     
@@ -188,13 +188,13 @@ public class ConfigurationManager : NSObject, ConfigurationAdministration, Confi
 
     // ConfigurationAdministration
     
-    func addSource(source : ConfigurationSource) throws -> Void {
+    public func addSource(source : ConfigurationSource) throws -> Void {
         sources.append(source)
         
         try source.load(self)
     }
-    
-    func configurationAdded(item: ConfigurationItem , source : ConfigurationSource) throws -> Void {
+
+    public func configurationAdded(item: ConfigurationItem , source : ConfigurationSource) throws -> Void {
         let existingItem =  getItem(item.scope, fqn: item.fqn)
         
         if existingItem != nil {
@@ -205,8 +205,8 @@ public class ConfigurationManager : NSObject, ConfigurationAdministration, Confi
         
         try configurationChanged(item);
     }
-    
-    func configurationChanged(item: ConfigurationItem) throws -> Void {
+
+    public func configurationChanged(item: ConfigurationItem) throws -> Void {
         items[ScopeAndName(scope : item.scope, fqn : item.fqn)] = item
         
         let listenerData = listeners[item.fqn]
@@ -221,7 +221,7 @@ public class ConfigurationManager : NSObject, ConfigurationAdministration, Confi
     
     // ConfigurationProvider
     
-    public func addListener(namespace : String, key : String,  listener : ConfigurationListener , expectedType : Any.Type, scope : Scope = Scope.WILDCARD) -> Void {
+    public func addListener(namespace : String = "", key : String,  listener : ConfigurationListener , expectedType : Any.Type, scope : Scope = Scope.WILDCARD) -> Void {
         let fqn = FQN(namespace: namespace, key: key)
         
         if listeners[fqn] == nil {
@@ -231,16 +231,16 @@ public class ConfigurationManager : NSObject, ConfigurationAdministration, Confi
             listeners[fqn]!.append(ConfigurationListenerData(scope: scope, fqn: fqn, configurationListener: listener, expectedType: expectedType))
         }
     }
-    
-    func getConfigurationItem(namespace : String, key : String) -> ConfigurationItem? {
+
+    public func getConfigurationItem(namespace : String = "", key : String) -> ConfigurationItem? {
         return items[ScopeAndName(scope : scope, fqn: FQN(namespace: namespace, key: key))]
     }
 
-    func hasValue(namespace : String, key : String, scope : Scope? = nil) -> Bool {
+    public func hasValue(namespace : String = "", key : String, scope : Scope? = nil) -> Bool {
         return getEffectiveConfigurationItem(scope != nil ? scope! : self.scope, fqn: FQN(namespace: namespace, key: key)) != nil
     }
     
-    public func getValue(type : Any.Type, namespace : String, key : String, defaultValue: Any? = nil, scope : Scope? = nil) throws -> Any {
+    public func getValue(type : Any.Type, namespace : String = "", key : String, defaultValue: Any? = nil, scope : Scope? = nil) throws -> Any {
         let resultItem = getEffectiveConfigurationItem(scope != nil ? scope! : self.scope, fqn: FQN(namespace: namespace, key: key));
         
         if resultItem == nil {
@@ -268,8 +268,7 @@ public class ConfigurationManager : NSObject, ConfigurationAdministration, Confi
         }
     }
 
-
-    public func getValue<T>(type : T.Type, namespace : String, key : String, defaultValue: T? = nil, scope : Scope? = nil) throws -> T {
+    public func getValue<T>(type : T.Type, namespace : String = "", key : String, defaultValue: T? = nil, scope : Scope? = nil) throws -> T {
         let resultItem = getEffectiveConfigurationItem(scope != nil ? scope! : self.scope, fqn: FQN(namespace: namespace, key: key));
         
         if resultItem == nil {

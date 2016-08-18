@@ -5,6 +5,7 @@
 
 import Foundation
 
+/// Wrapper for `dispatch_semaphore_t`
 public class Semaphore {
     // MARK: instance data
 
@@ -12,6 +13,8 @@ public class Semaphore {
 
     // init
 
+    /// Create a new `Semaphore` given an initial count
+    /// - Parameter value: the initial value or 0
     init(value: Int = 0) {
         semaphore = dispatch_semaphore_create(value)
     }

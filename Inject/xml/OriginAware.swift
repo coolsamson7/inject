@@ -6,6 +6,8 @@
 //  Copyright © 2016 Andreas Ernst. All rights reserved.
 //
 
-protocol OriginAware {
+// classes implementing this protocol will be informed about line and column data of the corresponding xml element
+public protocol OriginAware {
+    /// line and column number
     var origin : Origin? { get set }
 }

@@ -6,6 +6,7 @@
 //  Copyright © 2016 Andreas Ernst. All rights reserved.
 //
 
+/// A `FQN` is a fully qualified name containing a namespace and a key
 public class FQN : Hashable, CustomStringConvertible {
     // MARK: instance data
     
@@ -14,7 +15,7 @@ public class FQN : Hashable, CustomStringConvertible {
     
     // class func
     
-    class func fromString(str : String) -> FQN {
+    public class func fromString(str : String) -> FQN {
         let colon  = str.rangeOfString(":", range: str.startIndex..<str.endIndex)
         if colon != nil {
             let namespace = str[str.startIndex..<colon!.startIndex]

@@ -6,6 +6,7 @@
 //  Copyright © 2016 Andreas Ernst. All rights reserved.
 //
 
+/// A `ConfigurationProvider` is able to retrieve configuration values
 protocol ConfigurationProvider {
     func getConfigurationItem(namespace : String, key : String) -> ConfigurationItem?
 

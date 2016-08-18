@@ -6,6 +6,7 @@
 //  Copyright © 2016 Andreas Ernst. All rights reserved.
 //
 
+/// A `ConfigurationItem` stores information about a configuration value ( name, source, type, e.g )
 public class ConfigurationItem {
     // MARK: instance data
     

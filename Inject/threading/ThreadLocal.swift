@@ -6,9 +6,11 @@
 //  Copyright © 2016 Andreas Ernst. All rights reserved.
 //
 
+/// a thread local for the specified dgeneric type
 public class ThreadLocal<T> {
     // MARK: types
-    
+
+    /// a generator function for initial values
     typealias Generator = () -> T
     
     // MARK: instance data
@@ -17,14 +19,18 @@ public class ThreadLocal<T> {
     var generator : Generator;
     
     // MARK: constructor
-    
+
+    // Create a new `ThreadLocal` given a generator for inital values
+    /// - Parameter generator : the generator
     init(generator : Generator) {
         self.generator = generator
         self.id =  NSUUID().UUIDString
     }
     
     // MARK: public
-    
+
+    /// Return the thread local value associated to the current thread. If no value is set, the generator will be called
+    /// Returns: the associated value
     public func get() -> T {
         let threadDictionary = NSThread.currentThread().threadDictionary;
         
@@ -39,11 +45,14 @@ public class ThreadLocal<T> {
             return value
         }
     }
-    
+
+    /// Set the thread lcoal to the specified value
+    /// - Parameter value: the new value
     public func set(value : T) -> Void {
         NSThread.currentThread().threadDictionary[id] = value as? AnyObject
     }
-    
+
+    /// remove any associated thread local
     public func remove() -> Void {
         NSThread.currentThread().threadDictionary.removeObjectForKey(id)
     }

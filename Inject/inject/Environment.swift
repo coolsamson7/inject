@@ -70,7 +70,7 @@ public class Environment: BeanFactory {
         
         // MARK: implement OriginAware
         
-        var origin : Origin? {
+        public var origin : Origin? {
             get {
                 return _origin
             }

@@ -6,6 +6,7 @@
 //  Copyright © 2016 Andreas Ernst. All rights reserved.
 //
 
+/// A configuration source based on the process info
 public class ProcessInfoConfigurationSource : AbstractConfigurationSource {
     // init
 
