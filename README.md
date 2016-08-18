@@ -9,12 +9,39 @@
   <img src="https://cloud.githubusercontent.com/assets/19403960/17474460/43a71bd6-5d56-11e6-9bcb-6d2aaa9ac466.png" width="40%">
 </p>
 
-I wanted to learn Swift so i decided to try something easy as a start:-)
-
 `Inject` is a dependency injection container for Swift that picks up the basic `Spring` ideas - as far as they are possible to be implemented due to missing reflection features - but in addition offers several configuration possibilities:
 * configuration with xml files
 * fluent interface depending on reflection features
 * fluent interface applying closure functions ( without the need for reflection anymore )
+
+In addition a number of other concepts are implemented
+* basic reflection and type introspection features 
+* configuration framework
+* logging framework
+* tracing framework
+* threading classes
+* xml parser
+* type conversion facilities
+
+But let's come back to the dependency container again :-)
+
+# Features
+
+Here is a summary of the supported features
+* full dependency management - and cycle detection - including `depends-on`, `ref`, embedded `<bean>`'s as property values, and injections
+* full typechecking with respect to property values
+* property injections ( only.. ) including automatic type conversions and number coercions ( for the fluent part )
+* injections resembling the spring `@Inject` autowiring mechanism
+* support for different scopes including `singleton`  and `protoype` as builtin flavors
+* support for lazy initialized beans
+* support for bean templates ( e.g. `parent="<id>"` )
+* lifecycle methods ( e.g. `postConstruct` )
+* `BeanPostProcessor`'s
+* `FactoryBean`'s
+* support for hierarchical containers, inheriting beans ( including the post processors, of course )
+* support for placeholder resolution ( e.g. `${property=<default>}`) referencing possible configuration values that are retrieved by different providers ( e.g. process info, plists, etc. )
+* support for custom namespace handlers that are much more easy to handle than in the spring world
+
 
 Let's look at an xml example first ( included in the repository )
 
@@ -231,6 +258,8 @@ As you see, the provided closure functions both create the object and set proper
 
 Even in this case there is a small prerequisite for the used classes since an internal type registry that collects structural infromation on all object needs to crate a prototype object in order to analzye the properties: The classes need to implement a protocol `Initializable` that simply declares a function `init()`.
 
+# Logging
+
 In addition to the injection container, a logging framework has been implemented - and integrated - as well.  
 
 Once the singleton is configured
@@ -262,30 +291,7 @@ Provided log destinations are
 
 The queueded log destination uses a dispatch queue. As a default a serial queue will be created whose purpose simply is to serialze the entries. In this case ´synchronize: false´ prevents that the console operations are synchronized with a Mutex
 
-# Features
 
-Here is a summary of the supported features
-* full dependency management - and cycle detection - including `depends-on`, `ref`, embedded `<bean>`'s as property values, and injections
-* full typechecking with respect to property values
-* property injections ( only.. ) including automatic type conversions and number coercions ( for the fluent part )
-* injections resembling the spring `@Inject` autowiring mechanism
-* support for different scopes including `singleton`  and `protoype` as builtin flavors
-* support for lazy initialized beans
-* support for bean templates ( e.g. `parent="<id>"` )
-* lifecycle methods ( e.g. `postConstruct` )
-* `BeanPostProcessor`'s
-* `FactoryBean`'s
-* support for hierarchical containers, inheriting beans ( including the post processors, of course )
-* support for placeholder resolution ( e.g. `${property=<default>}`) referencing possible configuration values that are retrieved by different providers ( e.g. process info, plists, etc. )
-* support for custom namespace handlers that are much more easy to handle than in the spring world
-
-In addition to the core implementation there are quite a number of classes that are interesting
-* additional containers ( identity set and map )
-* conversion factories
-* an easy to use xml parser
-* threading classes ( locks, conditions, futures, thread local, ... )
-* tracing classes
-* full blown logging framework
 
 ## Requirements
 
