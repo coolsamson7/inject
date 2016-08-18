@@ -28,33 +28,38 @@ public class BeanDescriptor : CustomStringConvertible {
     
     private static var beans = IdentityMap<AnyObject, BeanDescriptor>();
 
-    private static var SWIFT_OBJECT_CLASS : AnyClass = try! Classes.class4Name("SwiftObject")
-    
     // MARK: class methods
     
-    ///Return the
+    /// Return the appropriate bean descriptor for the specific class
     /// - Parameter clazz: the corresponding class
-    ///
     /// - Returns: the `BeanDescriptor` instance for the particular class
     public class func forClass(clazz: AnyClass) throws -> BeanDescriptor {
         if let bean = beans[clazz] {
             return bean;
         }
         else {
-            let bean = BeanDescriptor(clazz: clazz);
-            
-            beans[clazz] = bean;
-            
-            try bean.analyze()
-            
-            return bean;
+            return try BeanDescriptor(clazz: clazz)
         }
     }
-    
+
+    /// Return the appropriate bean descriptor for the specific class name
+    /// - Parameter clazz: the corresponding class name
+    /// - Returns: the `BeanDescriptor` instance for the particular class
     public class func forClass(clazz: String) throws -> BeanDescriptor {
         return try forClass(try Classes.class4Name(clazz))
     }
-    
+
+    // internal
+
+    private func createInstance4(clazz : AnyClass) throws -> AnyObject {
+        if let initializable = clazz as? Initializable.Type {
+            return initializable.init()
+        }
+        else {
+            throw EnvironmentErrors.Exception(message: "cannot create a \(Classes.className(clazz))")
+        }
+    }
+
     // MARK: inner classes
     
     public class PropertyDescriptor : CustomStringConvertible {
@@ -88,6 +93,10 @@ public class BeanDescriptor : CustomStringConvertible {
         
         public func getPropertyType() -> Any.Type {
             return type;
+        }
+
+        public func isOptional() -> Bool {
+            return optional
         }
 
         public func getBean() -> BeanDescriptor {
@@ -243,62 +252,66 @@ public class BeanDescriptor : CustomStringConvertible {
     
     // MARK: constructor
     
-    init(clazz: AnyClass) {
+    init(clazz: AnyClass) throws {
         self.clazz = clazz
+
+        // register
+
+        BeanDescriptor.beans[clazz] = self
+
+        // and analyze
+
+        let instance = try createInstance4(clazz)
+
+        try analyze(Mirror(reflecting: instance), instance: instance)
+    }
+
+    init(instance: AnyObject, mirror : Mirror? = nil) throws {
+        let _mirror = mirror != nil ? mirror! : Mirror(reflecting: instance)
+
+        self.clazz = _mirror.subjectType as! AnyClass
+
+        print(self.clazz)
+
+        // register
+
+        BeanDescriptor.beans[clazz] = self
+
+        // and analyze
+
+        try analyze(_mirror, instance: instance)
     }
     
     // private
-
-    func analyzeProperty(name : String, value: Any, index : Int, overallIndex : Int) -> AttributeDescriptor {
-        let mirror : Mirror  = Mirror(reflecting: value)
-        var type = mirror.subjectType
-        var optional = false
-        var elementType : Any.Type? = nil
-        var factory : Factory = {fatalError("no factory implemented")}
-        
-        // what the hell?
-
-        if let optionalType = value as? OptionalType {
-            type = optionalType.wrappedType()
-            optional = true
-        }
-
-        if let array = value as? ArrayType {
-            elementType = array.elementType()
-            factory = array.factory()
-        }
-        
-        return AttributeDescriptor(bean: self, name: name, index: index, overallIndex: overallIndex, type: type, elementType: elementType, factory: factory, optional: optional)
-    }
     
-    private func analyze() throws {
-        // check superclass
-        
-        if let superClass = clazz.superclass() {
-            if superClass != NSObject.self &&  superClass != BeanDescriptor.SWIFT_OBJECT_CLASS {
-                superBean = try BeanDescriptor.forClass(superClass)
-                
+    private func analyze(mirror : Mirror, instance : AnyObject) throws {
+        // check super mirror
+
+        if let superMirror = mirror.superclassMirror() {
+            if let superClass = superMirror.subjectType as? AnyClass {
+                superBean = BeanDescriptor.beans[superClass] != nil ?  BeanDescriptor.beans[superClass]  : try BeanDescriptor(instance: instance, mirror: superMirror)
+
                 superBean!.directSubBeans.append(self)
-                
+
                 // add inherited properties
-                
+
                 for property in superBean!.allProperties {
                     allProperties.append(property)
-                    
+
                     properties[property.name] = property;
                 }
             }
+            else {
+                // hmmm....what could this be?
+            }
         }
-        
+
+        // local stuff
+
         var startIndex = properties.count
 
-        // create a sample instance
+        // analyze properties
 
-        let instance  = try create();
-
-        // and check the mirror...
-
-        let mirror = Mirror(reflecting: instance)
         if let displayStyle = mirror.displayStyle {
             if displayStyle == .Class {
                 // analyze properties
@@ -325,13 +338,43 @@ public class BeanDescriptor : CustomStringConvertible {
             classInitializer.initializeClass()
         }
 
-        //print(self)
+        print(self)
     }
-    
+
+    private func analyzeProperty(name : String, value: Any, index : Int, overallIndex : Int) -> AttributeDescriptor {
+        let mirror : Mirror  = Mirror(reflecting: value)
+        var type = mirror.subjectType
+        var optional = false
+        var elementType : Any.Type? = nil
+        var factory : Factory = {fatalError("no factory implemented")}
+
+        // what the hell?
+
+        if let optionalType = value as? OptionalType {
+            type = optionalType.wrappedType()
+            optional = true
+        }
+
+        if let array = value as? ArrayType {
+            elementType = array.elementType()
+            factory = array.factory()
+        }
+
+        return AttributeDescriptor(bean: self, name: name, index: index, overallIndex: overallIndex, type: type, elementType: elementType, factory: factory, optional: optional)
+    }
+
     // MARK: public
     
     public func getBeanClass() -> AnyClass {
         return clazz
+    }
+
+    public func getSuperBean() -> BeanDescriptor? {
+        return superBean
+    }
+
+    public func getSubBeans() -> [BeanDescriptor] {
+        return directSubBeans
     }
     
     public func create() throws -> AnyObject {
