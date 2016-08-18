@@ -30,7 +30,7 @@ public class AbstractConfigurationSource : NSObject, ConfigurationSource, Bean, 
     
     // class Initializer
     
-    func initializeClass() {
+    public func initializeClass() {
         try! BeanDescriptor.forClass(AbstractConfigurationSource.self).getProperty("configurationManager").autowire()
     }
     

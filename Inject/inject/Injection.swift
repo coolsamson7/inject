@@ -31,7 +31,7 @@ public class Injection : NSObject, Bean, ClassInitializer {
     
     // class Initializer
     
-    func initializeClass() {
+    public func initializeClass() {
         try! BeanDescriptor.forClass(Injection.self).getProperty("injector").autowire()
     }
     
