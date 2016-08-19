@@ -125,6 +125,7 @@ public class Environment: BeanFactory {
             }
         }
 
+        var implements = [Any.Type]()
         var target: AnyClass?
         var properties = [PropertyDeclaration]()
 
@@ -288,12 +289,23 @@ public class Environment: BeanFactory {
             return self
         }
 
+        /// add a new property
+        /// - Parameter property : a `PropertyDeclaration`
+        /// - Returns: self
         public func property(property: PropertyDeclaration) -> Self {
             properties.append(property)
 
             return self
         }
-        
+
+        // specifies that the corresponding instance implements a number of types
+
+        public func implements(types : Any.Type...) throws -> Self {
+            self.implements = types
+
+            return self
+        }
+
         // MARK: internal
 
         func report(builder : StringBuilder) {
@@ -457,6 +469,10 @@ public class Environment: BeanFactory {
                 else {
                     // create manually with instance avoiding the generic init call
                     _bean = try BeanDescriptor(instance: result)
+                }
+
+                for prot in implements {
+                    try _bean!.implements(prot)
                 }
             }
 
@@ -1616,8 +1632,8 @@ public class Environment: BeanFactory {
         return declaration!
     }
 
-    public func getBeanDeclarationsByType(clazz : AnyClass) -> [Environment.BeanDeclaration] {
-        return getBeanDeclarationsByType(try! BeanDescriptor.forClass(clazz))
+    public func getBeanDeclarationsByType(type : Any.Type) -> [Environment.BeanDeclaration] {
+        return getBeanDeclarationsByType(try! BeanDescriptor.forType(type))
     }
 
     public func getBeanDeclarationsByType(bean : BeanDescriptor) -> [Environment.BeanDeclaration] {
@@ -1665,12 +1681,12 @@ public class Environment: BeanFactory {
     }
 
     /// return an array of all bean instances of a given type
-    /// - Parameter clazz: the bean class
+    /// - Parameter type: the bean type
     /// - Returns: the array of instances
     /// - Throws: any errors
 
-    public func getBeansByType(clazz : AnyClass) throws -> [AnyObject] {
-        let declarations = getBeanDeclarationsByType(clazz)
+    public func getBeansByType(type : Any.Type) throws -> [AnyObject] {
+        let declarations = getBeanDeclarationsByType(type)
         var result : [AnyObject] = []
         for declaration in declarations {
             if !declaration.abstract {

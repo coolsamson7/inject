@@ -345,7 +345,7 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
         // implement Accessor
 
         override public func getName() -> String {
-            return "\(property?.bean.clazz).\(property)"
+            return "\(property?.bean.type).\(property)"
         }
 
         public override func getIndex() -> Int {

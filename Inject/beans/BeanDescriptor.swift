@@ -30,6 +30,18 @@ public class BeanDescriptor : CustomStringConvertible {
         }
     }
 
+    /// Return the appropriate bean descriptor for the specific type
+    /// - Parameter type: the type
+    /// - Returns: the `BeanDescriptor` instance for the particular class
+    public class func forType(type: Any.Type) throws -> BeanDescriptor {
+        if let bean = beans[ObjectIdentifier(type)] {
+            return bean
+        }
+        else {
+            return try BeanDescriptor(type: type)
+        }
+    }
+
     /// Return the appropriate bean descriptor for the specific class name
     /// - Parameter clazz: the corresponding class name
     /// - Returns: the `BeanDescriptor` instance for the particular class
@@ -243,7 +255,8 @@ public class BeanDescriptor : CustomStringConvertible {
     internal var ownProperties: [PropertyDescriptor]! = [PropertyDescriptor]()
     internal var properties: [String:PropertyDescriptor]! = [String: PropertyDescriptor]()
     internal var directSubBeans = [BeanDescriptor]()
-    
+    internal var protocols = [BeanDescriptor]()
+
     // MARK: constructor
     
     init(type: Any.Type) throws {
@@ -416,6 +429,32 @@ public class BeanDescriptor : CustomStringConvertible {
     
     public func findProperty(name: String) -> PropertyDescriptor? {
         return properties[name]
+    }
+
+    public func implementedBy(bean : BeanDescriptor) -> Self {
+        if !directSubBeans.contains({$0 === bean}) {
+            directSubBeans.append(bean)
+        } // if
+
+        return self
+    }
+
+    public func implements(types : Any.Type...) throws -> Self {
+        for type in types {
+            if let clazz = type as? AnyClass {
+                throw BeanDescriptorErrors.Exception(message: "implements expects a protocol, got a class \(type)")
+            }
+
+            let protocolDescriptor = try! BeanDescriptor.forType(type)
+
+            if !protocols.contains({$0 === protocolDescriptor}) {
+                protocols.append(protocolDescriptor) // local only
+
+                protocolDescriptor.implementedBy(self)
+            } // if
+        }
+
+        return self
     }
     
     // subscript

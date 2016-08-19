@@ -234,7 +234,7 @@ class SampleTest: XCTestCase {
         // implement BeanDescriptorInitializer
 
         func initializeBeanDescriptor(beanDescriptor : BeanDescriptor) {
-            //TODO FOO beanDescriptor.implements(SwiftProtocol.self)
+            //try! beanDescriptor.implements(SwiftProtocol.self)
         }
     }
 
@@ -261,7 +261,7 @@ class SampleTest: XCTestCase {
             swift.other = try environment.getBean(AnotherSwift.self)
 
             return swift
-        }).requires(class: AnotherSwift.self))
+        }).requires(class: AnotherSwift.self).implements(SwiftProtocol.self))
 
         .define(environment.bean(AnotherSwift.self, factory: AnotherSwift.init)/*{
             let swift = AnotherSwift()
@@ -275,5 +275,7 @@ class SampleTest: XCTestCase {
         // fetch
 
         let swift = try! environment.getBean(Swift.self)
+
+       let xxx =  try! environment.getBeansByType(SwiftProtocol.self)
     }
 }

@@ -61,12 +61,12 @@ public class Injector : NSObject {
     func inject(target : AnyObject, context: Environment) throws -> Void  {
         let bean = try BeanDescriptor.forClass(target.dynamicType)
         
-        if let classInjections = cachedInjections[bean.clazz] {
+        if let classInjections = cachedInjections[bean.getClass()] {
             try classInjections.inject(target, context: context);
         }
         else {
             let classInjections = ClassInjections(injector: self, bean:bean)
-            cachedInjections[bean.clazz] = classInjections
+            cachedInjections[bean.getClass()] = classInjections
             
             try classInjections.inject(target, context: context)
         }
