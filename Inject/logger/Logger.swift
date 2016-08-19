@@ -198,21 +198,22 @@ public class LogManager {
 
     /// A `Log` is an endpoint that will store log entries ( e.g. console, file, etc. )
     public class Log {
+        // MARK: static data
+
+        static var defaultFormatter : LogFormatter = LogFormatter.timestamp() + " [" + LogFormatter.logger() + "] " + LogFormatter.level() + " - " + LogFormatter.message()
+
         // MARK: instance data
 
+        var colorize : Bool
         var name : String
         var formatter : LogFormatter
 
         // MARK: init
 
-        init(name : String) {
+        init(name : String, formatter : LogFormatter? = nil, colorize : Bool = false) {
             self.name = name
-            self.formatter = LogFormatter.timestamp() + " [" + LogFormatter.logger() + "] " + LogFormatter.level() + " - " + LogFormatter.message()
-        }
-
-        init(name : String, formatter : LogFormatter) {
-            self.name = name
-            self.formatter = formatter
+            self.colorize = colorize
+            self.formatter = formatter != nil ? formatter! : Log.defaultFormatter
         }
 
         // MARK: public
@@ -221,7 +222,13 @@ public class LogManager {
         /// - Parameter entry: the log entry
         /// - Returns: the formatted entry
         public func format(entry : LogManager.LogEntry) -> String {
-            return formatter.format(entry)
+            var result : String = formatter.format(entry)
+
+            if colorize {
+                result = LogFormatter.colorize(result, level: entry.level)
+            }
+
+            return result
         }
 
         // MARK: abstract

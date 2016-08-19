@@ -6,7 +6,7 @@
 //  Copyright © 2016 Andreas Ernst. All rights reserved.
 //
 
-/// Thos log simply calls 'print()'
+/// This log simply calls 'print()'
 public class ConsoleLog: LogManager.Log {
     // MARK: init
 
@@ -17,25 +17,14 @@ public class ConsoleLog: LogManager.Log {
     /// Create a new `ConsoleLog`
     /// - Parameter name: the log nam
     /// - Parameter formatter: the corresponding formatter
+    /// - Parameter colorize: if `true`, the log entry weill be colorized
     /// - Parameter synchronize: if `true` the write operations is synchronized
-    init(name : String, formatter: LogFormatter, synchronize : Bool = true) {
+    init(name : String, formatter: LogFormatter? = nil, synchronize : Bool = true, colorize : Bool = false) {
         if synchronize {
             mutex = Mutex()
         }
 
-        super.init(name: name, formatter: formatter)
-    }
-
-    /// Create a new `ConsoleLog` with the default format
-    /// - Parameter name: the log nam
-    /// - Parameter formatter: the corresponding formatter
-    /// - Parameter synchronize: if `true` the write operations is synchronized
-    init(name : String, synchronize : Bool = true) {
-        if synchronize {
-            mutex = Mutex()
-        }
-
-        super.init(name: name)
+        super.init(name: name, formatter: formatter, colorize: colorize)
     }
 
     // MARK: override Destination
@@ -43,7 +32,7 @@ public class ConsoleLog: LogManager.Log {
     override func log(entry : LogManager.LogEntry) -> Void {
         if let mutex = self.mutex {
             mutex.synchronized {
-                print(LogFormatter.colorize(self.format(entry), level: entry.level))
+                print(self.format(entry))
             }
         }
         else {

@@ -43,7 +43,7 @@ class Foo : NSObject, Bean, BeanDescriptorInitializer {
         // funny code here
     }
 
-    // ClassInitializer
+    // implement BeanDescriptorInitializer
 
     func initializeBeanDescriptor(beanDescriptor : BeanDescriptor) {
         beanDescriptor["bar"].inject(InjectBean())

@@ -14,20 +14,12 @@ public class NSLogLog: LogManager.Log {
 
     // MARK: init
 
-    init(name : String, formatter: LogFormatter, synchronize : Bool = true) {
+    init(name : String, formatter: LogFormatter? = nil, synchronize : Bool = true, colorize : Bool = false) {
         if synchronize {
             mutex = Mutex()
         }
 
-        super.init(name: name, formatter: formatter)
-    }
-
-    init(name : String, synchronize : Bool = true) {
-        if synchronize {
-            mutex = Mutex()
-        }
-
-        super.init(name: name)
+        super.init(name: name, formatter: formatter, colorize: colorize)
     }
 
     // MARK: override Destination

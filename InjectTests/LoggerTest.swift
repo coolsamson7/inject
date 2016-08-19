@@ -22,7 +22,7 @@ class LoggerTests: XCTestCase {
         init(name : String, formatter: LogFormatter, callback: (LogManager.LogEntry) -> Void) {
             self.callback = callback
 
-            super.init(name: name, formatter: formatter)
+            super.init(name: name, formatter: formatter, colorize: false)
         }
 
         // MARK: override Destination

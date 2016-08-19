@@ -341,19 +341,25 @@ public class BeanDescriptor : CustomStringConvertible {
         }
     }
 
+    private class func missingFactory() -> Any {
+        fatalError("no factory implemented")
+    }
+
     private func analyzeProperty(name : String, value: Any, index : Int, overallIndex : Int) -> AttributeDescriptor {
         let mirror : Mirror  = Mirror(reflecting: value)
         var type = mirror.subjectType
         var optional = false
         var elementType : Any.Type? = nil
-        var factory : Factory = {fatalError("no factory implemented")}
+        var factory : Factory = BeanDescriptor.missingFactory
 
-        // what the hell?
+        // unwrap optional type
 
         if let optionalType = value as? OptionalType {
             type = optionalType.wrappedType()
             optional = true
         }
+
+        // extract array type
 
         if let array = value as? ArrayType {
             elementType = array.elementType()

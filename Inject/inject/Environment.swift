@@ -1351,10 +1351,10 @@ public class Environment: BeanFactory {
                 inheritFrom(parent!)
             }
 
-            Environment.LOGGER.info("refresh environment \(name)")
+            Environment.LOGGER.info("startup environment \(name)")
 
             if (Tracer.ENABLED) {
-                Tracer.trace("inject.runtime", level: .HIGH, message: "refresh \(name)")
+                Tracer.trace("inject.runtime", level: .HIGH, message: "startup \(name)")
             }
 
             // load

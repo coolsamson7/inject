@@ -6,7 +6,7 @@
 //  Copyright © 2016 Andreas Ernst. All rights reserved.
 //
 
-/// A `FileLog` logs entriues in a file
+/// A `FileLog` logs entries in a file
 public class FileLog: LogManager.Log {
     // MARK: init
 
@@ -20,26 +20,12 @@ public class FileLog: LogManager.Log {
     /// - Parameter fileName: the file name
     /// - Parameter formatter: the corresponding formatter
     /// - Parameter synchronize: if `true` the write operations is synchronized
-    init(name : String, fileName : String, formatter: LogFormatter, synchronize : Bool = true) throws {
+    init(name : String, fileName : String, formatter: LogFormatter? = nil, synchronize : Bool = true, colorize : Bool = false) throws {
         if synchronize {
             mutex = Mutex()
         }
 
-        super.init(name: name, formatter: formatter)
-
-        fileHandle = try openFile(fileName)
-    }
-
-    /// Create a new `FileLog` with the defautl format
-    /// - Parameter name: the log nam
-    /// - Parameter fileName: the file name
-    /// - Parameter synchronize: if `true` the write operations is synchronized
-    init(name : String, fileName : String, synchronize : Bool = true) throws {
-        if synchronize {
-            mutex = Mutex()
-        }
-
-        super.init(name: name, formatter: LogFormatter.timestamp() + " [" + LogFormatter.logger() + "] " + LogFormatter.level() + " - " + LogFormatter.message())
+        super.init(name: name, formatter: formatter, colorize: colorize)
 
         fileHandle = try openFile(fileName)
     }

@@ -252,7 +252,7 @@ class BeanFactoryTests: XCTestCase {
 
         XCTAssert(bar.age == 0)
 
-        let foo = try! child.getBean(FooBean.self, byId: "foo")
+        _ = try! child.getBean(FooBean.self, byId: "foo")
 
         //XCTAssert(bar.age == 4711)
     }

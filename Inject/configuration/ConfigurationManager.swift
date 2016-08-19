@@ -6,7 +6,7 @@
 //  Copyright © 2016 Andreas Ernst. All rights reserved.
 //
 
-/// central class that collects `ConfigurationSource`'s and is able to retieve configuration values.
+/// central class that collects `ConfigurationSource`'s and is able to retrieve configuration values.
 public class ConfigurationManager : NSObject, ConfigurationAdministration, ConfigurationProvider {
     // local class
     

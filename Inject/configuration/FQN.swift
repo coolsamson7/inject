@@ -13,7 +13,7 @@ public class FQN : Hashable, CustomStringConvertible {
     var namespace : String
     var key : String
     
-    // class func
+    // MARK: class func
     
     public class func fromString(str : String) -> FQN {
         let colon  = str.rangeOfString(":", range: str.startIndex..<str.endIndex)
@@ -28,9 +28,9 @@ public class FQN : Hashable, CustomStringConvertible {
         }
     }
     
-    // init
+    // MARK: init
     
-    init(namespace : String, key : String) {
+    init(namespace : String = "", key : String) {
         self.namespace = namespace;
         self.key = key
     }
@@ -43,7 +43,7 @@ public class FQN : Hashable, CustomStringConvertible {
         }
     }
     
-    // CustomStringConvertible
+    // MARK: implement CustomStringConvertible
     
     public var description: String {
         return "[namespace: \"\(namespace)\", key: \"\(key)\"]"

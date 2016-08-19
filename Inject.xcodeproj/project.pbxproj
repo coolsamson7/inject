@@ -48,7 +48,7 @@
 		B09233311D3CEFC1008267A2 /* IdentityMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = B09233301D3CEFC1008267A2 /* IdentityMap.swift */; };
 		B09233361D3CF0DF008267A2 /* Tracer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B09233351D3CF0DF008267A2 /* Tracer.swift */; };
 		B092333B1D3CF132008267A2 /* BeanDescriptorErrors.swift in Sources */ = {isa = PBXBuildFile; fileRef = B09233371D3CF132008267A2 /* BeanDescriptorErrors.swift */; };
-		B092333C1D3CF132008267A2 /* ClassInitializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B09233381D3CF132008267A2 /* ClassInitializer.swift */; };
+		B092333C1D3CF132008267A2 /* BeanDescriptorInitializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B09233381D3CF132008267A2 /* BeanDescriptorInitializer.swift */; };
 		B092333D1D3CF132008267A2 /* Inject.swift in Sources */ = {isa = PBXBuildFile; fileRef = B09233391D3CF132008267A2 /* Inject.swift */; };
 		B092333E1D3CF132008267A2 /* InjectBean.swift in Sources */ = {isa = PBXBuildFile; fileRef = B092333A1D3CF132008267A2 /* InjectBean.swift */; };
 		B09233401D3CF15E008267A2 /* StringBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = B092333F1D3CF15E008267A2 /* StringBuilder.swift */; };
@@ -155,7 +155,7 @@
 		B09233301D3CEFC1008267A2 /* IdentityMap.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IdentityMap.swift; sourceTree = "<group>"; };
 		B09233351D3CF0DF008267A2 /* Tracer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Tracer.swift; sourceTree = "<group>"; };
 		B09233371D3CF132008267A2 /* BeanDescriptorErrors.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BeanDescriptorErrors.swift; sourceTree = "<group>"; };
-		B09233381D3CF132008267A2 /* ClassInitializer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClassInitializer.swift; sourceTree = "<group>"; };
+		B09233381D3CF132008267A2 /* BeanDescriptorInitializer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BeanDescriptorInitializer.swift; sourceTree = "<group>"; };
 		B09233391D3CF132008267A2 /* Inject.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Inject.swift; sourceTree = "<group>"; };
 		B092333A1D3CF132008267A2 /* InjectBean.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InjectBean.swift; sourceTree = "<group>"; };
 		B092333F1D3CF15E008267A2 /* StringBuilder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StringBuilder.swift; sourceTree = "<group>"; };
@@ -279,7 +279,7 @@
 			isa = PBXGroup;
 			children = (
 				B09233371D3CF132008267A2 /* BeanDescriptorErrors.swift */,
-				B09233381D3CF132008267A2 /* ClassInitializer.swift */,
+				B09233381D3CF132008267A2 /* BeanDescriptorInitializer.swift */,
 				B09233391D3CF132008267A2 /* Inject.swift */,
 				B092333A1D3CF132008267A2 /* InjectBean.swift */,
 				B092332D1D3CEF8A008267A2 /* BeanDescriptor.swift */,
@@ -630,7 +630,7 @@
 				B09233361D3CF0DF008267A2 /* Tracer.swift in Sources */,
 				B09233441D3CFC41008267A2 /* Box.swift in Sources */,
 				B09233401D3CF15E008267A2 /* StringBuilder.swift in Sources */,
-				B092333C1D3CF132008267A2 /* ClassInitializer.swift in Sources */,
+				B092333C1D3CF132008267A2 /* BeanDescriptorInitializer.swift in Sources */,
 				B09233311D3CEFC1008267A2 /* IdentityMap.swift in Sources */,
 				B09233631D3CFDA5008267A2 /* ConfigurationItem.swift in Sources */,
 				B0CB43161D3CEEC20038DF3B /* String.extension.swift in Sources */,
