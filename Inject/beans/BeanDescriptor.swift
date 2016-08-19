@@ -9,12 +9,12 @@
 import Foundation
 
 /// `BeanDescriptor` stores information on the internal structure of classes, covering
-/// - super- and subclasses
-/// - properties including their types
+/// * super- and subclasses
+/// * properties including their types
 public class BeanDescriptor : CustomStringConvertible {
     // MARK: static data
     
-    private static var beans = IdentityMap<AnyObject, BeanDescriptor>();
+    private static var beans = [ObjectIdentifier:BeanDescriptor]()
 
     // MARK: class functions
     
@@ -22,11 +22,11 @@ public class BeanDescriptor : CustomStringConvertible {
     /// - Parameter clazz: the corresponding class
     /// - Returns: the `BeanDescriptor` instance for the particular class
     public class func forClass(clazz: AnyClass) throws -> BeanDescriptor {
-        if let bean = beans[clazz] {
+        if let bean = beans[ObjectIdentifier(clazz)] {
             return bean
         }
         else {
-            return try BeanDescriptor(clazz: clazz)
+            return try BeanDescriptor(type: clazz)
         }
     }
 
@@ -39,8 +39,8 @@ public class BeanDescriptor : CustomStringConvertible {
 
     // MARK: internal class functions
 
-    public class func findBeanDescriptor(clazz: AnyClass) -> BeanDescriptor? {
-        return beans[clazz]
+    public class func findBeanDescriptor(type: Any.Type) -> BeanDescriptor? {
+        return beans[ObjectIdentifier(type)]
     }
 
     // internal
@@ -215,7 +215,8 @@ public class BeanDescriptor : CustomStringConvertible {
             super.init(bean: bean, name: name, index: index, overallIndex: overallIndex, type: type, elementType: elementType, factory: factory, optional: optional);
         }
     }
-    
+
+    /// currently not used...
     public class RelationDescriptor : PropertyDescriptor {
         // MARK: instance data
         
@@ -232,36 +233,37 @@ public class BeanDescriptor : CustomStringConvertible {
         override public func isAttribute() -> Bool {
             return false;
         }
-        
     }
     
     // MARK: instance data
     
-    internal var clazz: AnyClass;
-    internal var superBean: BeanDescriptor?;
-    internal var allProperties: [PropertyDescriptor]! = [PropertyDescriptor]();
-    internal var ownProperties: [PropertyDescriptor]! = [PropertyDescriptor]();
-    internal var properties: [String:PropertyDescriptor]! = [String: PropertyDescriptor]();
+    internal var type : Any.Type
+    internal var superBean: BeanDescriptor?
+    internal var allProperties: [PropertyDescriptor]! = [PropertyDescriptor]()
+    internal var ownProperties: [PropertyDescriptor]! = [PropertyDescriptor]()
+    internal var properties: [String:PropertyDescriptor]! = [String: PropertyDescriptor]()
     internal var directSubBeans = [BeanDescriptor]()
     
     // MARK: constructor
     
-    init(clazz: AnyClass) throws {
-        self.clazz = clazz
+    init(type: Any.Type) throws {
+        self.type = type
 
         if (Tracer.ENABLED) {
-            Tracer.trace("inject.beans", level: .HIGH, message: "create descriptor for \(clazz)")
+            Tracer.trace("inject.beans", level: .HIGH, message: "create descriptor for \(type)")
         }
 
         // register
 
-        BeanDescriptor.beans[clazz] = self
+        BeanDescriptor.beans[ObjectIdentifier(type)] = self
 
         // and analyze
 
-        let instance = try createInstance4(clazz)
+        if let clazz = type as? AnyClass {
+            let instance = try createInstance4(clazz)
 
-        try analyze(Mirror(reflecting: instance), instance: instance)
+            try analyze(Mirror(reflecting: instance), instance: instance)
+        }
     }
 
     init(instance: AnyObject, mirror : Mirror? = nil) throws {
@@ -271,11 +273,11 @@ public class BeanDescriptor : CustomStringConvertible {
 
         let _mirror = mirror != nil ? mirror! : Mirror(reflecting: instance)
 
-        self.clazz = _mirror.subjectType as! AnyClass
+        self.type = _mirror.subjectType
 
         // register
 
-        BeanDescriptor.beans[clazz] = self
+        BeanDescriptor.beans[ObjectIdentifier(type)] = self
 
         // and analyze
 
@@ -289,7 +291,7 @@ public class BeanDescriptor : CustomStringConvertible {
 
         if let superMirror = mirror.superclassMirror() {
             if let superClass = superMirror.subjectType as? AnyClass {
-                superBean = BeanDescriptor.beans[superClass] != nil ?  BeanDescriptor.beans[superClass]  : try BeanDescriptor(instance: instance, mirror: superMirror)
+                superBean = BeanDescriptor.beans[ObjectIdentifier(superClass)] != nil ?  BeanDescriptor.beans[ObjectIdentifier(superClass)]  : try BeanDescriptor(instance: instance, mirror: superMirror)
 
                 superBean!.directSubBeans.append(self)
 
@@ -335,7 +337,7 @@ public class BeanDescriptor : CustomStringConvertible {
         // ( and i am obviously too stupid to call a class func :-) )
 
         if let beanDescriptorInitializer = instance as? BeanDescriptorInitializer {
-            if instance.dynamicType == self.clazz {
+            if instance.dynamicType == self.type {
                 beanDescriptorInitializer.initializeBeanDescriptor(self)
             }
         }
@@ -371,8 +373,16 @@ public class BeanDescriptor : CustomStringConvertible {
 
     // MARK: public
     
-    public func getBeanClass() -> AnyClass {
-        return clazz
+    public func getType() -> Any.Type {
+        return type
+    }
+
+    public func isClass() -> Bool {
+        return type is AnyClass
+    }
+
+    public func getClass() -> AnyClass {
+        return type as! AnyClass
     }
 
     public func getSuperBean() -> BeanDescriptor? {
@@ -384,11 +394,11 @@ public class BeanDescriptor : CustomStringConvertible {
     }
     
     public func create() throws -> AnyObject {
-        if let initializable = clazz as? Initializable.Type {
+        if let initializable = type as? Initializable.Type {
             return initializable.init()
         }
         else {
-            throw BeanDescriptorErrors.Exception(message: "cannot create a \(Classes.className(clazz))")
+            throw BeanDescriptorErrors.Exception(message: "cannot create a \(type)")
         }
     }
     
@@ -399,7 +409,7 @@ public class BeanDescriptor : CustomStringConvertible {
     public func getProperty(name: String) throws -> PropertyDescriptor {
         let property =  properties[name]
         if property == nil {
-            throw BeanDescriptorErrors.UnknownProperty(message: "unknown property \(clazz).\(name)")
+            throw BeanDescriptorErrors.UnknownProperty(message: "unknown property \(type).\(name)")
         }
         return property!
     }
@@ -422,10 +432,10 @@ public class BeanDescriptor : CustomStringConvertible {
         get {
             let builder = StringBuilder()
             
-            builder.append("bean(\(clazz)) {\n")
+            builder.append("bean(\(type)) {\n")
             
             for property in allProperties {
-                builder.append("\t\(property.bean.clazz).\(property.name): \(property.type)")
+                builder.append("\t\(property.bean.type).\(property.name): \(property.type)")
                 if property.optional {
                     builder.append("?")
                 }

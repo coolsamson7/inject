@@ -12,13 +12,13 @@ public class ObjectIdentityKey: Hashable {
     // MARK: instance data
     
     private var object: AnyObject
-    private var hash: Int;
+    private var hash: Int
     
     // init
     
     init(object: AnyObject) {
-        self.object = object;
-        self.hash = unsafeAddressOf(object).hashValue;
+        self.object = object
+        self.hash = unsafeAddressOf(object).hashValue
     }
     
     // Hashable
@@ -31,14 +31,13 @@ public class ObjectIdentityKey: Hashable {
 }
 
 public func ==(lhs: ObjectIdentityKey, rhs: ObjectIdentityKey) -> Bool {
-    return lhs.object === rhs.object;
+    return lhs.object === rhs.object
 }
 
 public class IdentitySet<T:AnyObject> {
-    // local classes
     // MARK: instance data
     
-    private var set = Set<ObjectIdentityKey>();
+    private var set = Set<ObjectIdentityKey>()
     
     // MARK: public
     
@@ -54,7 +53,7 @@ public class IdentitySet<T:AnyObject> {
 public class IdentityMap<K:AnyObject, V:AnyObject> {
     // MARK: instance data
     
-    private var map = [ObjectIdentityKey: V]();
+    private var map = [ObjectIdentityKey: V]()
     
     // MARK: public
     

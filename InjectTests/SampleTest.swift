@@ -126,6 +126,9 @@ class Bazong : NSObject {
     }
 }
 
+protocol SwiftProtocol {
+}
+
 class SampleTest: XCTestCase {
     override class func setUp() {
         Classes.setDefaultBundle(SampleTest.self)
@@ -217,7 +220,8 @@ class SampleTest: XCTestCase {
        var baz = try! environment.getBean(Baz.self)
     }
 
-    class Swift : Initializable {
+
+    class Swift : SwiftProtocol, Initializable, BeanDescriptorInitializer {
         var name : String?
         var number : Int = 0
         var other : AnotherSwift?
@@ -225,6 +229,12 @@ class SampleTest: XCTestCase {
         // Initializable
 
         required init() {
+        }
+
+        // implement BeanDescriptorInitializer
+
+        func initializeBeanDescriptor(beanDescriptor : BeanDescriptor) {
+            //TODO FOO beanDescriptor.implements(SwiftProtocol.self)
         }
     }
 
@@ -253,13 +263,14 @@ class SampleTest: XCTestCase {
             return swift
         }).requires(class: AnotherSwift.self))
 
-        .define(environment.bean(AnotherSwift.self, factory: AnotherSwift.init/*{
+        .define(environment.bean(AnotherSwift.self, factory: AnotherSwift.init)/*{
             let swift = AnotherSwift()
 
             swift.name = "other swift"
 
             return swift
-        }*/))
+        }*/
+                )
 
         // fetch
 

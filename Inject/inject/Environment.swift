@@ -1268,7 +1268,7 @@ public class Environment: BeanFactory {
     var parent : Environment? = nil
     var injector : Injector
     var configurationManager : ConfigurationManager
-    var byType = IdentityMap<AnyObject,ArrayOf<BeanDeclaration>>()
+    var byType = [ObjectIdentifier : ArrayOf<BeanDeclaration>]()
     var byId = [String : BeanDeclaration]()
     var postProcessors = [BeanPostProcessor]()
     var scopes = [String:BeanScope]()
@@ -1396,7 +1396,7 @@ public class Environment: BeanFactory {
         return result
     }
 
-    /// create a `BeanDeclaration
+    /// create a `BeanDeclaration`
     /// - Parameter className: the name of the bean class
     /// - Parameter id: an optional id
     /// - Parameter lazy: the lazy attribute. default is `false`
@@ -1417,7 +1417,7 @@ public class Environment: BeanFactory {
         return result
     }
 
-    /// create a `BeanDeclaration
+    /// create a `BeanDeclaration`
     /// - Parameter clazz: the bean class
     /// - Parameter id: an optional id
     /// - Parameter lazy: the lazy attribute. default is `false`
@@ -1497,11 +1497,6 @@ public class Environment: BeanFactory {
 
         self.postProcessors = parent.postProcessors
 
-        // nor merge for dictionaries...
-
-        //self.byType = parent.byType
-        //self.byId = parent.byId
-
         // patch EnvironmentAware
 
         for declaration in parent.localBeans {
@@ -1526,7 +1521,6 @@ public class Environment: BeanFactory {
             return scope!
         }
     }
-
     
     func rememberId(declaration : Environment.BeanDeclaration) throws -> Void {
         if let id = declaration.id {
@@ -1572,12 +1566,12 @@ public class Environment: BeanFactory {
         } // if
         
         if clazz != nil && !declaration.abstract {
-            let declarations = byType[clazz!];
+            let declarations = byType[ObjectIdentifier(clazz!)]
             if declarations != nil {
                 declarations!.append(declaration)
             }
             else {
-                byType[clazz!] = ArrayOf<Environment.BeanDeclaration>(values: declaration);
+                byType[ObjectIdentifier(clazz!)] = ArrayOf<Environment.BeanDeclaration>(values: declaration)
             }
         }
     }
@@ -1630,7 +1624,7 @@ public class Environment: BeanFactory {
         // local func
 
         func collect(bean : BeanDescriptor, inout candidates : [Environment.BeanDeclaration]) -> Void {
-            let localCandidates = byType[bean.clazz]
+            let localCandidates = byType[ObjectIdentifier(bean.type)]
 
             if localCandidates != nil {
                 for candidate in localCandidates! {
