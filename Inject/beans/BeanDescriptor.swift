@@ -442,7 +442,7 @@ public class BeanDescriptor : CustomStringConvertible {
     public func implements(types : Any.Type...) throws -> Self {
         for type in types {
             if let clazz = type as? AnyClass {
-                throw BeanDescriptorErrors.Exception(message: "implements expects a protocol, got a class \(type)")
+                throw BeanDescriptorErrors.Exception(message: "implements expects a protocol, got a class \(clazz)")
             }
 
             let protocolDescriptor = try! BeanDescriptor.forType(type)
