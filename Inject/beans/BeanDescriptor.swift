@@ -271,8 +271,6 @@ public class BeanDescriptor : CustomStringConvertible {
 
         self.clazz = _mirror.subjectType as! AnyClass
 
-        print(self.clazz)
-
         // register
 
         BeanDescriptor.beans[clazz] = self
@@ -430,11 +428,12 @@ public class BeanDescriptor : CustomStringConvertible {
             
             builder.append("bean(\(clazz)) {\n")
             
-            for (name,property) in properties {
-                builder.append("\t").append(name).append(": \(property.type)")
+            for property in allProperties {
+                builder.append("\t\(property.bean.clazz).\(property.name): \(property.type)")
                 if property.optional {
                     builder.append("?")
                 }
+
                 builder.append("\n")
             }
             
