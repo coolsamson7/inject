@@ -5,14 +5,20 @@
 //  Created by Andreas Ernst on 18.07.16.
 //  Copyright © 2016 Andreas Ernst. All rights reserved.
 //
+
+/// `ConfigurationValueInjection`  computes values fpr configuration value injections
 public class ConfigurationValueInjection : Injection {
     // MARK: instance data
     
     var configurationManager : ConfigurationManager?
     
-    // init
-    
-    init(configurationManager : ConfigurationManager) {
+    // MARK: init
+
+    override init() {
+        super.init()
+    }
+
+    public init(configurationManager : ConfigurationManager) {
         self.configurationManager = configurationManager
         
         super.init(clazz: InjectConfigurationValue.self)
@@ -29,7 +35,7 @@ public class ConfigurationValueInjection : Injection {
     }
 }
 
-@objc(InjectConfigurationValue)
+/// A injection kind for configuration values
 public class InjectConfigurationValue : Inject {
     // MARK: instance data
     
@@ -37,9 +43,9 @@ public class InjectConfigurationValue : Inject {
     var key        : String
     var defaultValue : Any?
     
-    // init
+    // MARK: init
     
-    init(namespace : String, key : String, defaultValue : Any?) {
+    init(namespace : String = "", key : String, defaultValue : Any? = nil) {
         self.namespace = namespace
         self.key = key
         self.defaultValue = defaultValue

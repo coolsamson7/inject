@@ -14,7 +14,7 @@ public class ProcessInfoConfigurationSource : AbstractConfigurationSource {
         super.init(url: "process info", mutable: false, canOverrule: true)
     }
 
-    init(name : String) {
+    public init(name : String) {
         super.init(url: name, mutable: false, canOverrule: true)
     }
 

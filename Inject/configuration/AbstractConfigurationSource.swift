@@ -6,20 +6,17 @@
 //  Copyright © 2016 Andreas Ernst. All rights reserved.
 //
 
-public class AbstractConfigurationSource : NSObject, ConfigurationSource, Bean, ClassInitializer  {
+public class AbstractConfigurationSource : NSObject, ConfigurationSource, Bean, BeanDescriptorInitializer {
     // MARK: instance data
     
-    var _url : String
+    var _url : String = ""
     var _mutable = false
     var _canOverrule = false
     var configurationManager : ConfigurationManager? = nil // injected
     
-    // init
+    // MARK: init
     
     override init() {
-        _url = ""
-        
-        super.init()
     }
     
     init(url : String, mutable : Bool, canOverrule : Bool) {
@@ -28,19 +25,19 @@ public class AbstractConfigurationSource : NSObject, ConfigurationSource, Bean, 
         self._canOverrule = canOverrule
     }
     
-    // class Initializer
+    // MARK: implement BeanDescriptorInitializer
     
-    public func initializeClass() {
-        try! BeanDescriptor.forClass(AbstractConfigurationSource.self).getProperty("configurationManager").autowire()
+    public func initializeBeanDescriptor(beanDescriptor : BeanDescriptor) {
+        beanDescriptor["configurationManager"].autowire()
     }
     
-    // Bean
+    // MARK: implement Bean
     
     public func postConstruct() throws -> Void {
         try configurationManager!.addSource(self)
     }
     
-    // ConfigurationSource
+    // MARK: implement ConfigurationSource
     
     public func load(configurationManager : ConfigurationManager) throws -> Void {
         // noop

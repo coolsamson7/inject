@@ -1,6 +1,6 @@
 
 //
-//  Inject.swift
+//  Factory.swift
 //  Inject
 //
 //  Created by Andreas Ernst on 18.07.16.
@@ -8,6 +8,5 @@
 //
 import Foundation
 
-/// base class for different kind of injections
-public class Inject : NSObject {
-}
+/// a factory creates instances
+public typealias Factory = () -> Any

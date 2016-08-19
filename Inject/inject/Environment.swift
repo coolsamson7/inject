@@ -40,7 +40,7 @@ public class Environment: BeanFactory {
         // MARK: implement BeanFactory
 
         func create(declaration: BeanDeclaration) throws -> AnyObject {
-            return try declaration.bean!.create()
+            return try declaration.bean.create()
         }
     }
 
@@ -82,12 +82,12 @@ public class Environment: BeanFactory {
 
     /// An `BeanDeclaration` collects the necessary information to construct a particular instance.
     /// This covers
-    /// - the class
-    /// - the scope: "singleton", "prototype" or custom. "singleton" is the default
-    /// - lazy attribute. The defualt is `false`
-    /// - optional id of a parent bean if, that defines common attributes that will be inherited
-    /// - properties
-    /// - the target class for factory beans
+    /// * the class
+    /// * the scope: "singleton", "prototype" or custom. "singleton" is the default
+    /// * lazy attribute. The default is `false`
+    /// * optional id of a parent bean if, that defines common attributes that will be inherited
+    /// * properties
+    /// * the target class for factory beans
     public class BeanDeclaration : Declaration {
         // MARK: local classes
 
@@ -112,8 +112,20 @@ public class Environment: BeanFactory {
 
         var id : String?
         var requires : [Require] = []
-        var bean: BeanDescriptor?
-        var target: BeanDescriptor?
+        var clazz : AnyClass?
+        var _bean: BeanDescriptor?
+
+        var bean : BeanDescriptor {
+            get {
+                if _bean == nil {
+                    _bean = try! BeanDescriptor.forClass(clazz!)
+                }
+
+                return _bean!
+            }
+        }
+
+        var target: AnyClass?
         var properties = [PropertyDeclaration]()
 
         var factory : BeanFactory = DefaultConstructorFactory.instance
@@ -132,7 +144,7 @@ public class Environment: BeanFactory {
         init(instance : AnyObject) {
             self.factory = ValueFactory(object: instance)
             //self.singleton = instance // this is not done on purpose since we want the post processors to run!
-            self.bean = try! BeanDescriptor.forClass(instance.dynamicType)
+            self.clazz = instance.dynamicType
         }
 
         /// create a new `BeanDeclaration`
@@ -143,10 +155,10 @@ public class Environment: BeanFactory {
         // MARK: fluent stuff
 
         /// set the class of this bean declaration
-        /// - Parameter clazz: the class name
+        /// - Parameter className: the class name
         /// - Returns: self
-        public func clazz(clazz : String) throws -> Self {
-            self.bean = try BeanDescriptor.forClass(clazz)
+        public func clazz(className : String) throws -> Self {
+            self.clazz = try Classes.class4Name(className)
 
             return self
         }
@@ -271,7 +283,7 @@ public class Environment: BeanFactory {
         /// - Parameter clazz: the class that this factory beans creates
         /// - Returns: self
         public func target(clazz : AnyClass) throws -> Self {
-            self.target = try BeanDescriptor.forClass(clazz)
+            self.target = clazz
 
             return self
         }
@@ -285,7 +297,7 @@ public class Environment: BeanFactory {
         // MARK: internal
 
         func report(builder : StringBuilder) {
-            builder.append(Classes.className(bean!.clazz))
+            builder.append(Classes.className(clazz!))
             if id != nil {
                 builder.append("[\"\(id!)\"]")
             }
@@ -307,8 +319,8 @@ public class Environment: BeanFactory {
         
         func inheritFrom(parent : BeanDeclaration, loader: Environment.Loader) throws -> Void  {
             var resolveProperties = false
-            if bean == nil {
-                bean = parent.bean
+            if clazz == nil {
+                clazz = parent.clazz
                 
                 resolveProperties = true
                 
@@ -367,16 +379,18 @@ public class Environment: BeanFactory {
             for property in properties {
                 try property.connect(self, loader: loader)
             }
-            
-            // injections
-            
-            for beanProperty in bean!.getAllProperties() {
-                if beanProperty.autowired {
-                    let declaration = try loader.context.getCandidate(beanProperty.getPropertyType() as! AnyClass)
-                    
-                    loader.dependency(declaration, before: self)
-                }
-            }
+
+            if let descriptor = BeanDescriptor.findBeanDescriptor(clazz!) { // do not create the descriptor on demand!
+                // injections
+
+                for beanProperty in descriptor.getProperties() {
+                    if beanProperty.autowired {
+                        let declaration = try loader.context.getCandidate(beanProperty.getPropertyType() as! AnyClass)
+
+                        loader.dependency(declaration, before: self)
+                    } // if
+                } // for
+            } // if
         }
         
         func resolve(loader : Environment.Loader) throws -> Void {
@@ -384,7 +398,7 @@ public class Environment: BeanFactory {
                 try property.resolve(loader)
 
                 if !checkTypes(property.getType(), expected: property.property!.getPropertyType()) {
-                    throw EnvironmentErrors.TypeMismatch(message: " property \(Classes.className(bean!.clazz)).\(property.name) expected a \(property.property!.getPropertyType()) got \(property.getType())")
+                    throw EnvironmentErrors.TypeMismatch(message: " property \(Classes.className(clazz!)).\(property.name) expected a \(property.property!.getPropertyType()) got \(property.getType())")
                 }
             }
         }
@@ -394,9 +408,9 @@ public class Environment: BeanFactory {
 
             // check for post processors
 
-            if bean!.clazz is BeanPostProcessor.Type {
+            if clazz is BeanPostProcessor.Type {
                 if (Tracer.ENABLED) {
-                    Tracer.trace("inject.runtime", level: .HIGH, message: "add post processor \(bean!.clazz)")
+                    Tracer.trace("inject.runtime", level: .HIGH, message: "add post processor \(clazz)")
                 }
 
                 loader.context.postProcessors.append(try self.getInstance(loader.context) as! BeanPostProcessor) // sanity checks
@@ -429,11 +443,23 @@ public class Environment: BeanFactory {
         
         func create(environment: Environment) throws -> AnyObject {
             if (Tracer.ENABLED) {
-                Tracer.trace("inject.runtime", level: .HIGH, message: "create instance of \(bean!.clazz)")
+                Tracer.trace("inject.runtime", level: .HIGH, message: "create instance of \(clazz!)")
             }
             
             let result = try factory.create(self) // MARK: constructor, value, etc
-            
+
+            // make sure that the bean descriptor is initialized since we need the class hierarchy for subsequent bean requests!
+
+            if _bean == nil {
+                if let beanDescriptor = BeanDescriptor.findBeanDescriptor(result.dynamicType) {
+                    _bean = beanDescriptor
+                }
+                else {
+                    // create manually with instance avoiding the generic init call
+                    _bean = try BeanDescriptor(instance: result)
+                }
+            }
+
             // set properties
             
             for property in properties {
@@ -442,7 +468,7 @@ public class Environment: BeanFactory {
 
                 if resolved != nil {
                     if (Tracer.ENABLED) {
-                        Tracer.trace("inject.runtime", level: .FULL, message: "set \(Classes.className(bean!.clazz)).\(beanProperty.getName()) = \(resolved!)")
+                        Tracer.trace("inject.runtime", level: .FULL, message: "set \(Classes.className(clazz!)).\(beanProperty.getName()) = \(resolved!)")
                     }
 
                     try beanProperty.set(result, value: resolved)
@@ -451,7 +477,7 @@ public class Environment: BeanFactory {
 
             // run processors
             
-            return try environment.runPostProcessors(result);
+            return try environment.runPostProcessors(result)
         }
         
         // CustomStringConvertible
@@ -459,7 +485,7 @@ public class Environment: BeanFactory {
         override public var description: String {
             let builder = StringBuilder();
             
-            builder.append("bean(class: \(bean)")
+            builder.append("bean(class: \(clazz)")
             if id != nil {
                 builder.append(", id: \"\(id!)\"")
             }
@@ -523,7 +549,7 @@ public class Environment: BeanFactory {
         }
 
         override func getType() -> Any.Type {
-            return ref.bean!.clazz
+            return ref.clazz!
         }
     }
 
@@ -557,7 +583,7 @@ public class Environment: BeanFactory {
         }
 
         override func getType() -> Any.Type {
-            return bean!.bean!.clazz
+            return bean!.clazz!
         }
     }
 
@@ -587,7 +613,7 @@ public class Environment: BeanFactory {
         }
 
         override func getType() -> Any.Type {
-            return bean.bean!.clazz
+            return bean.clazz!
         }
     }
 
@@ -735,7 +761,7 @@ public class Environment: BeanFactory {
         // functions
         
         func resolveProperty(beanDeclaration : BeanDeclaration, loader: Environment.Loader) throws -> Void  {
-            property = beanDeclaration.bean!.findProperty(name)
+            property = beanDeclaration.bean.findProperty(name)
             
             if property == nil {
                 throw EnvironmentErrors.UnknownProperty(property: name, bean: beanDeclaration)
@@ -743,7 +769,7 @@ public class Environment: BeanFactory {
         }
         
         func collect(beanDeclaration : BeanDeclaration, environment: Environment, loader: Environment.Loader) throws -> Void {
-            if beanDeclaration.bean != nil { // abstract classes
+            if beanDeclaration.clazz != nil { // abstract classes
                 try resolveProperty(beanDeclaration, loader: loader)
             }
 
@@ -1386,7 +1412,7 @@ public class Environment: BeanFactory {
         result.lazy = lazy
         result.abstract = abstract
 
-        result.bean = try BeanDescriptor.forClass(className)
+        result.clazz = try Classes.class4Name(className)
 
         return result
     }
@@ -1412,7 +1438,13 @@ public class Environment: BeanFactory {
             result.factory = FactoryFactory<T>(factory: factory!)
         }
 
-        result.bean = try BeanDescriptor.forClass(clazz as! AnyClass)
+        if let anyClass = clazz as? AnyClass {
+            result.clazz = anyClass
+
+        }
+        else {
+            throw EnvironmentErrors.Exception(message: "only classes are accepted, got \(clazz)")
+        }
 
         return result
     }
@@ -1515,13 +1547,13 @@ public class Environment: BeanFactory {
             clazz = valueFactory.object.dynamicType
         }
         else {
-            clazz = declaration.bean?.clazz // may be nil in case of a inherited bean!
+            clazz = declaration.clazz // may be nil in case of a inherited bean!
         }
 
         // is that a factory bean?
 
         if clazz is FactoryBean.Type {
-            let target = declaration.target
+            let target : AnyClass? = declaration.target
             if target == nil {
                 fatalError("missing target");
             }
@@ -1532,7 +1564,7 @@ public class Environment: BeanFactory {
 
             bean.scope = BeanFactoryScope(declaration : declaration, context: self)
             bean.requires(bean: declaration)
-            bean.bean = target
+            bean.clazz = target
 
             // remember
 

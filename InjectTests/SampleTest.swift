@@ -24,7 +24,7 @@ class SamplePostProcessor : NSObject, BeanPostProcessor {
     }
 }
 
-class Foo : NSObject, Bean, ClassInitializer {
+class Foo : NSObject, Bean, BeanDescriptorInitializer {
     // instance data
 
     var id : String = ""
@@ -45,8 +45,8 @@ class Foo : NSObject, Bean, ClassInitializer {
 
     // ClassInitializer
 
-    func initializeClass() {
-        try! BeanDescriptor.forClass(Foo.self).getProperty("bar").inject(InjectBean())
+    func initializeBeanDescriptor(beanDescriptor : BeanDescriptor) {
+        beanDescriptor["bar"].inject(InjectBean())
     }
 }
 
@@ -253,18 +253,16 @@ class SampleTest: XCTestCase {
             return swift
         }).requires(class: AnotherSwift.self))
 
-        .define(environment.bean(AnotherSwift.self, factory: {
+        .define(environment.bean(AnotherSwift.self, factory: AnotherSwift.init/*{
             let swift = AnotherSwift()
 
             swift.name = "other swift"
 
             return swift
-        }))
+        }*/))
 
         // fetch
 
         let swift = try! environment.getBean(Swift.self)
-
-        print(swift)
     }
 }

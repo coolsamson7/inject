@@ -234,7 +234,7 @@ public class JSON {
         override func makeOperations(definition : Definition) throws -> Void {
             let bean = try BeanDescriptor.forClass(definition.clazz)
 
-            for property in bean.getAllProperties() {
+            for property in bean.getProperties() {
                 if !except.contains(property.getName()) {
                     definition.operations.append(JSONProperty(property: property.getName(), json: property.getName(), deep : false))
                 }

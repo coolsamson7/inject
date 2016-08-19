@@ -5,7 +5,10 @@
 //  Created by Andreas Ernst on 18.07.16.
 //  Copyright © 2016 Andreas Ernst. All rights reserved.
 //
-public class Injection : NSObject, Bean, ClassInitializer {
+
+/// `Injection`s are classes that compute requested injected objects based on different tye of injections.
+/// This is a base class
+public class Injection : NSObject, Bean, BeanDescriptorInitializer {
     // MARK: instance data
     
     var injector : Injector?
@@ -15,8 +18,6 @@ public class Injection : NSObject, Bean, ClassInitializer {
     
     override init() {
         clazz = Injection.self
-        
-        super.init()
     }
     
     init(clazz : AnyClass) {
@@ -29,13 +30,13 @@ public class Injection : NSObject, Bean, ClassInitializer {
         return self// implement!
     }
     
-    // class Initializer
+    // MARK: implement ClassInitializer
     
-    public func initializeClass() {
-        try! BeanDescriptor.forClass(Injection.self).getProperty("injector").autowire()
+    public func initializeBeanDescriptor(beanDescriptor : BeanDescriptor) {
+        beanDescriptor["injector"].autowire()
     }
     
-    // Bean
+    // MARK: implement Bean
     
     public func postConstruct() -> Void {
         injector!.register(self)

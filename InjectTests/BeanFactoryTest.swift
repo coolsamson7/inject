@@ -28,7 +28,7 @@ class BarBean: NSObject {
     var weight : Int = 87
 }
 
-class Data : NSObject , Bean, ClassInitializer {
+class Data : NSObject, Bean, BeanDescriptorInitializer {
     // instance data
 
     var string : String = ""
@@ -43,8 +43,8 @@ class Data : NSObject , Bean, ClassInitializer {
 
     // ClassInitializer
 
-    func initializeClass() {
-        try! BeanDescriptor.forClass(Data.self).getProperty("foo").inject(InjectBean())
+    func initializeBeanDescriptor(beanDescriptor : BeanDescriptor) {
+        beanDescriptor["foo"].inject(InjectBean())
     }
 
     // Bean
@@ -94,6 +94,8 @@ class FooBean: FooBase {
 class BeanFactoryTests: XCTestCase {
     override class func setUp() {
         Classes.setDefaultBundle(BeanFactoryTests.self)
+
+        try! BeanDescriptor.forClass(Data.self) // force creation
 
         // set tracing
 

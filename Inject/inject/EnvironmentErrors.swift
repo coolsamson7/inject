@@ -51,7 +51,7 @@ public enum EnvironmentErrors: ErrorType , CustomStringConvertible {
             builder.append("\(self.dynamicType).CylicDependencies: \(message)");
             
         case .UnknownProperty(let property, let bean):
-            builder.append("\(self.dynamicType).UnknownProperty: \(bean.bean).\(property)")
+            builder.append("\(self.dynamicType).UnknownProperty: \(bean.clazz!).\(property)")
             if bean.origin != nil {
                 builder.append(" in [\(bean.origin!.line):\(bean.origin!.column)]")
             }

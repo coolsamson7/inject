@@ -533,7 +533,7 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
 
             var properties : [String] = []
 
-            for property in local ? sourceBean.getProperties() :  sourceBean.getAllProperties() {
+            for property in sourceBean.getProperties() {
                 if except.contains(property.name) {
                     continue
                 }
@@ -1312,7 +1312,7 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
                     if (immutable) {
                         // check if all arguments are mapped
 
-                        if try (getChildren().count <  BeanDescriptor.forClass(type as! AnyClass).getAllProperties().count) {
+                        if try (getChildren().count <  BeanDescriptor.forClass(type as! AnyClass).getProperties().count) {
                             throw MapperError.Definition(message: "not all properties of the composite \(type) are mapped", definition: definition, match: match, accessor: accessor);
                         }
 
@@ -1643,7 +1643,7 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
     // private
 
     private func addImmutableCompositeDefinition(int side: Int, clazz: AnyClass, outerComposite: Int, outerIndex: Int, parentAccessor: Accessor?) -> Int {
-        composites[side].append(ImmutableCompositeDefinition(clazz: clazz, int: try! BeanDescriptor.forClass(clazz).getAllProperties().count, outerComposite: outerComposite, outerIndex: outerIndex, parentAccessor: parentAccessor));
+        composites[side].append(ImmutableCompositeDefinition(clazz: clazz, int: try! BeanDescriptor.forClass(clazz).getProperties().count, outerComposite: outerComposite, outerIndex: outerIndex, parentAccessor: parentAccessor));
 
         return composites[side].count - 1;
     }

@@ -8,34 +8,22 @@
 //
 import Foundation
 
-/// We need this protocol in order to create non NSObject classes....wtf
-
-public protocol Initializable : class {
-    init()
-}
-
-extension NSObject : Initializable {
-}
-
-public typealias Factory = () -> Any
-
 /// `BeanDescriptor` stores information on the internal structure of classes, covering
 /// - super- and subclasses
 /// - properties including their types
-
 public class BeanDescriptor : CustomStringConvertible {
     // MARK: static data
     
     private static var beans = IdentityMap<AnyObject, BeanDescriptor>();
 
-    // MARK: class methods
+    // MARK: class functions
     
     /// Return the appropriate bean descriptor for the specific class
     /// - Parameter clazz: the corresponding class
     /// - Returns: the `BeanDescriptor` instance for the particular class
     public class func forClass(clazz: AnyClass) throws -> BeanDescriptor {
         if let bean = beans[clazz] {
-            return bean;
+            return bean
         }
         else {
             return try BeanDescriptor(clazz: clazz)
@@ -47,6 +35,12 @@ public class BeanDescriptor : CustomStringConvertible {
     /// - Returns: the `BeanDescriptor` instance for the particular class
     public class func forClass(clazz: String) throws -> BeanDescriptor {
         return try forClass(try Classes.class4Name(clazz))
+    }
+
+    // MARK: internal class functions
+
+    public class func findBeanDescriptor(clazz: AnyClass) -> BeanDescriptor? {
+        return beans[clazz]
     }
 
     // internal
@@ -255,6 +249,10 @@ public class BeanDescriptor : CustomStringConvertible {
     init(clazz: AnyClass) throws {
         self.clazz = clazz
 
+        if (Tracer.ENABLED) {
+            Tracer.trace("inject.beans", level: .HIGH, message: "create descriptor for \(clazz)")
+        }
+
         // register
 
         BeanDescriptor.beans[clazz] = self
@@ -267,6 +265,10 @@ public class BeanDescriptor : CustomStringConvertible {
     }
 
     init(instance: AnyObject, mirror : Mirror? = nil) throws {
+        if (Tracer.ENABLED) {
+            Tracer.trace("inject.beans", level: .HIGH, message: "create descriptor for \(instance.dynamicType)")
+        }
+
         let _mirror = mirror != nil ? mirror! : Mirror(reflecting: instance)
 
         self.clazz = _mirror.subjectType as! AnyClass
@@ -332,8 +334,10 @@ public class BeanDescriptor : CustomStringConvertible {
         // this is a hack since swift does not include something like a static initializer
         // ( and i am obviously too stupid to call a class func :-) )
 
-        if let classInitializer = instance as? ClassInitializer {
-            classInitializer.initializeClass()
+        if let beanDescriptorInitializer = instance as? BeanDescriptorInitializer {
+            if instance.dynamicType == self.clazz {
+                beanDescriptorInitializer.initializeBeanDescriptor(self)
+            }
         }
     }
 
@@ -378,20 +382,16 @@ public class BeanDescriptor : CustomStringConvertible {
             return initializable.init()
         }
         else {
-            throw EnvironmentErrors.Exception(message: "cannot create a \(Classes.className(clazz))")
+            throw BeanDescriptorErrors.Exception(message: "cannot create a \(Classes.className(clazz))")
         }
     }
     
-    public func getProperties() -> [PropertyDescriptor] {
-        return ownProperties;
-    }
-    
-    public func getAllProperties() -> [PropertyDescriptor] {
-        return allProperties;
+    public func getProperties(local : Bool = false) -> [PropertyDescriptor] {
+        return local ? ownProperties : allProperties
     }
     
     public func getProperty(name: String) throws -> PropertyDescriptor {
-        let property =  properties[name];
+        let property =  properties[name]
         if property == nil {
             throw BeanDescriptorErrors.UnknownProperty(message: "unknown property \(clazz).\(name)")
         }
@@ -399,25 +399,15 @@ public class BeanDescriptor : CustomStringConvertible {
     }
     
     public func findProperty(name: String) -> PropertyDescriptor? {
-        return properties[name];
+        return properties[name]
     }
     
     // subscript
     
-    subscript(name: String) -> PropertyDescriptor {
+    public subscript(name: String) -> PropertyDescriptor {
         get {
             return try! getProperty(name)
         }
-    }
-    
-    // reflection
-    
-    func get(object: NSObject!, property: String) throws -> Any? {
-        return try getProperty(property).get(object);
-    }
-    
-    func set(object: NSObject!, property: String, value: Any?) throws -> Void {
-        try getProperty(property).set(object, value: value);
     }
     
     // CustomStringConvertible

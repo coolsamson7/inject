@@ -8,14 +8,16 @@
 //
 import Foundation
 
-@objc(InjectBean)
+/// `InjectBean` is a injection kind for beans
 public class InjectBean : Inject {
     // MARK: instance data
     
     var id : String?
     
-    // init
-    
+    // MARK: init
+
+    /// Create a new `InjectBean`
+    /// - Parameter id: an optional id
     init(id : String? = nil) {
         self.id = id
     }

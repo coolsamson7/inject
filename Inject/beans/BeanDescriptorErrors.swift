@@ -8,10 +8,12 @@
 //
 import Foundation
 
+/// All errors concerning aspects of the class `BeanDescriptor`
 public enum BeanDescriptorErrors : ErrorType , CustomStringConvertible {
     case UnknownProperty(message:String)
     case CannotSetNil(message: String)
     case TypeMismatch(message: String)
+    case Exception(message: String)
     
     // CustomStringConvertible
     
@@ -20,11 +22,16 @@ public enum BeanDescriptorErrors : ErrorType , CustomStringConvertible {
         
         switch self {
         case .UnknownProperty(let message):
-            builder.append("\(self.dynamicType).UnknownProperty: ").append(message);
+            builder.append("\(self.dynamicType).UnknownProperty: ").append(message)
+
         case .CannotSetNil(let message):
-            builder.append("\(self.dynamicType).CannotSetNil: ").append(message);
+            builder.append("\(self.dynamicType).CannotSetNil: ").append(message)
+
         case .TypeMismatch(let message):
-            builder.append("\(self.dynamicType).TypeMismatch: ").append(message);
+            builder.append("\(self.dynamicType).TypeMismatch: ").append(message)
+
+        case .Exception(let message):
+                builder.append("\(self.dynamicType).Exception: ").append(message)
         } // switch
         
         return builder.toString()

@@ -85,8 +85,8 @@ public class XMLEnvironmentLoader: XMLParser {
             if let dependsOn = self.dependsOn {
                 bean.requires(id: dependsOn)
             }
-            bean.bean = clazz != nil ? try BeanDescriptor.forClass(clazz!) : nil
-            bean.target =  target != nil ? try BeanDescriptor.forClass(target!) : nil
+            bean.clazz = clazz != nil ? try Classes.class4Name(clazz!) : nil
+            bean.target =  target != nil ? try Classes.class4Name(target!) : nil
             
             
             for property in properties {

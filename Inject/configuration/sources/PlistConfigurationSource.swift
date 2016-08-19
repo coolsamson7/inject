@@ -22,7 +22,7 @@ public class PlistConfigurationSource : AbstractConfigurationSource {
         super.init()
     }
 
-    init(name : String) {
+    public init(name : String) {
         super.init(url: name /*NSBundle.mainBundle().pathForResource(name, ofType: "plist")!*/, mutable: false, canOverrule: true)
     }
 
