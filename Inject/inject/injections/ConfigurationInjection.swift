@@ -6,17 +6,13 @@
 //  Copyright © 2016 Andreas Ernst. All rights reserved.
 //
 
-/// `ConfigurationValueInjection`  computes values fpr configuration value injections
+/// `ConfigurationValueInjection`  computes values for configuration value injections
 public class ConfigurationValueInjection : Injection {
     // MARK: instance data
     
-    var configurationManager : ConfigurationManager?
+    var configurationManager : ConfigurationManager
     
     // MARK: init
-
-    override init() {
-        super.init()
-    }
 
     public init(configurationManager : ConfigurationManager) {
         self.configurationManager = configurationManager
@@ -28,7 +24,7 @@ public class ConfigurationValueInjection : Injection {
     
     override func computeValue(inject : Inject, property: BeanDescriptor.PropertyDescriptor, environment: Environment) throws -> Any {
         if let injectConfigurationValue = inject as? InjectConfigurationValue {
-            return try configurationManager!.getValue(property.getPropertyType(), namespace: injectConfigurationValue.namespace, key: injectConfigurationValue.key, defaultValue: injectConfigurationValue.defaultValue)
+            return try configurationManager.getValue(property.getPropertyType(), namespace: injectConfigurationValue.namespace, key: injectConfigurationValue.key, defaultValue: injectConfigurationValue.defaultValue)
         } // if
         
         fatalError("should not happen")

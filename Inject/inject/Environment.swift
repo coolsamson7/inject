@@ -1034,65 +1034,117 @@ public class Environment: BeanFactory {
             return declaration
         }
 
-        func sortDependencies(dependencies : [Dependency]) -> [[Environment.BeanDeclaration]] {
-            // closure state
+        func sortDependencies(dependencies : [Dependency]) throws -> Void {
+            // local functions
 
-            var index = 0
-            var stack: [Dependency] = []
-            var cycles: [[Environment.BeanDeclaration]] = []
+            func detectCycles() -> [[Environment.BeanDeclaration]] {
+                // closure state
 
-            // local func
+                var index = 0
+                var stack: [Dependency] = []
+                var cycles: [[Environment.BeanDeclaration]] = []
 
-            func traverse(dependency: Dependency) {
-                dependency.index = index
-                dependency.lowLink = index
+                // local func
 
-                index += 1
+                func traverse(dependency: Dependency) {
+                    dependency.index = index
+                    dependency.lowLink = index
 
-                stack.append(dependency) // add to the stack
+                    index += 1
+
+                    stack.append(dependency) // add to the stack
+
+                    for successor in dependency.successors {
+                        if successor.index == nil {
+                            traverse(successor)
+
+                            dependency.lowLink = min(dependency.lowLink, successor.lowLink)
+                        }
+                        else if stack.contains(successor) {
+                            // if the component was not closed yet
+
+                            dependency.lowLink = min(dependency.lowLink, successor.index!)
+                        }
+                    } // for
+
+                    if dependency.lowLink == dependency.index! {
+                        // root of a component
+
+                        var group:[Dependency] = []
+
+                        var member: Dependency
+                        repeat {
+                            member = stack.removeLast()
+
+                            group.append(member)
+                        } while member !== dependency
+
+                        if group.count > 1 {
+                            cycles.append(group.map({$0.declaration}))
+                        }
+                    }
+                }
+
+                // get goin'
+
+                for dependency in dependencies {
+                    if dependency.index == nil {
+                        traverse(dependency)
+                    }
+                }
+
+                // done
+
+                return cycles
+            }
+
+            // sort
+
+            var stack = [Dependency]()
+            for dependency in dependencyList {
+                if dependency.inCount == 0 {
+                    stack.append(dependency)
+                }
+            } // for
+
+            var count = 0
+            while !stack.isEmpty {
+                let dependency = stack.removeFirst()
+
+                dependency.index = count
+
+                //print("\(index): \(dependency.declaration.bean!.clazz)")
 
                 for successor in dependency.successors {
-                    if successor.index == nil {
-                        traverse(successor)
-
-                        dependency.lowLink = min(dependency.lowLink, successor.lowLink)
-                    }
-                    else if stack.contains(successor) {
-                        // if the component was not closed yet
-
-                        dependency.lowLink = min(dependency.lowLink, successor.index!)
+                    successor.inCount -= 1
+                    if successor.inCount == 0 {
+                        stack.append(successor)
                     }
                 } // for
 
-                if dependency.lowLink == dependency.index! {
-                    // root of a component
+                count += 1
+            } // while
 
-                    var group:[Dependency] = []
+            // if something is left, we have a cycle!
 
-                    var member: Dependency
-                    repeat {
-                        member = stack.removeLast()
+            if count < dependencyList.count {
+                let cycles = detectCycles()
 
-                        group.append(member)
-                    } while member !== dependency
+                let builder = StringBuilder()
 
-                    if group.count > 1 {
-                        cycles.append(group.map({$0.declaration}))
+                builder.append("\(cycles.count) cycles:")
+                var index = 0
+                for cycle in cycles {
+                    builder.append("\n\(index): ")
+                    for declaration in cycle {
+                        builder.append(declaration).append(" ")
                     }
+
+                    index += 1
                 }
+
+                throw EnvironmentErrors.CylicDependencies(message: builder.toString())
             }
-
-            // get goin'
-
-            for dependency in dependencies {
-                if dependency.index == nil {
-                    traverse(dependency)
-                }
-            }
-
-            // done
-
-            return cycles
         }
 
         func load() throws -> Environment {
@@ -1130,55 +1182,7 @@ public class Environment: BeanFactory {
                 Tracer.trace("inject.loader", level: .HIGH, message: "sort beans")
             }
 
-            let cycles = sortDependencies(dependencyList)
-            if cycles.count > 0 {
-                let builder = StringBuilder()
-
-                builder.append("\(cycles.count) cycles:")
-                var index = 0
-                for cycle in cycles {
-                    builder.append("\n\(index): ")
-                    for declaration in cycle {
-                        builder.append(declaration).append(" ")
-                    }
-
-                    index += 1
-                }
-
-                throw EnvironmentErrors.CylicDependencies(message: builder.toString())
-            }
-            else {
-                // hmmm....tarjan does not sort topologically..let's do that here
-
-                var stack = [Dependency]()
-                for dependency in dependencyList {
-                    if dependency.inCount == 0 {
-                        stack.append(dependency)
-                    }
-                } // for
-
-                var index = 0
-                while !stack.isEmpty {
-                    let dependency = stack.removeFirst()
-
-                    dependency.index = index
-
-                    //print("\(index): \(dependency.declaration.bean!.clazz)")
-
-                    for successor in dependency.successors {
-                        successor.inCount -= 1
-                        if successor.inCount == 0 {
-                            stack.append(successor)
-                        }
-                    } // for
-
-                    index += 1
-                }
-            }
-
-            // sort according to index
-
-            //dependencyList.sortInPlace({$0.index < $1.index})
+            try sortDependencies(dependencyList)
 
             // and resort local beans
 
@@ -1196,15 +1200,6 @@ public class Environment: BeanFactory {
                 try bean.resolve(self)
                 try bean.prepare(self)
             } // for
-
-
-            /*if (Tracer.ENABLED) {
-                Tracer.trace("inject.loader", level: .HIGH, message: "prepare beans")
-            }
-
-            for dependency in dependencyList {
-                try dependency.declaration.prepare(self)  // instantiate all non lazy singletons, add post processors, etc...
-            }*/
 
             // done
 

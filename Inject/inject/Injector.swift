@@ -5,16 +5,17 @@
 //  Created by Andreas Ernst on 18.07.16.
 //  Copyright © 2016 Andreas Ernst. All rights reserved.
 //
-@objc(Injector)
-public class Injector : NSObject {
-    // local classes
+
+/// `Injector` is the object that will execute injections based on registered injectors
+public class Injector {
+    // MARK: local classes
     
     class ClassInjections {
         // MARK: instance data
         
         var injections : [(inject: Inject, property: BeanDescriptor.PropertyDescriptor, injection: Injection)] = []
         
-        // init
+        // MARK: init
         
         init(injector : Injector, bean : BeanDescriptor) {
             analyze(injector, bean: bean);
@@ -51,18 +52,18 @@ public class Injector : NSObject {
     // MARK: internal
     
     // MARK: public
-    
-    func register(injections : Injection...) {
+
+    public func register(injections : Injection...) {
         for injection in injections {
             self.injections[injection.clazz] = injection
         }
     }
-    
-    func inject(target : AnyObject, context: Environment) throws -> Void  {
-        let bean = try BeanDescriptor.forClass(target.dynamicType)
+
+    public func inject(target : AnyObject, context: Environment) throws -> Void  {
+        let bean = try BeanDescriptor.forInstance(target)
         
         if let classInjections = cachedInjections[bean.getClass()] {
-            try classInjections.inject(target, context: context);
+            try classInjections.inject(target, context: context)
         }
         else {
             let classInjections = ClassInjections(injector: self, bean:bean)
@@ -70,6 +71,5 @@ public class Injector : NSObject {
             
             try classInjections.inject(target, context: context)
         }
-        
     }
 }

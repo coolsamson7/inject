@@ -42,6 +42,18 @@ public class BeanDescriptor : CustomStringConvertible {
         }
     }
 
+    /// Return the appropriate bean descriptor for the specific object type
+    /// - Parameter object: the object
+    /// - Returns: the `BeanDescriptor` instance for the particular object
+    public class func forInstance(object: AnyObject) throws -> BeanDescriptor {
+        if let bean = beans[ObjectIdentifier(object.dynamicType)] {
+            return bean
+        }
+        else {
+            return try BeanDescriptor(instance: object)
+        }
+    }
+
     /// Return the appropriate bean descriptor for the specific class name
     /// - Parameter clazz: the corresponding class name
     /// - Returns: the `BeanDescriptor` instance for the particular class

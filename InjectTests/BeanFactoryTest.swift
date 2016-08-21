@@ -104,7 +104,7 @@ class BeanFactoryTests: XCTestCase {
         // set logging
 
         LogManager()
-           .registerLogger("", level : .ALL, logs: [QueuedLog(name: "async-console", delegate: ConsoleLog(name: "console", synchronize: false))])
+           .registerLogger("", level : .OFF, logs: [QueuedLog(name: "async-console", delegate: ConsoleLog(name: "console", synchronize: false))])
     }
 
     // tests
@@ -255,5 +255,65 @@ class BeanFactoryTests: XCTestCase {
         _ = try! child.getBean(FooBean.self, byId: "foo")
 
         //XCTAssert(bar.age == 4711)
+        
+        try! Timer.measure({
+            let parent = try Environment(name: "parent")
+            
+            try parent.getConfigurationManager().addSource(ProcessInfoConfigurationSource())
+            
+            try parent
+                //.define(parent.bean(ProcessInfoConfigurationSource.self)
+                //   .id("x1"))
+                
+                .define(parent.bean(Data.self, id: "b0")
+                    .property("string", value: "b0")
+                    .property("int", value: 1)
+                    .property("float", value: Float(-1.1))
+                    .property("double", value: -2.2))
+                
+                .define(parent.bean(FooBean.self, id: "foo")
+                    .property("name", resolve: "${andi=Andreas?}")
+                    .property("age", resolve: "${SIMULATOR_MAINSCREEN_HEIGHT=51}")).startup() // TODO?
+            
+            /*.define(parent.bean(Bar.self)
+             .id("bar")
+             .abstract()
+             .property("name", resolve: "${andi=Andreas?}"))
+             */
+            let child = try! Environment(name: "child", parent: parent)
+            
+            try! child
+                .define(child.bean(Data.self)
+                    .id("b1")
+                    .dependsOn("b0")
+                    .property("foo", inject: InjectBean(id: "foo"))
+                    .property("string", value: "b1")
+                    .property("int", value: 1)
+                    .property("int8", value: Int8(1))
+                    .property("float", value: Float(1.1))
+                    .property("double", value: 2.2))
+                
+                .define(child.bean(Data.self)
+                    .id("lazy")
+                    .lazy()
+                    .property("bar", bean: child.bean(BarBean.self)
+                        .property("name", value: "name")
+                        .property("age", value: 0)
+                    )
+                    .property("string", value: "lazy")
+                    .property("int", value: 1)
+                    .property("float", value: Float(1.1))
+                    .property("double", value: 2.2))
+                
+                .define(child.bean(Data.self)
+                    .id("prototype")
+                    .scope(child.scope("prototype"))
+                    .property("string", value: "b1")
+                    .property("int", value: 1)
+                    .property("float", value: Float(1.1))
+                    .property("double", value: 2.2)).startup()
+            
+            return true
+            }, times: 1000)
     }
 }

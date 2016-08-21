@@ -9,7 +9,7 @@
 public class BeanInjection : Injection {
     // MARK: init
     
-    override init() {
+    init() {
         super.init(clazz: InjectBean.self)
     }
     

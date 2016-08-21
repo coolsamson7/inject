@@ -6,20 +6,15 @@
 //  Copyright © 2016 Andreas Ernst. All rights reserved.
 //
 
-/// `Injection`s are classes that compute requested injected objects based on different tye of injections.
-/// This is a base class
-public class Injection : NSObject, Bean, BeanDescriptorInitializer {
+/// `Injection`s are classes that compute objects that will be injected in an object based on a specific `Inject` class.
+public class Injection : Bean, BeanDescriptorInitializer {
     // MARK: instance data
     
     var injector : Injector?
-    var clazz : AnyClass;
+    var clazz : AnyClass
     
     // init
-    
-    override init() {
-        clazz = Injection.self
-    }
-    
+
     init(clazz : AnyClass) {
         self.clazz = clazz
     }
@@ -27,10 +22,10 @@ public class Injection : NSObject, Bean, BeanDescriptorInitializer {
     // MARK: public
     
     func computeValue(inject : Inject, property: BeanDescriptor.PropertyDescriptor, environment: Environment) throws -> Any {
-        return self// implement!
+        return self // implement!
     }
     
-    // MARK: implement ClassInitializer
+    // MARK: implement BeanDescriptorInitializer
     
     public func initializeBeanDescriptor(beanDescriptor : BeanDescriptor) {
         beanDescriptor["injector"].autowire()
