@@ -1463,7 +1463,7 @@ public class Environment: BeanFactory {
     /// return a `Settings` instance tha can be used to define configuration values
     /// - Returns: a new `Settings` instance
     public func settings(file: String = #file, function: String = #function, line: Int = #line) -> Settings {
-        return Settings(configurationManager: self.configurationManager, url: file + " " function + " line: " + String(line))
+        return Settings(configurationManager: self.configurationManager, url: file + " " + function + " line: " + String(line))
     }
 
     /// This class collects manual configuration values
