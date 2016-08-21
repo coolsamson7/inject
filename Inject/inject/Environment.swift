@@ -1379,7 +1379,7 @@ public class Environment: BeanFactory {
     }
 
     /// register a named scope
-    // - Parameter scope: the ``BeanScope
+    // - Parameter scope: the `BeanScope`
     public func registerScope(scope : BeanScope) -> Void {
         scopes[scope.name] = scope
     }
@@ -1458,6 +1458,55 @@ public class Environment: BeanFactory {
         }
 
         return result
+    }
+
+    /// return a `Settings` instance tha can be used to define configuration values
+    /// - Returns: a new `Settings` instance
+    public func settings(file: String = #file, function: String = #function, line: Int = #line) -> Settings {
+        return Settings(configurationManager: self.configurationManager, url: file + " " function + " line: " + String(line))
+    }
+
+    /// This class collects manual configuration values
+
+    public class Settings : AbstractConfigurationSource {
+        // MARK: instance data
+
+        var items = [ConfigurationItem]()
+
+        // MARK: init
+
+        init(configurationManager : ConfigurationManager, url: String) {
+            super.init(configurationManager: configurationManager, url: url)
+        }
+
+        // MARK:fluent interface
+
+        public func setValue(namespace : String = "", key : String, value : Any) -> Self {
+            items.append(ConfigurationItem(
+                    fqn: FQN(namespace: namespace, key: key),
+                    type: value.dynamicType,
+                    value: value,
+                    source: url
+                    ))
+
+            return self
+        }
+
+        // MARK: implement ConfigurationSource
+
+        override public func load(configurationManager : ConfigurationManager) throws -> Void {
+            for item in items {
+                try configurationManager.configurationAdded(item, source: self)
+            }
+        }
+    }
+
+    /// define configuration values
+    /// - Parameter settings: the object that contains configuration values
+    public func define(settings : Settings) throws -> Self {
+        try configurationManager.addSource(settings)
+
+        return self
     }
 
     /// defines the specified `BeanDeclaration`
