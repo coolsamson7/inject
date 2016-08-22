@@ -4,11 +4,16 @@
 
 **Implemented enhancements:**
 
+* support for protocols
+* manual configuration values
+* performance optimizations
+* closure factories
+
 ## [1.0.1](https://github.com/coolsamson7/inject/tree/1.0.1) (2016-08-08)
 
 **Implemented enhancements:**
 
-- Initial release
+- Added more docs
 
 ## [1.0.0](https://github.com/coolsamson7/inject/tree/1.0.0) (2016-08-08)
 
