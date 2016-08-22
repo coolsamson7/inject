@@ -164,7 +164,7 @@ var environment = Environment(name: "environment")
 
 environment
    .loadXML(data)
-   .refresh() // would be done on demand anyway whenever a getter is called that references the internal layout 
+   .startup() // would be done on demand anyway whenever a getter is called that references the internal layout 
 ```
 beans can be retrieved via a simple api
 
@@ -228,7 +228,7 @@ try environment
             .property("id", value: "foo-3")
             .property("number", value: 1)))
 
-    .refresh()
+    .startup()
 ```
 Both mechanisms heavily rely in reflection which is used to create instances and set properties. The drawback is that - at least in the current version - the corresponding objects need to derive from `NSObject` in order to use the corresponding low level methods. It is possible to avoid that, if 
 * property setters are avoided, and
@@ -289,9 +289,7 @@ Provided log destinations are
 * file
 * queued log destination
 
-The queueded log destination uses a dispatch queue. As a default a serial queue will be created whose purpose simply is to serialze the entries. In this case ´synchronize: false´ prevents that the console operations are synchronized with a Mutex
-
-
+The queueded log destination uses a dispatch queue. As a default a serial queue will be created whose purpose simply is to serialize the entries. In this case ´synchronize: false´ prevents that the console operations are synchronized with a Mutex
 
 ## Requirements
 
@@ -301,7 +299,7 @@ The queueded log destination uses a dispatch queue. As a default a serial queue 
 # Documentation
 
 * Check the [Wiki](https://github.com/coolsamson7/inject/wiki)
-* API Docs [here](http://cocoadocs.org/docsets/inject/0.9.4/)
+* API Docs [here](http://cocoadocs.org/docsets/inject/1.0.1/)
 
 # Installation
 
@@ -328,24 +326,14 @@ What is still missing ( mainly due to the crappy Swift support for reflection )
 
 And there are also limitations ( darn )
 * all reflection usage requires the corresponding objects need to derive from `NSObject` ( xml and fluent interface with property setters )
-* all objects need to have a default `init` function
 
 This limitation is due to the - missing - swift support for relection. As soon as the language evolves i would change that.. 
 # Roadmap
-* support the different package managers
+* support more package managers
 * wait for replies :-)
 * internal type system on top of the swift low level types ( answering questions like: what are the implemented protocols of a class, is a class a number type, is one type assignable from another type, what are my generic parameters, etc. ) 
 * support more injections
 * integrate proxy patterns as a basis for a service framework
-
-# Help Needed
-
-Even with the limited language support, some features could be probable added. I you have experience with
-* `NSProxy` stuff 
-* Swift/objc type system and ideally an abstraction on top of it
-* method invocation ( method and especially dynamic init-calls, etc. )
- 
-give me a call! :-)
 
 ## License
 
