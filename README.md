@@ -3,6 +3,7 @@
 [![Swift Version](https://img.shields.io/badge/Swift-2.2-F16D39.svg?style=flat)](https://developer.apple.com/swift)
 [![Build Status](https://travis-ci.org/coolsamson7/inject.svg?style=flat)](https://travis-ci.org/coolsamson7/inject)
 [![CocoaPods](https://img.shields.io/cocoapods/v/inject.svg)](https://github.com/coolsamson7/inject)
+![Platform](https://img.shields.io/cocoapods/p/inject.svg?style=flat)](http://cocoapods.org/pods/inject)
 [![License][mit-badge]][mit-url]
 
 <p align="center">
