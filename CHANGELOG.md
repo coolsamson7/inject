@@ -1,6 +1,6 @@
 # Change Log
 
-## [1.0.2](https://github.com/coolsamson7/inject/tree/1.0.2) (2016-08-08)
+## [1.0.2](https://github.com/coolsamson7/inject/tree/1.0.2) (2016-08-22)
 
 **Implemented enhancements:**
 
@@ -9,7 +9,7 @@
 * performance optimizations
 * closure factories
 
-## [1.0.1](https://github.com/coolsamson7/inject/tree/1.0.1) (2016-08-08)
+## [1.0.1](https://github.com/coolsamson7/inject/tree/1.0.1) (2016-08-19)
 
 **Implemented enhancements:**
 
