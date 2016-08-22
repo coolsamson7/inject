@@ -170,7 +170,7 @@ class SampleTest: XCTestCase {
 
     // TODO: + explicit dependency + factory sample!
    func testFluent() {
-        let environment = try! Environment(name: "fluent environment")
+        let environment = try! Environment(name: "fluent environment", traceOrigin: true)
 
         try! environment.addConfigurationSource(ProcessInfoConfigurationSource())
 
@@ -277,5 +277,7 @@ class SampleTest: XCTestCase {
         let swift = try! environment.getBean(SwiftProtocol.self)
 
        let xxx =  try! environment.getBeansByType(SwiftProtocol.self)
+
+        print(xxx)
     }
 }

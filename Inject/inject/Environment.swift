@@ -326,6 +326,10 @@ public class Environment: BeanFactory {
                 builder.append(" scope: \(scope!.name)")
             }
 
+            if origin != nil {
+                builder.append(" origin: \(origin!)")
+            }
+
             builder.append("\n")
         }
         
@@ -499,7 +503,7 @@ public class Environment: BeanFactory {
         // CustomStringConvertible
         
         override public var description: String {
-            let builder = StringBuilder();
+            let builder = StringBuilder()
             
             builder.append("bean(class: \(clazz)")
             if id != nil {
@@ -1274,6 +1278,7 @@ public class Environment: BeanFactory {
 
     // MARK: instance data
 
+    var traceOrigin = false
     var name : String = ""
     var loader : Loader?
     var parent : Environment? = nil
@@ -1289,8 +1294,9 @@ public class Environment: BeanFactory {
     
     // MARK: init
     
-    init(name: String, parent : Environment? = nil) throws {
+    init(name: String, parent : Environment? = nil, traceOrigin : Bool = false) throws {
         self.name = name
+        self.traceOrigin = traceOrigin
 
         if parent != nil {
             self.parent = parent
@@ -1329,12 +1335,12 @@ public class Environment: BeanFactory {
 
             // add initial bean declarations so that constructed objects can also refer to those instances
 
-            try define(BeanDeclaration(instance: injector))
-            try define(BeanDeclaration(instance: configurationManager))
+            try define(bean(injector))
+            try define(bean(configurationManager))
 
             // default post processor
 
-            try define(BeanDeclaration(instance: EnvironmentPostProcessor(environment: self))) // should be the first bean!
+            try define(bean(EnvironmentPostProcessor(environment: self))) // should be the first bean!
         }
     }
 
@@ -1397,11 +1403,15 @@ public class Environment: BeanFactory {
     /// - Parameter instance: the corresponding instance
     /// - Parameter id: an optional id
     /// - Returns: the new `BeanDeclaration`
-    public func bean(instance : AnyObject, id : String? = nil) -> Environment.BeanDeclaration {
+    public func bean(instance : AnyObject, id : String? = nil, file: String = #file, function: String = #function, line: Int = #line, column: Int = #column) -> Environment.BeanDeclaration {
         let result = Environment.BeanDeclaration(instance: instance)
 
         if id != nil {
             result.id = id
+        }
+
+        if traceOrigin {
+            result.origin = Origin(file: file, line: line, column: column)
         }
 
         return result
@@ -1413,11 +1423,15 @@ public class Environment: BeanFactory {
     /// - Parameter lazy: the lazy attribute. default is `false`
     /// - Parameter abstract:t he abstract attribute. default is `false`
     /// - Returns: the new `BeanDeclaration`
-    public func bean(className : String, id : String? = nil, lazy : Bool = false, abstract : Bool = false) throws -> Environment.BeanDeclaration {
+    public func bean(className : String, id : String? = nil, lazy : Bool = false, abstract : Bool = false, file: String = #file, function: String = #function, line: Int = #line, column: Int = #column) throws -> Environment.BeanDeclaration {
         let result = Environment.BeanDeclaration()
 
         if id != nil {
             result.id = id
+        }
+
+        if traceOrigin {
+            result.origin = Origin(file: file, line: line, column: column)
         }
 
         result.lazy = lazy
@@ -1433,13 +1447,17 @@ public class Environment: BeanFactory {
     /// - Parameter id: an optional id
     /// - Parameter lazy: the lazy attribute. default is `false`
     /// - Parameter abstract:t he abstract attribute. default is `false`
-    /// - Parameter factory: a factory funtion that will return a new instance of the specific type
+    /// - Parameter factory: a factory function that will return a new instance of the specific type
     /// - Returns: the new `BeanDeclaration`
-    public func bean<T>(clazz : T.Type, id : String? = nil, lazy : Bool = false, abstract : Bool = false, factory : (() throws -> T)? = nil) throws -> Environment.BeanDeclaration {
+    public func bean<T>(clazz : T.Type, id : String? = nil, lazy : Bool = false, abstract : Bool = false, file: String = #file, function: String = #function, line: Int = #line, column: Int = #column, factory : (() throws -> T)? = nil) throws -> Environment.BeanDeclaration {
         let result = Environment.BeanDeclaration()
 
         if id != nil {
             result.id = id
+        }
+
+        if traceOrigin {
+           result.origin = Origin(file: file, line: line, column: column)
         }
 
         result.lazy = lazy
@@ -1729,12 +1747,12 @@ public class Environment: BeanFactory {
     /// - Returns: the array of instances
     /// - Throws: any errors
 
-    public func getBeansByType(type : Any.Type) throws -> [AnyObject] {
+    public func getBeansByType<T>(type : T.Type) throws -> [T] {
         let declarations = getBeanDeclarationsByType(type)
-        var result : [AnyObject] = []
+        var result : [T] = []
         for declaration in declarations {
             if !declaration.abstract {
-                result.append(try declaration.getInstance(self))
+                result.append(try declaration.getInstance(self) as! T)
             }
         }
 

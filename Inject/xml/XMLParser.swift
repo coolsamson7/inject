@@ -250,7 +250,7 @@ public class XMLParser: NSObject {
                             }
                             
                             if var originAware = currentClass!.instance as? OriginAware {
-                                originAware.origin = Origin(line: parser.lineNumber, column: parser.columnNumber)
+                                originAware.origin = Origin(file: "", line: parser.lineNumber, column: parser.columnNumber)
                             }
                             
                             push(currentClass!)
