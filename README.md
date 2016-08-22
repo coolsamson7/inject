@@ -3,19 +3,16 @@
 [![Swift Version](https://img.shields.io/badge/Swift-2.2-F16D39.svg?style=flat)](https://developer.apple.com/swift)
 [![Build Status](https://travis-ci.org/coolsamson7/inject.svg?style=flat)](https://travis-ci.org/coolsamson7/inject)
 [![CocoaPods](https://img.shields.io/cocoapods/v/inject.svg)](https://github.com/coolsamson7/inject)
-![Platform](https://img.shields.io/cocoapods/p/inject.svg?style=flat)](http://cocoapods.org/pods/inject)
+[![Platform](https://img.shields.io/cocoapods/p/inject.svg?style=flat)](http://cocoapods.org/pods/inject)
 [![License][mit-badge]][mit-url]
 
 <p align="center">
   <img src="https://cloud.githubusercontent.com/assets/19403960/17474460/43a71bd6-5d56-11e6-9bcb-6d2aaa9ac466.png" width="40%">
 </p>
 
-`Inject` is a dependency injection container for Swift that picks up the basic `Spring` ideas - as far as they are possible to be implemented due to missing reflection features - but in addition offers several configuration possibilities:
-* configuration with xml files
-* fluent interface depending on reflection features
-* fluent interface applying closure functions ( without the need for reflection anymore )
+`Inject` is a dependency injection container for Swift that picks up the basic `Spring` ideas - as far as they are possible to be implemented - and additionally utilizes the Swift language features in order to provide a simple and intuitive api.
 
-In addition a number of other concepts are implemented
+In addition to the core a number of other concepts are implemented
 * basic reflection and type introspection features 
 * configuration framework
 * logging framework
@@ -29,24 +26,166 @@ But let's come back to the dependency container again :-)
 # Features
 
 Here is a summary of the supported features
-* full dependency management - and cycle detection - including `depends-on`, `ref`, embedded `<bean>`'s as property values, and injections
-* full typechecking with respect to property values
-* property injections ( only.. ) including automatic type conversions and number coercions ( for the fluent part )
+* specifiction of beans via a fluent interface or xml
+* full dependency management including cycle detection 
+* full typechecking
+* integrated management of configuration values
 * injections resembling the spring `@Inject` autowiring mechanism
 * support for different scopes including `singleton`  and `protoype` as builtin flavors
 * support for lazy initialized beans
-* support for bean templates ( e.g. `parent="<id>"` )
+* support for bean templates
 * lifecycle methods ( e.g. `postConstruct` )
 * `BeanPostProcessor`'s
 * `FactoryBean`'s
-* support for hierarchical containers, inheriting beans ( including the post processors, of course )
-* support for placeholder resolution ( e.g. `${property=<default>}`) referencing possible configuration values that are retrieved by different providers ( e.g. process info, plists, etc. )
-* support for custom namespace handlers that are much more easy to handle than in the spring world
+* support for hierarchical containers, that inherit beans ( and post processors )
+* support for placeholder resolution ( e.g. `${property=<default>}`) in xml 
+* support for custom namespace handlers in xml
+* automatic type conversions and number coercions in xml
 
+For detailed information please visit
 
-Let's look at an xml example first ( included in the repository )
+* The [Wiki](https://github.com/coolsamson7/inject/wiki) and
+* the generated [API Docs](http://cocoadocs.org/docsets/inject/1.0.1/)
 
-Here is a sample configuration file `sample.xml` that will demonstrate most of the features
+# Examples
+
+Let's look at some simple examples.
+
+```Swift
+let environment = try! Environment(name: "my first environment")
+
+try! environment
+   // a bar created by the default constructor
+   
+   .define(environment.bean(Bar.self, factory: Bar.init))
+   
+   // a foo that depends on bar
+   
+   .define(environment.bean(Foo.self, factory: {
+            return Foo(bar: try! environment.getBean(Bar.self))
+        }).requires(class: Bar.self))
+        
+   // get goin'
+   
+   .startup()
+```
+
+One the environment is configured, beans can simply be retrieved via the `getBean()` function.
+
+```Swift
+let foo = try environment.getBean(Foo.self))
+```
+Behind the scenes all bean definitions will be validated - e.g. looking for cyclic dependencies or non resolvable dependencies - and all singleton beans will be eagerly constructed.
+
+Other injections - here property inejctions - can be expressed via the fluent interface
+
+```Swift
+environment.define(environment.bean(Foo.self, id: "foo-1")
+   .property("name", value: "foo")
+   .property("number", value: 7))
+```
+
+**Injections**
+
+A similar concept as the Java `@Inject` annotations is available that let's you define injections on a class basis.
+
+```Swift
+public class AbstractConfigurationSource : NSObject, Bean, BeanDescriptorInitializer, ... {
+    // MARK: instance data
+    
+    ...
+    var configurationManager : ConfigurationManager? = nil // injected
+    
+    ...
+    
+    // MARK: implement BeanDescriptorInitializer
+    
+    public func initializeBeanDescriptor(beanDescriptor : BeanDescriptor) {
+        beanDescriptor["configurationManager"].inject(InjectBean())
+    }
+    
+    // MARK: implement Bean
+    
+    public func postConstruct() throws -> Void {
+        try configurationManager!.addSource(self)
+    }
+```
+
+**Scopes**
+
+Scopes determine when and how often a bean instance is created. 
+* The default is "singleton", which will create an instance once and will cache the value.
+* "Prototype" will recreate a  new instance whenever a bean is requested.
+
+Other scopes can be simply added ( e.g. session scope )
+
+**Lazy Beans***
+
+Beans that are marked as lazy will be constructed on every request as a new instance
+
+**Factory Beans**
+
+Factory beans are beans that implement a specific protocol and create other beans in turn.
+
+```Swift
+environment
+   // a template
+
+   .define(environment.bean(FooFactory.self)
+      .property("id", value: "...") // configure the factory....
+      .target(Foo.self) / i will create foo's
+    )
+    
+let foo = environment.getBean(Foo.self) // is cerated by the factory!
+```
+
+**Abstract Beans**
+
+It is possible to define a bean skeletton - possibly hiding ugly technical parameters - and let the programmer finsh configuration by adding the missing parts:
+
+```Swift
+environment
+   // a template
+
+   .define(environment.bean(Foo.self, id: "foo-template")
+      .property("url", value: "...")
+      .property("port", value: 8080))
+   
+   // the concrete bean
+   
+   .define(environment.bean(Foo.self, parent: "foo-template")
+      .property("missing", value: "foo") // add missing properties
+   )
+```
+Usually templates are part of a parent environment to separate technical aspects.
+
+**Bean Post Processor**
+
+Bean Post Processors are classes that implement a specific protocol and are calle dby the container in order to modify the to be constructed instance.
+
+**Lifecycle Callbacks**
+
+Different protocols can be implemenetd by classes which will be called by the container when an instance is created.
+The most important is a `postConstruct` that is called after the instance has been created and all psot processors have bben executed. 
+
+**Configuration Values**
+
+Every container defines a central registry that maintains configuration values - from different sources - that can be retrieved with an uniform api.
+
+```Swift
+let environment = ...
+environment.addConfigurationSource(ProcessInfoConfigurationSource()) // process info
+environment.addConfigurationSource(PlistConfigurationSource(name: "Info")) // will read Info.plist in the current bundle
+
+// retrieve some values
+
+environment.getConfigurationValue(Int.self, key: "SIMULATOR_MAINSCREEN_HEIGHT", defaultValue: 100) // implicit conversion!
+```
+
+**XML Configuration**
+
+And for all xml lovers ( :-) ), an xml parser for the original - at least a subset - spring schema.
+
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <beans
@@ -154,110 +293,13 @@ Here is a sample configuration file `sample.xml` that will demonstrate most of t
 </beans>
 ```
 
-As you can see, i was too lazy to create an own xsd, so i will stick to the spring xsd for now :-)
-
-Once the container is setup, which is done like this:
-
-```swift
-var data : NSData = NSData(contentsOfURL: NSBundle(forClass: SampleTest.self).URLForResource("sample", withExtension: "xml")!)!
-    
+```Swift
 var environment = Environment(name: "environment")
-
+var data : NSData = ...
 environment
    .loadXML(data)
-   .startup() // would be done on demand anyway whenever a getter is called that references the internal layout 
+   .startup()  
 ```
-beans can be retrieved via a simple api
-
-```swift
-// by type if one instance only exists ( it would throw an error otherwise )
-
-let baz = try environment.getBean(Baz.self)
-
-// by id
-
-let foo = try environment.getBean(Foo.self, byId: "foo-1")
-
-```
-
-If you don't like xml a fluent interface is provided that will offer the same features.
-
-Here is the - more or less - equivalent
-
-```swift
-let environment = try Environment(name: "fluent environment")
-
-try environment.addConfigurationSource(ProcessInfoConfigurationSource())
-try environment.addConfigurationSource(PlistConfigurationSource(name: "Info"))
-
-try environment
-    .define(environment.bean(SamplePostProcessor.self))
-
-    .define(environment.bean(Foo(), id: "constructed foo")) // plain object
-
-    .define(environment.bean(Foo.self, id: "foo-by-factory", factory: {return Foo()})) // closure factory
-     
-    .define(environment.bean(Foo.self, id: "foo-1")
-        .property("id", value: "foo-1")
-        //.property("bar", inject: InjectBean()) the injection is expressed in the class itself, so this is not needed!
-        .property("number", resolve: "${dunno=1}"))
-
-    .define(environment.bean(Foo.self, id: "foo-prototype")
-        .scope(environment.scope("prototype"))
-        .property("id", value: "foo-prototype")
-        //.property("bar", inject: InjectBean()) the injection is expressed in the class itself, so this is not needed!
-        .property("number", resolve: "${com.foo:bar=1}"))
-
-    .define(environment.bean(Bar.self, id: "bar-parent", abstract: true)
-        .property("magic", value: 4711))
-
-    .define(environment.bean(Bar.self, id: "bar", lazy: true)
-        .parent("bar-parent")
-        .property("id", value: "bar"))
-
-    .define(environment.bean(BazFactory.self, id: "baz")
-        .property("name", value: "factory")
-        .property("id", value: "id"))
-
-    .define(environment.bean(Bazong.self, id: "bazong-1")
-        .property("id", value: "id")
-        .property("foo", ref: "foo-1"))
-
-    .define(environment.bean(Bazong.self, id: "bazong-2")
-        .property("id", value: "id")
-        .property("foo", bean: environment.bean(Foo.self)
-            .property("id", value: "foo-3")
-            .property("number", value: 1)))
-
-    .startup()
-```
-Both mechanisms heavily rely in reflection which is used to create instances and set properties. The drawback is that - at least in the current version - the corresponding objects need to derive from `NSObject` in order to use the corresponding low level methods. It is possible to avoid that, if 
-* property setters are avoided, and
-* "constructors" are realized by closure functions
-
-Let's look at another example ( assuming two plain swift classes `Swift` and `AnotherSwift` ):
-
-```swift
-let environment = try Environment(name: "closure environment")
-
-try environment
-     .define(environment.bean(Swift.self, factory: {
-            let swift = Swift(name:  try environment.getValue(String.self, key: "dunno", defaultValue: "default")) // access configuration values
-
-            // set additional properties
-            
-            swift.other = try environment.getBean(AnotherSwift.self) // must be constructed first!
-
-            return swift
-        }).requires(class: AnotherSwift.self))
-
-        .define(environment.bean(AnotherSwift.self, factory: {
-            AnotherSwift(name: "other swift")
-        }))
-```
-As you see, the provided closure functions both create the object and set properties. In order to guarantee that all dependencies are available, dependencies explicitely nned to be declared by the `requires` function!
-
-Even in this case there is a small prerequisite for the used classes since an internal type registry that collects structural infromation on all object needs to crate a prototype object in order to analzye the properties: The classes need to implement a protocol `Initializable` that simply declares a function `init()`.
 
 # Logging
 
@@ -297,11 +339,6 @@ The queueded log destination uses a dispatch queue. As a default a serial queue 
 - iOS 8.0+
 - Xcode 7.0+
 
-# Documentation
-
-* Check the [Wiki](https://github.com/coolsamson7/inject/wiki)
-* API Docs [here](http://cocoadocs.org/docsets/inject/1.0.1/)
-
 # Installation
 
 ## Cocoapods
@@ -316,25 +353,14 @@ end
 
 Then run `pod install` command. For details of the installation and usage of CocoaPods, visit [its official website](https://cocoapods.org).
 
-# Missing
-
-What is still missing ( mainly due to the crappy Swift support for reflection )
-* method injection
-* constructor injection
-* let me think...hmmm
-
 # Limitations
 
-And there are also limitations ( darn )
-* all reflection usage requires the corresponding objects need to derive from `NSObject` ( xml and fluent interface with property setters )
+Depending on the specific bean definition, it may be required that the corresponding classes derive from `NSObject`.
+This limitation is due to the - missing - `Swift` support for relection. As soon as the language evolves i would change that.. 
 
-This limitation is due to the - missing - swift support for relection. As soon as the language evolves i would change that.. 
 # Roadmap
 * support more package managers
 * wait for replies :-)
-* internal type system on top of the swift low level types ( answering questions like: what are the implemented protocols of a class, is a class a number type, is one type assignable from another type, what are my generic parameters, etc. ) 
-* support more injections
-* integrate proxy patterns as a basis for a service framework
 
 ## License
 
