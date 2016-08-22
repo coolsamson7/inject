@@ -42,6 +42,8 @@ Here is a summary of the supported features
 * support for custom namespace handlers in xml
 * automatic type conversions and number coercions in xml
 
+# Documentation
+
 For detailed information please visit
 
 * The [Wiki](https://github.com/coolsamson7/inject/wiki) and
