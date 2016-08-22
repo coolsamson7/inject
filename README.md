@@ -47,7 +47,7 @@ Here is a summary of the supported features
 For detailed information please visit
 
 * The [Wiki](https://github.com/coolsamson7/inject/wiki) and
-* the generated [API Docs](http://cocoadocs.org/docsets/inject/1.0.1/)
+* the generated [API Docs](http://cocoadocs.org/docsets/inject/1.0.2/)
 
 # Examples
 
@@ -345,11 +345,11 @@ The queueded log destination uses a dispatch queue. As a default a serial queue 
 
 ## Cocoapods
 
-To install with CocoaPods, add `pod 'inject', '~> 1.0.0'`  to your `Podfile`, e.g.
+To install with CocoaPods, add `pod 'inject', '~> 1.0.2'`  to your `Podfile`, e.g.
 
 ```ruby
 target 'MyApp' do
-  pod 'inject', '~> 1.0.0'
+  pod 'inject', '~> 1.0.2'
 end
 ```
 
