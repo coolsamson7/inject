@@ -179,9 +179,9 @@ class SampleTest: XCTestCase {
 
            .define(environment.bean(SamplePostProcessor.self))
 
-           .define(environment.bean(Foo.self, id: "foo-1")
-               .property("id", value: "foo-1")
-               .property("number", resolve: "${dunno=1}"))
+        .define(environment.bean(Foo.self, id: "foo-1")
+        .property("id", value: "foo-1")
+        .property("number", resolve: "${dunno=1}"))
 
            .define(environment.bean(Foo.self, id: "foo-prototype")
               .scope(environment.scope("prototype"))
@@ -234,7 +234,7 @@ class SampleTest: XCTestCase {
         // implement BeanDescriptorInitializer
 
         func initializeBeanDescriptor(beanDescriptor : BeanDescriptor) {
-            //try! beanDescriptor.implements(SwiftProtocol.self)
+            try! beanDescriptor.implements(SwiftProtocol.self)
         }
     }
 
@@ -257,7 +257,7 @@ class SampleTest: XCTestCase {
            .define(environment.bean(Swift.self, factory: {
             let swift = Swift()
 
-            swift.name = try environment.getValue(String.self, key: "dunno", defaultValue: "default")
+            swift.name = try environment.getConfigurationValue(String.self, key: "dunno", defaultValue: "default")
             swift.other = try environment.getBean(AnotherSwift.self)
 
             return swift
@@ -274,7 +274,7 @@ class SampleTest: XCTestCase {
 
         // fetch
 
-        let swift = try! environment.getBean(Swift.self)
+        let swift = try! environment.getBean(SwiftProtocol.self)
 
        let xxx =  try! environment.getBeansByType(SwiftProtocol.self)
     }

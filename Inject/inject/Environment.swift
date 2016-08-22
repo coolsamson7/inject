@@ -1833,7 +1833,7 @@ public class Environment: BeanFactory {
     /// - Parameter scope: the optional scope
     /// - Returns: the value
     /// - Throws: any possible error
-    public func getValue<T>(type : T.Type, namespace : String = "", key : String, defaultValue: T? = nil, scope : Scope? = nil) throws -> T {
+    public func getConfigurationValue<T>(type : T.Type, namespace : String = "", key : String, defaultValue: T? = nil, scope : Scope? = nil) throws -> T {
         return try configurationManager.getValue(type, namespace: namespace, key: key, defaultValue: defaultValue, scope: scope)
     }
     
