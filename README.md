@@ -77,7 +77,7 @@ let foo = try environment.getBean(Foo.self))
 ```
 Behind the scenes all bean definitions will be validated - e.g. looking for cyclic dependencies or non resolvable dependencies - and all singleton beans will be eagerly constructed.
 
-Other injections - here property inejctions - can be expressed via the fluent interface
+Other injections - here property injections - can be expressed via the fluent interface
 
 ```Swift
 environment.define(environment.bean(Foo.self, id: "foo-1")
@@ -119,7 +119,7 @@ Scopes determine when and how often a bean instance is created.
 
 Other scopes can be simply added ( e.g. session scope )
 
-**Lazy Beans***
+**Lazy Beans**
 
 Beans that are marked as lazy will be constructed on every request as a new instance
 
