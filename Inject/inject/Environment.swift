@@ -1270,7 +1270,7 @@ public class Environment: BeanFactory {
 
     // MARK: static data
 
-    static var LOGGER = LogManager.getLogger(forClass: Environment.self)
+    static let LOGGER = LogManager.getLogger(forClass: Environment.self)
 
     // MARK: instance data
 
