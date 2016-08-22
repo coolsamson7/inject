@@ -397,7 +397,7 @@ public class Environment: BeanFactory {
 
                 for beanProperty in descriptor.getProperties() {
                     if beanProperty.autowired {
-                        let declaration = try loader.context.getCandidate(beanProperty.getPropertyType() as! AnyClass)
+                        let declaration = try loader.context.getCandidate(beanProperty.getPropertyType())
 
                         loader.dependency(declaration, before: self)
                     } // if
@@ -588,7 +588,7 @@ public class Environment: BeanFactory {
                 bean = try loader.context.getDeclarationById(inject.id!)
             }
             else {
-                bean = try loader.context.getCandidate(type as! AnyClass)
+                bean = try loader.context.getCandidate(type)
             }
 
             loader.dependency(bean!, before: beanDeclaration)
@@ -1636,14 +1636,14 @@ public class Environment: BeanFactory {
         }
     }
 
-    func getCandidate(clazz : AnyClass) throws -> Environment.BeanDeclaration {
-        let candidates = getBeanDeclarationsByType(try BeanDescriptor.forClass(clazz))
+    func getCandidate(type : Any.Type) throws -> Environment.BeanDeclaration {
+        let candidates = getBeanDeclarationsByType(try BeanDescriptor.forType(type))
         
         if candidates.count == 0 {
-            throw EnvironmentErrors.NoCandidateForType(type: clazz)
+            throw EnvironmentErrors.NoCandidateForType(type: type)
         }
         if candidates.count > 1 {
-            throw EnvironmentErrors.AmbiguousCandidatesForType(type: clazz)
+            throw EnvironmentErrors.AmbiguousCandidatesForType(type: type)
         }
         else {
             return candidates[0]
@@ -1758,13 +1758,13 @@ public class Environment: BeanFactory {
             }
         }
         else {
-            let result = getBeanDeclarationsByType(try BeanDescriptor.forClass(type as! AnyClass))
+            let result = getBeanDeclarationsByType(try BeanDescriptor.forType(type))
             
             if result.count == 0 {
-                throw EnvironmentErrors.UnknownBeanByType(type: type as! AnyClass)
+                throw EnvironmentErrors.UnknownBeanByType(type: type)
             }
             else if result.count > 1 {
-                throw EnvironmentErrors.AmbiguousBeanByType(type: type as! AnyClass)
+                throw EnvironmentErrors.AmbiguousBeanByType(type: type)
             }
             else {
                 return try result[0].getInstance(self) as! T
@@ -1778,7 +1778,7 @@ public class Environment: BeanFactory {
     /// - Parameter id: an optional id
     /// - Returns: the instance
     /// - Throws: Any error
-    public func getBean(type : AnyClass, byId id : String? = nil) throws -> AnyObject {
+    public func getBean(type : Any.Type, byId id : String? = nil) throws -> AnyObject {
         try validate()
 
         if id != nil {
@@ -1790,7 +1790,7 @@ public class Environment: BeanFactory {
             }
         }
         else {
-            let result = getBeanDeclarationsByType(try BeanDescriptor.forClass(type ))
+            let result = getBeanDeclarationsByType(try BeanDescriptor.forType(type))
 
             if result.count == 0 {
                 throw EnvironmentErrors.UnknownBeanByType(type: type )

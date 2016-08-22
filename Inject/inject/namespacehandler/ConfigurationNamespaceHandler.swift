@@ -5,9 +5,9 @@
 //  Created by Andreas Ernst on 18.07.16.
 //  Copyright © 2016 Andreas Ernst. All rights reserved.
 //
-
+/// `ConfigurationNamespaceHandler` is a `NamespaceHandler` that is used to define confiuration values
 public class ConfigurationNamespaceHandler : NamespaceHandler {
-    // local classes
+    // MARK: local classes
     
     // the source
     

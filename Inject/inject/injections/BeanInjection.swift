@@ -21,9 +21,7 @@ public class BeanInjection : Injection {
                 return try environment.getBean(AnyObject.self, byId: beanInject.id!);
             }
             else {
-                let clazz : AnyClass = property.getPropertyType() as! AnyClass // = AnyObject.type
-
-                return try environment.getBean(clazz)
+                return try environment.getBean(property.getPropertyType())
             }
         } // if
         
