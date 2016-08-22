@@ -6,6 +6,7 @@
 //  Copyright © 2016 Andreas Ernst. All rights reserved.
 //
 
+/// Base class for a `ConfigurationSource`
 public class AbstractConfigurationSource : NSObject, ConfigurationSource, Bean, BeanDescriptorInitializer {
     // MARK: instance data
     

@@ -175,8 +175,12 @@ class BeanFactoryTests: XCTestCase {
         let parent = try Environment(name: "parent")
 
         try parent.getConfigurationManager().addSource(ProcessInfoConfigurationSource())
+        try parent.getConfigurationManager().addSource(PlistConfigurationSource(name: "Info", forClass: self.dynamicType))
 
         try parent
+           .define(parent.settings()
+              .setValue(key: "key", value: "key_value"))
+
            //.define(parent.bean(ProcessInfoConfigurationSource.self)
            //   .id("x1"))
 
@@ -195,6 +199,8 @@ class BeanFactoryTests: XCTestCase {
                .abstract()
                .property("name", resolve: "${andi=Andreas?}"))
 */
+        print(parent.getConfigurationManager().report())
+
         let child = try! Environment(name: "child", parent: parent)
 
         try! child
@@ -262,6 +268,9 @@ class BeanFactoryTests: XCTestCase {
             try parent.getConfigurationManager().addSource(ProcessInfoConfigurationSource())
             
             try parent
+                .define(parent.settings()
+                    .setValue(key: "key", value: "key_value"))
+
                 //.define(parent.bean(ProcessInfoConfigurationSource.self)
                 //   .id("x1"))
                 
@@ -314,6 +323,6 @@ class BeanFactoryTests: XCTestCase {
                     .property("double", value: 2.2)).startup()
             
             return true
-            }, times: 1000)
+            }, times: 1)
     }
 }

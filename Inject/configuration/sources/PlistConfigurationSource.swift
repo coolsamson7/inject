@@ -8,25 +8,30 @@
 
 /// A configuration source based on plists
 public class PlistConfigurationSource : AbstractConfigurationSource {
-    // MARK: instance data
+    // MARK: class func
 
-    var name : String? {
-        didSet {
-            _url = NSBundle.mainBundle().pathForResource(name, ofType: "plist")!
+    class func bundle(forClass: AnyClass? = nil) -> NSBundle {
+        var bundle = NSBundle.mainBundle()
+
+        if forClass != nil {
+            bundle = NSBundle(forClass: forClass!)
         }
+
+        return bundle
     }
 
-    // init
+    // MARK: init
 
     override init() {
         super.init()
     }
 
-    public init(name : String) {
-        super.init(url: name /*NSBundle.mainBundle().pathForResource(name, ofType: "plist")!*/, mutable: false, canOverrule: true)
+    public init(name : String, forClass: AnyClass? = nil) {
+        super.init(url: PlistConfigurationSource.bundle(forClass).pathForResource(name, ofType: "plist")!, mutable: false, canOverrule: true)
+
     }
 
-    // override
+    // MARK: override AbstractConfigurationSource
 
     override public func load(configurationManager : ConfigurationManager) throws -> Void {
         let dict = NSDictionary(contentsOfFile: url) as! [String: AnyObject]
