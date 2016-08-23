@@ -10,14 +10,14 @@
   <img src="https://cloud.githubusercontent.com/assets/19403960/17474460/43a71bd6-5d56-11e6-9bcb-6d2aaa9ac466.png" width="40%">
 </p>
 
-`Inject` is a dependency injection container for Swift that picks up the basic `Spring` ideas - as far as they are possible to be implemented - and additionally utilizes the Swift language features in order to provide a simple and intuitive api.
+`Inject` is a dependency injection container for Swift that picks up the basic `Spring` ideas - as far as they are possible to be implemented - and additionally utilizes the Swift language features - e.g. closures - in order to provide a simple and intuitive api.
 
 In addition to the core a number of other concepts are implemented
 * basic reflection and type introspection features 
 * configuration framework
 * logging framework
 * tracing framework
-* threading classes
+* concurrency classes
 * xml parser
 * type conversion facilities
 
@@ -28,7 +28,7 @@ But let's come back to the dependency container again :-)
 Here is a summary of the supported features
 * specifiction of beans via a fluent interface or xml
 * full dependency management including cycle detection 
-* full typechecking
+* all defintions are checked for typesafeness
 * integrated management of configuration values
 * injections resembling the spring `@Inject` autowiring mechanism
 * support for different scopes including `singleton`  and `protoype` as builtin flavors
@@ -75,7 +75,7 @@ try! environment
 One the environment is configured, beans can simply be retrieved via the `getBean()` function.
 
 ```Swift
-let foo = try environment.getBean(Foo.self))
+let foo = try environment.getBean(Foo.self)
 ```
 Behind the scenes all bean definitions will be validated - e.g. looking for cyclic dependencies or non resolvable dependencies - and all singleton beans will be eagerly constructed.
 
@@ -108,6 +108,7 @@ public class AbstractConfigurationSource : NSObject, Bean, BeanDescriptorInitial
     
     // MARK: implement Bean
     
+    // we know, that all injections have been executed....
     public func postConstruct() throws -> Void {
         try configurationManager!.addSource(self)
     }
@@ -134,11 +135,11 @@ environment
    // a template
 
    .define(environment.bean(FooFactory.self)
-      .property("id", value: "...") // configure the factory....
+      .property("someProperty", value: "...") // configure the factory....
       .target(Foo.self) / i will create foo's
     )
     
-let foo = environment.getBean(Foo.self) // is cerated by the factory!
+let foo = environment.getBean(Foo.self) // is created by the factory!
 ```
 
 **Abstract Beans**
@@ -149,7 +150,7 @@ It is possible to define a bean skeletton - possibly hiding ugly technical param
 environment
    // a template
 
-   .define(environment.bean(Foo.self, id: "foo-template")
+   .define(environment.bean(Foo.self, id: "foo-template", abstract: true)
       .property("url", value: "...")
       .property("port", value: 8080))
    
