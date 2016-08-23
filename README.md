@@ -124,7 +124,7 @@ Other scopes can be simply added ( e.g. session scope )
 
 **Lazy Beans**
 
-Beans that are marked as lazy will be constructed on every request as a new instance
+Beans that are marked as lazy will be constructed after the first request.
 
 **Factory Beans**
 
@@ -132,8 +132,6 @@ Factory beans are beans that implement a specific protocol and create other bean
 
 ```Swift
 environment
-   // a template
-
    .define(environment.bean(FooFactory.self)
       .property("someProperty", value: "...") // configure the factory....
       .target(Foo.self) / i will create foo's
@@ -164,12 +162,12 @@ Usually templates are part of a parent environment to separate technical aspects
 
 **Bean Post Processor**
 
-Bean Post Processors are classes that implement a specific protocol and are calle dby the container in order to modify the to be constructed instance.
+Bean Post Processors are classes that implement a specific protocol and are called by the container in order to modify the to be constructed instance.
 
 **Lifecycle Callbacks**
 
 Different protocols can be implemenetd by classes which will be called by the container when an instance is created.
-The most important is a `postConstruct` that is called after the instance has been created and all psot processors have bben executed. 
+The most important is a `postConstruct` that is called after the instance has been created and all psot processors have been executed. 
 
 **Configuration Values**
 
