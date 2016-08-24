@@ -23,6 +23,14 @@ In addition to the core a number of other concepts are implemented
 
 But let's come back to the dependency container again :-)
 
+# What's a dependency injection container anyway?
+
+The basic idea is to have one central object that knows about all kind of different object types and object dependencies and whose task is to instantiate and assemble them appropriately by populating fields ( with property setters, methods or appropriate constructor calls ). Classes do not have to know anything about the current infrastructure - e.g. implemenation details for protocols, or specific configuration values - as this know how is solely in the responsiblity of the container and injected into the classes.
+
+If you think about unit testing, where service implementations need to be exchanged by some kind of local variants ( e.g. mocks ) you get a feeling for the benefits.
+
+The other big benefit is that the lifecycle of objects is also managed by a central instance. This on the one hand avoids singleton patterns all over your code - which simply is a mess - and on the other hand allows for other features such as session scoped objects, or the possibility to shutdown the complete container - releasing ressources - with on call.
+
 # Features
 
 Here is a summary of the supported features
@@ -134,7 +142,7 @@ Factory beans are beans that implement a specific protocol and create other bean
 environment
    .define(environment.bean(FooFactory.self)
       .property("someProperty", value: "...") // configure the factory....
-      .target(Foo.self) / i will create foo's
+      .target(Foo.self) // i will create foo's
     )
     
 let foo = environment.getBean(Foo.self) // is created by the factory!
