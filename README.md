@@ -10,25 +10,33 @@
   <img src="https://cloud.githubusercontent.com/assets/19403960/17474460/43a71bd6-5d56-11e6-9bcb-6d2aaa9ac466.png" width="40%">
 </p>
 
-`Inject` is a dependency injection container for Swift that picks up the basic `Spring` ideas - as far as they are possible to be implemented - and additionally utilizes the Swift language features in order to provide a simple and intuitive api.
+`Inject` is a dependency injection container for Swift that picks up the basic `Spring` ideas - as far as they are possible to be implemented - and additionally utilizes the Swift language features - e.g. closures - in order to provide a simple and intuitive api.
 
 In addition to the core a number of other concepts are implemented
 * basic reflection and type introspection features 
 * configuration framework
 * logging framework
 * tracing framework
-* threading classes
+* concurrency classes
 * xml parser
 * type conversion facilities
 
 But let's come back to the dependency container again :-)
+
+# What's a dependency injection container anyway?
+
+The basic idea is to have one central object that knows about all kind of different object types and object dependencies and whose task is to instantiate and assemble them appropriately by populating fields ( with property setters, methods or appropriate constructor calls ). Classes do not have to know anything about the current infrastructure - e.g. implemenation details for protocols, or specific configuration values - as this know how is solely in the responsiblity of the container and injected into the classes.
+
+If you think about unit testing, where service implementations need to be exchanged by some kind of local variants ( e.g. mocks ) you get a feeling for the benefits.
+
+The other big benefit is that the lifecycle of objects is also managed by a central instance. This on the one hand avoids singleton patterns all over your code - which simply is a mess - and on the other hand allows for other features such as session scoped objects, or the possibility to shutdown the complete container - releasing ressources - with on call.
 
 # Features
 
 Here is a summary of the supported features
 * specifiction of beans via a fluent interface or xml
 * full dependency management including cycle detection 
-* full typechecking
+* all defintions are checked for typesafeness
 * integrated management of configuration values
 * injections resembling the spring `@Inject` autowiring mechanism
 * support for different scopes including `singleton`  and `protoype` as builtin flavors
@@ -75,7 +83,7 @@ try! environment
 One the environment is configured, beans can simply be retrieved via the `getBean()` function.
 
 ```Swift
-let foo = try environment.getBean(Foo.self))
+let foo = try environment.getBean(Foo.self)
 ```
 Behind the scenes all bean definitions will be validated - e.g. looking for cyclic dependencies or non resolvable dependencies - and all singleton beans will be eagerly constructed.
 
@@ -108,6 +116,7 @@ public class AbstractConfigurationSource : NSObject, Bean, BeanDescriptorInitial
     
     // MARK: implement Bean
     
+    // we know, that all injections have been executed....
     public func postConstruct() throws -> Void {
         try configurationManager!.addSource(self)
     }
@@ -117,13 +126,21 @@ public class AbstractConfigurationSource : NSObject, Bean, BeanDescriptorInitial
 
 Scopes determine when and how often a bean instance is created. 
 * The default is "singleton", which will create an instance once and will cache the value.
-* "Prototype" will recreate a  new instance whenever a bean is requested.
+* "prototype" will recreate a  new instance whenever a bean is requested.
 
-Other scopes can be simply added ( e.g. session scope )
+**Example**: 
+```Swift
+environment.define(environment.bean(Foo.self)
+   .scope("prototype")
+   .property("name", value: "foo")
+   .property("number", value: 7))
+```
+
+Other scopes can be simply added (e.g. session scope ) by defining the implementing class in the current environment.
 
 **Lazy Beans**
 
-Beans that are marked as lazy will be constructed on every request as a new instance
+Beans that are marked as lazy will be constructed after the first request.
 
 **Factory Beans**
 
@@ -131,14 +148,12 @@ Factory beans are beans that implement a specific protocol and create other bean
 
 ```Swift
 environment
-   // a template
-
    .define(environment.bean(FooFactory.self)
-      .property("id", value: "...") // configure the factory....
-      .target(Foo.self) / i will create foo's
+      .property("someProperty", value: "...") // configure the factory....
+      .target(Foo.self) // i will create foo's
     )
     
-let foo = environment.getBean(Foo.self) // is cerated by the factory!
+let foo = environment.getBean(Foo.self) // is created by the factory!
 ```
 
 **Abstract Beans**
@@ -149,7 +164,7 @@ It is possible to define a bean skeletton - possibly hiding ugly technical param
 environment
    // a template
 
-   .define(environment.bean(Foo.self, id: "foo-template")
+   .define(environment.bean(Foo.self, id: "foo-template", abstract: true)
       .property("url", value: "...")
       .property("port", value: 8080))
    
@@ -163,12 +178,12 @@ Usually templates are part of a parent environment to separate technical aspects
 
 **Bean Post Processor**
 
-Bean Post Processors are classes that implement a specific protocol and are calle dby the container in order to modify the to be constructed instance.
+Bean Post Processors are classes that implement a specific protocol and are called by the container in order to modify the to be constructed instance.
 
 **Lifecycle Callbacks**
 
 Different protocols can be implemenetd by classes which will be called by the container when an instance is created.
-The most important is a `postConstruct` that is called after the instance has been created and all psot processors have bben executed. 
+The most important is a `postConstruct` that is called after the instance has been created and all psot processors have been executed. 
 
 **Configuration Values**
 
