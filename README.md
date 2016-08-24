@@ -126,9 +126,16 @@ public class AbstractConfigurationSource : NSObject, Bean, BeanDescriptorInitial
 
 Scopes determine when and how often a bean instance is created. 
 * The default is "singleton", which will create an instance once and will cache the value.
-* "Prototype" will recreate a  new instance whenever a bean is requested.
+* "prototype" will recreate a  new instance whenever a bean is requested.
 
-Other scopes can be simply added ( e.g. session scope )
+**Example**: 
+```Swift
+environment.define(environment.bean(Foo.self, scope: "prototype")
+   .property("name", value: "foo")
+   .property("number", value: 7))
+```
+
+Other scopes can be simply added (e.g. session scope ) by defining the implementing class in the current environment.
 
 **Lazy Beans**
 
