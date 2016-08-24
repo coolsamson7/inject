@@ -48,21 +48,25 @@ public class LogManager {
     public class LogEntry {
         // MARK: instance data
 
-        var level    : Level
-        var logger   : String
-        var message  : String
-        var thread: String
-        var file     : String
-        var function : String
-        var line     : Int
-        var column   : Int
+        var level     : Level
+        var logger    : String
+        var message   : String
+        var error     : ErrorType?
+        var stacktrace : Stacktrace?
+        var thread    : String
+        var file      : String
+        var function  : String
+        var line      : Int
+        var column    : Int
         var timestamp : NSDate
 
         // MARK: init
 
-        init(logger: String, level : Level, message: String, thread: String, file: String, function: String, line: Int, column: Int, timestamp : NSDate) {
+        init(logger: String, level : Level, message: String, error : ErrorType? = nil, stacktrace : Stacktrace? = nil, thread: String, file: String, function: String, line: Int, column: Int, timestamp : NSDate) {
             self.logger   = logger
             self.level    = level
+            self.error    = error
+            self.stacktrace  = stacktrace
             self.message  = message
             self.thread   = thread
             self.file     = file
@@ -152,10 +156,10 @@ public class LogManager {
         /// create a log entry
         /// - Parameter level: the severity level
         /// - Parameter message: the message - auto - closure
-        public func log<T>(level : Level, @autoclosure message: () -> T, file: String = #file, function: String = #function, line: Int = #line, column: Int = #column) -> Void {
+        public func log<T>(level : Level, error: ErrorType? = nil, stackTrace : Stacktrace? = nil, @autoclosure message: () -> T, file: String = #file, function: String = #function, line: Int = #line, column: Int = #column) -> Void {
             if isApplicable(level) {
                 let msg = message()
-                let entry = LogEntry(logger: path, level : level, message: "\(msg)", thread: currentThreadName(), file: file, function: function, line: line, column: column, timestamp : NSDate())
+                let entry = LogEntry(logger: path, level : level, message: "\(msg)", error: error, stacktrace : stackTrace, thread: currentThreadName(), file: file, function: function, line: line, column: column, timestamp : NSDate())
 
                 for log in allLogs {
                     log.log(entry)
@@ -185,14 +189,14 @@ public class LogManager {
 
         /// create a log entry with severity error
         /// - Parameter message: the message - auto - closure
-        public func error<T>(@autoclosure message: () -> T, file: String = #file, function: String = #function, line: Int = #line, column: Int = #column) -> Void {
-            log(.ERROR, message: message, file: file, function: function, line: line, column: column)
+        public func error<T>(error: ErrorType? = nil, stackTrace : Stacktrace = Stacktrace(frames: NSThread.callStackSymbols()), @autoclosure message: () -> T, file: String = #file, function: String = #function, line: Int = #line, column: Int = #column) -> Void {
+            log(.ERROR, error: error, stackTrace: stackTrace, message: message, file: file, function: function, line: line, column: column)
         }
 
         /// create a log entry with severity fatal
         /// - Parameter message: the message - auto - closure
-        public func fatal<T>(@autoclosure message: () -> T, file: String = #file, function: String = #function, line: Int = #line, column: Int = #column) -> Void {
-            log(.FATAL, message: message, file: file, function: function, line: line, column: column)
+        public func fatal<T>(error: ErrorType? = nil, stackTrace : Stacktrace = Stacktrace(frames: NSThread.callStackSymbols()), @autoclosure message: () -> T, file: String = #file, function: String = #function, line: Int = #line, column: Int = #column) -> Void {
+            log(.FATAL, error: error, stackTrace: stackTrace, message: message, file: file, function: function, line: line, column: column)
         }
     }
 

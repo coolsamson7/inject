@@ -114,7 +114,23 @@ public class LogFormatter {
     /// return a formatter referencing the message part
     /// Returns: the formatter
     public class func message() -> LogFormatter {
-        return LogFormatter { $0.message }
+        func message(logEntry : LogManager.LogEntry) -> String {
+            let builder = StringBuilder()
+
+            builder.append(logEntry.message)
+
+            if let error = logEntry.error {
+                builder.append(" ").append("\(error)")
+            }
+
+            if let stacktrace = logEntry.stacktrace {
+                builder.append("\n").append(stacktrace)
+            }
+
+            return builder.toString()
+        }
+
+        return LogFormatter { message($0) }
     }
 
     // data

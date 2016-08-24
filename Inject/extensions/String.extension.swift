@@ -38,4 +38,8 @@ extension String {
             return -1
         }
     }
+
+    public func substring(from from: Int) -> String {
+       return self.substringFromIndex(self.startIndex.advancedBy(from))
+    }
 }

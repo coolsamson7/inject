@@ -37,6 +37,7 @@
 		28D359D491BD163AD8316AA5 /* CPL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D3558AA9C455146078B75E /* CPL.swift */; };
 		28D35B2FC01B153417AEC4B3 /* JSONTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D35528B4682760F2643853 /* JSONTest.swift */; };
 		28D35B32992669F931AA5F25 /* Mutex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D3575E22AAD939D050ACAE /* Mutex.swift */; };
+		28D35BAFA905939FA85D612A /* Stacktrace.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D351E415C61A9D24388665 /* Stacktrace.swift */; };
 		28D35C7540DA6069D4696114 /* Optional.extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D3559793F614E3502B5A0F /* Optional.extension.swift */; };
 		28D35C949BC967BAD019A928 /* XMLEnvironmentLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D35754F0C89ABFA9A702C2 /* XMLEnvironmentLoader.swift */; };
 		28D35CCF8BA4308CCFCD5FAE /* Future.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D35EA05D3041A74BA7B450 /* Future.swift */; };
@@ -113,6 +114,7 @@
 
 /* Begin PBXFileReference section */
 		28D351549DD74CAAF6CC46BA /* ConsoleLog.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConsoleLog.swift; sourceTree = "<group>"; };
+		28D351E415C61A9D24388665 /* Stacktrace.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Stacktrace.swift; sourceTree = "<group>"; };
 		28D3523E7DDE91CEC9343D2A /* JSON.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JSON.swift; sourceTree = "<group>"; };
 		28D3526C1C94BE24A955AFDD /* LoggerTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoggerTest.swift; sourceTree = "<group>"; };
 		28D352B193F5E05451D7E927 /* FileLog.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileLog.swift; sourceTree = "<group>"; };
@@ -412,6 +414,7 @@
 				28D359F33852B7EA679981FA /* Transformer.swift */,
 				28D35354E2BDB232FAFD6572 /* Trigger.swift */,
 				28D3558AA9C455146078B75E /* CPL.swift */,
+				28D351E415C61A9D24388665 /* Stacktrace.swift */,
 			);
 			path = util;
 			sourceTree = "<group>";
@@ -677,6 +680,7 @@
 				28D352AFE0EEFE269589B229 /* Initializable.swift in Sources */,
 				28D358C81A5D5059DE3FA519 /* Factory.swift in Sources */,
 				28D35216F1E7AF975A520F08 /* NSObject.extension.swift in Sources */,
+				28D35BAFA905939FA85D612A /* Stacktrace.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
