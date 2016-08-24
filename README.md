@@ -340,13 +340,18 @@ the usual methods are provided
 
 ```swift
 // this is usually a static var in a class!
-var logger = LogManager.getLogger(forClass: MyClass.self) // will build the fully qualified name
+var logger = LogManager.getLogger(forClass: MyClass.self) // will lookup with the fully qualified name
 
 logger.warn("ouch!") // this is a autoclosure!
+
+logger.fatal(SomeError(), message: "ouch")
 ```
+The `error` and `fatal` functions are called with an `ErrorType` argument. Both functions will emit an message containing the original message, the error representation and the current stacktrace.
+
 Provided log destinations are
 * console
 * file
+* nslog
 * queued log destination
 
 The queueded log destination uses a dispatch queue. As a default a serial queue will be created whose purpose simply is to serialize the entries. In this case ´synchronize: false´ prevents that the console operations are synchronized with a Mutex
