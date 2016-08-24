@@ -9,5 +9,5 @@
 import Foundation
 
 /// base class for different kind of injections
-public class Inject : NSObject {
+public class Inject {
 }

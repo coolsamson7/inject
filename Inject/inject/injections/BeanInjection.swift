@@ -5,11 +5,11 @@
 //  Created by Andreas Ernst on 18.07.16.
 //  Copyright © 2016 Andreas Ernst. All rights reserved.
 //
-/// `BeanInjection` executes injections for beans
+/// `BeanInjection` executes injections for beans based on the class `InjectBean`
 public class BeanInjection : Injection {
     // MARK: init
     
-    init() {
+    override init() {
         super.init(clazz: InjectBean.self)
     }
     

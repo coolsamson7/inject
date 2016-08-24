@@ -6,7 +6,7 @@
 //  Copyright © 2016 Andreas Ernst. All rights reserved.
 //
 
-/// `ConfigurationValueInjection`  computes values for configuration value injections
+/// `ConfigurationValueInjection`  computes values for configuration value injections based on the class `InjectConfigurationValue`
 public class ConfigurationValueInjection : Injection {
     // MARK: instance data
     

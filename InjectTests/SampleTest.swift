@@ -129,6 +129,26 @@ class Bazong : NSObject {
 protocol SwiftProtocol {
 }
 
+class SampleScope : AbstractBeanScope {
+    override init() {
+        super.init(name: "sample")
+    }
+
+    public override func prepare(bean : Environment.BeanDeclaration, factory : BeanFactory) throws {
+        if !bean.lazy {
+            try get(bean, factory: factory)
+        }
+    }
+
+    public override func get(bean : Environment.BeanDeclaration, factory : BeanFactory) throws -> AnyObject {
+        if bean.singleton == nil {
+            bean.singleton = try factory.create(bean)
+        }
+
+        return bean.singleton!
+    }
+}
+
 class SampleTest: XCTestCase {
     override class func setUp() {
         Classes.setDefaultBundle(SampleTest.self)
@@ -226,7 +246,7 @@ class SampleTest: XCTestCase {
         var number : Int = 0
         var other : AnotherSwift?
 
-        // Initializable
+        // BeanDescriptorInitializer
 
         required init() {
         }
@@ -238,13 +258,20 @@ class SampleTest: XCTestCase {
         }
     }
 
-    class AnotherSwift : Initializable {
+    class AnotherSwift : NSObject, BeanDescriptorInitializer {
         var name : String?
         var number : Int = 0
 
         // Initializable
 
-        required init() {
+        override init() {
+            super.init()
+        }
+
+        // implement BeanDescriptorInitializer
+
+        func initializeBeanDescriptor(beanDescriptor : BeanDescriptor) {
+            try! beanDescriptor["number"].inject(InjectConfigurationValue(key: "key", defaultValue: -1))
         }
     }
 
@@ -254,14 +281,19 @@ class SampleTest: XCTestCase {
         try! environment.addConfigurationSource(ProcessInfoConfigurationSource())
 
         try! environment
+           .define(environment.bean(SampleScope.self, factory: SampleScope.init))
+
            .define(environment.bean(Swift.self, factory: {
-            let swift = Swift()
+               let swift = Swift()
 
-            swift.name = try environment.getConfigurationValue(String.self, key: "dunno", defaultValue: "default")
-            swift.other = try environment.getBean(AnotherSwift.self)
+               swift.name = try environment.getConfigurationValue(String.self, key: "dunno", defaultValue: "default")
+               swift.other = try environment.getBean(AnotherSwift.self)
 
-            return swift
-        }).requires(class: AnotherSwift.self).implements(SwiftProtocol.self))
+               return swift
+           })
+               .requires(class: AnotherSwift.self)
+               .scope("sample")
+               .implements(SwiftProtocol.self))
 
         .define(environment.bean(AnotherSwift.self, factory: AnotherSwift.init)/*{
             let swift = AnotherSwift()
@@ -275,8 +307,12 @@ class SampleTest: XCTestCase {
         // fetch
 
         let swift = try! environment.getBean(SwiftProtocol.self)
+        let other = try! environment.getBean(AnotherSwift.self)
 
        let xxx =  try! environment.getBeansByType(SwiftProtocol.self)
+
+        let yyy =  try! environment.getBeansByType(Initializable.self)
+        let zzz =  try! environment.getBeansByType(BeanDescriptorInitializer.self)
 
         print(xxx)
     }

@@ -8,7 +8,7 @@
 //
 import Foundation
 
-/// All classes that conform to this protocol can be costructed on a generic basis....oh boy
+/// All classes that conform to this protocol can be constructed on a generic basis....oh boy
 public protocol Initializable : class {
     init()
 }

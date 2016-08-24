@@ -31,6 +31,14 @@ class FactoryFactory<T> : BeanFactory {
 public class Environment: BeanFactory {
     // MARK: local classes
 
+    public class UnresolvedScope : AbstractBeanScope {
+        // MARK: init
+
+        override init(name : String) {
+            super.init(name: name)
+        }
+    }
+
     /// this factory calls the default constructor of the given class
     class DefaultConstructorFactory : BeanFactory {
         // static data
@@ -196,6 +204,15 @@ public class Environment: BeanFactory {
         /// - Returns: self
         public func scope(scope : BeanScope) -> Self {
             self.scope = scope
+
+            return self
+        }
+
+        /// set the scope of this bean declaration
+        /// - Parameter scope: the scope
+        /// - Returns: self
+        public func scope(scope : String) -> Self {
+            self.scope = UnresolvedScope(name: scope)
 
             return self
         }
@@ -410,6 +427,14 @@ public class Environment: BeanFactory {
         }
         
         func resolve(loader : Environment.Loader) throws -> Void {
+            // resolve scope?
+
+            if let scope = self.scope as? UnresolvedScope {
+                self.scope = try loader.context.getScope(scope.name)
+            }
+
+            // resolve properties
+
             for property in properties {
                 try property.resolve(loader)
 
@@ -820,53 +845,41 @@ public class Environment: BeanFactory {
 
     // default scopes
 
-    public class PrototypeScope : BeanScope {
-        // Scope
+    public class PrototypeScope : AbstractBeanScope {
+        // MARK: init
 
-        public var name : String {
-            get {
-                return "prototype"
-            }
+        override init() {
+            super.init(name: "prototype")
         }
 
-        public func prepare(bean : Environment.BeanDeclaration, factory : BeanFactory) throws {
-            // noop
-        }
+        // MARK: override AbstractBeanScope
 
-        public func get(bean : Environment.BeanDeclaration, factory : BeanFactory) throws -> AnyObject {
+        public override func get(bean : Environment.BeanDeclaration, factory : BeanFactory) throws -> AnyObject {
             return try factory.create(bean)
-        }
-
-        public func finish() {
-            // noop
         }
     }
 
-    public class SingletonScope : BeanScope {
-        // Scope
+    public class SingletonScope : AbstractBeanScope {
+        // MARK: init
 
-        public var name : String {
-            get {
-                return "singleton"
-            }
+        override init() {
+            super.init(name: "singleton")
         }
 
-        public func prepare(bean : Environment.BeanDeclaration, factory : BeanFactory) throws {
+        // MARK: override AbstractBeanScope
+
+        public override func prepare(bean : Environment.BeanDeclaration, factory : BeanFactory) throws {
             if !bean.lazy {
                 try get(bean, factory: factory)
             }
         }
 
-        public func get(bean : Environment.BeanDeclaration, factory : BeanFactory) throws -> AnyObject {
+        public override func get(bean : Environment.BeanDeclaration, factory : BeanFactory) throws -> AnyObject {
             if bean.singleton == nil {
                 bean.singleton = try factory.create(bean)
             }
 
             return bean.singleton!
-        }
-
-        public func finish() {
-            // noop
         }
     }
 
@@ -1290,7 +1303,7 @@ public class Environment: BeanFactory {
     var scopes = [String:BeanScope]()
     var localBeans = [BeanDeclaration]()
 
-    var singletonScope : BeanScope
+    var singletonScope = SingletonScope()
     
     // MARK: init
     
@@ -1302,7 +1315,7 @@ public class Environment: BeanFactory {
             self.parent = parent
             self.injector = parent!.injector
             self.configurationManager = parent!.configurationManager
-            self.singletonScope = parent!.singletonScope
+            //self.singletonScope = parent!.singletonScope
             self.scopes = parent!.scopes
 
             self.byType = parent!.byType
@@ -1311,36 +1324,36 @@ public class Environment: BeanFactory {
             loader = Loader(context: self)
         }
         else {
-            // configuration manager
-
-            configurationManager = try ConfigurationManager(scope: Scope.WILDCARD)
-
             // injector
 
             injector = Injector()
 
-            injector.register(BeanInjection())
-            injector.register(ConfigurationValueInjection(configurationManager: configurationManager))
+            // configuration manager
+
+            configurationManager = try ConfigurationManager(scope: Scope.WILDCARD)
 
             // default scopes
-
-            singletonScope = SingletonScope() // cache scope
 
             registerScope(PrototypeScope())
             registerScope(singletonScope)
 
-            // set loader here in order to prevent exception..
+            // default injections
+
+            injector.register(BeanInjection())
+            injector.register(ConfigurationValueInjection(configurationManager: configurationManager))
+
+            // set loader here in order to prevent exception due to frozen environment..
 
             loader = Loader(context: self)
+
+            // default post processor
+
+            try define(bean(EnvironmentPostProcessor(environment: self))) // should be the first bean!
 
             // add initial bean declarations so that constructed objects can also refer to those instances
 
             try define(bean(injector))
             try define(bean(configurationManager))
-
-            // default post processor
-
-            try define(bean(EnvironmentPostProcessor(environment: self))) // should be the first bean!
         }
     }
 
@@ -1421,7 +1434,7 @@ public class Environment: BeanFactory {
     /// - Parameter className: the name of the bean class
     /// - Parameter id: an optional id
     /// - Parameter lazy: the lazy attribute. default is `false`
-    /// - Parameter abstract:t he abstract attribute. default is `false`
+    /// - Parameter abstract: the abstract attribute. default is `false`
     /// - Returns: the new `BeanDeclaration`
     public func bean(className : String, id : String? = nil, lazy : Bool = false, abstract : Bool = false, file: String = #file, function: String = #function, line: Int = #line, column: Int = #column) throws -> Environment.BeanDeclaration {
         let result = Environment.BeanDeclaration()
@@ -1541,7 +1554,7 @@ public class Environment: BeanFactory {
         if loader != nil {
             try loader!.addDeclaration(declaration)
         }
-        else {
+        else { for line in NSThread.callStackSymbols() {print(line)}
             throw EnvironmentErrors.Exception(message: "environment is frozen")
         }
 

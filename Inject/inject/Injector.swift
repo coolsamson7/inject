@@ -36,9 +36,12 @@ public class Injector {
         func analyze(injector : Injector, bean : BeanDescriptor) -> Void {
             for property in bean.allProperties {
                 if let inject = property.inject {
-                    let injection = injector.injections[inject.dynamicType]!
-                    
-                    injections.append((inject: inject, property: property, injection: injection))
+                    if let injection = injector.injections[inject.dynamicType] {
+                        injections.append((inject: inject, property: property, injection: injection))
+                    }
+                    else {
+                        fatalError("no matching injection for type \(inject)")
+                    }
                 }
             }
         }

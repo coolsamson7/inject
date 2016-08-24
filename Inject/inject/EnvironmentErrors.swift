@@ -6,6 +6,7 @@
 //  Copyright © 2016 Andreas Ernst. All rights reserved.
 //
 
+// all possible errors in the context of an environment
 public enum EnvironmentErrors: ErrorType , CustomStringConvertible {
     case ParseError(message: String)
     case NoCandidateForType(type : Any.Type)

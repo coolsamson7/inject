@@ -7,13 +7,19 @@
 //
 
 /// `Injection`s are classes that compute objects that will be injected in an object based on a specific `Inject` class.
-public class Injection : Bean, BeanDescriptorInitializer {
+public class Injection : NSObject, Bean, BeanDescriptorInitializer {
     // MARK: instance data
     
     var injector : Injector?
     var clazz : AnyClass
     
     // init
+
+    override init() {
+        self.clazz = self.dynamicType // anything...
+
+        super.init()
+    }
 
     init(clazz : AnyClass) {
         self.clazz = clazz
