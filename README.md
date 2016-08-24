@@ -130,7 +130,8 @@ Scopes determine when and how often a bean instance is created.
 
 **Example**: 
 ```Swift
-environment.define(environment.bean(Foo.self, scope: "prototype")
+environment.define(environment.bean(Foo.self)
+   .scope("prototype")
    .property("name", value: "foo")
    .property("number", value: 7))
 ```
