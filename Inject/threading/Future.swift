@@ -17,7 +17,7 @@ public class Future<T> {
 
     // init
 
-    init() {
+    public init() {
         mutex = Mutex()
         condition = Condition(mutex: mutex)
     }

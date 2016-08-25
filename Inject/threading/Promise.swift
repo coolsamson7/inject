@@ -52,7 +52,7 @@ public class Promise<T> {
 
     // MARK: init
 
-    init() {
+    public init() {
         self.state = .Pending
     }
 

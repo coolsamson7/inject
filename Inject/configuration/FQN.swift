@@ -29,8 +29,8 @@ public class FQN : Hashable, CustomStringConvertible {
     }
     
     // MARK: init
-    
-    init(namespace : String = "", key : String) {
+
+    public init(namespace : String = "", key : String) {
         self.namespace = namespace;
         self.key = key
     }

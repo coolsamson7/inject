@@ -19,7 +19,7 @@ public class ConsoleLog: LogManager.Log {
     /// - Parameter formatter: the corresponding formatter
     /// - Parameter colorize: if `true`, the log entry weill be colorized
     /// - Parameter synchronize: if `true` the write operations is synchronized
-    init(name : String, formatter: LogFormatter? = nil, synchronize : Bool = true, colorize : Bool = false) {
+    public init(name : String, formatter: LogFormatter? = nil, synchronize : Bool = true, colorize : Bool = false) {
         if synchronize {
             mutex = Mutex()
         }

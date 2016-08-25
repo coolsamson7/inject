@@ -19,7 +19,7 @@ public class ArrayOf<T : Equatable> : SequenceType {
     
     // init
     
-    init(values : T...) {
+    public init(values : T...) {
         self.values = values
     }
     

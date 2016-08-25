@@ -16,7 +16,7 @@ class FactoryFactory<T> : BeanFactory {
 
     // MARK: init
 
-    init(factory : () throws -> T ) {
+    internal init(factory : () throws -> T ) {
         self.factory = factory
     }
 
@@ -1306,8 +1306,8 @@ public class Environment: BeanFactory {
     var singletonScope = SingletonScope()
     
     // MARK: init
-    
-    init(name: String, parent : Environment? = nil, traceOrigin : Bool = false) throws {
+
+    public init(name: String, parent : Environment? = nil, traceOrigin : Bool = false) throws {
         self.name = name
         self.traceOrigin = traceOrigin
 

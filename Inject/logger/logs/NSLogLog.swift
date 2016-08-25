@@ -14,7 +14,7 @@ public class NSLogLog: LogManager.Log {
 
     // MARK: init
 
-    init(name : String, formatter: LogFormatter? = nil, synchronize : Bool = true, colorize : Bool = false) {
+    public init(name : String, formatter: LogFormatter? = nil, synchronize : Bool = true, colorize : Bool = false) {
         if synchronize {
             mutex = Mutex()
         }

@@ -65,12 +65,12 @@ public class ConfigurationManager : NSObject, ConfigurationAdministration, Confi
     
     // init
     
-    override init() {
+    override public init() {
         scope = Scope.WILDCARD
         super.init()
     }
-    
-    init(scope : Scope, sources : ConfigurationSource... ) throws {
+
+    public init(scope : Scope, sources : ConfigurationSource... ) throws {
         self.scope = scope
         
         super.init()
@@ -145,7 +145,7 @@ public class ConfigurationManager : NSObject, ConfigurationAdministration, Confi
         return value
     }
 
-    func report() -> String {
+    public func report() -> String {
         let builder = StringBuilder()
 
         builder.append("### Configuration Report\n\n")

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
+   LastUpgradeVersion = "0730"
    version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -14,8 +15,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "B0E8D73B1D3CE01D000CCE0C"
-               BuildableName = "InjectTests.xctest"
-               BlueprintName = "InjectTests"
+               BuildableName = "InjectTests IOS.xctest"
+               BlueprintName = "InjectTests IOS"
                ReferencedContainer = "container:Inject.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -32,8 +33,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "B0E8D73B1D3CE01D000CCE0C"
-               BuildableName = "InjectTests.xctest"
-               BlueprintName = "InjectTests"
+               BuildableName = "InjectTests IOS.xctest"
+               BlueprintName = "InjectTests IOS"
                ReferencedContainer = "container:Inject.xcodeproj">
             </BuildableReference>
             <SkippedTests>
@@ -63,8 +64,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "B0E8D73B1D3CE01D000CCE0C"
-            BuildableName = "InjectTests.xctest"
-            BlueprintName = "InjectTests"
+            BuildableName = "InjectTests IOS.xctest"
+            BlueprintName = "InjectTests IOS"
             ReferencedContainer = "container:Inject.xcodeproj">
          </BuildableReference>
       </MacroExpansion>

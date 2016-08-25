@@ -108,7 +108,7 @@ public class LogFormatter {
 
         dateFormatter.dateFormat = pattern
 
-        return LogFormatter { dateFormatter.stringFromDate($0.timestamp ) }
+        return LogFormatter { return dateFormatter.stringFromDate($0.timestamp) }
     }
 
     /// return a formatter referencing the message part
@@ -139,7 +139,7 @@ public class LogFormatter {
 
     // init
 
-    init(format : (LogManager.LogEntry) -> String) {
+    public init(format : (LogManager.LogEntry) -> String) {
         self.format = format
     }
 }
@@ -147,11 +147,11 @@ public class LogFormatter {
 // LogFormatter
 
 /// concatenate two formatters
-func + (left: LogFormatter, right: LogFormatter) -> LogFormatter {
-    return LogFormatter {left.format($0) + right.format($0)}
+public func + (left: LogFormatter, right: LogFormatter) -> LogFormatter {
+    return LogFormatter {return left.format($0) + right.format($0)}
 }
 
 /// concatenate a formatter and a string
-func + (left: LogFormatter, right: String) -> LogFormatter {
-    return LogFormatter {left.format($0) + right}
+public func + (left: LogFormatter, right: String) -> LogFormatter {
+    return LogFormatter {return left.format($0) + right}
 }

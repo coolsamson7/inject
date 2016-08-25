@@ -6,29 +6,7 @@
 //  Copyright © 2016 Andreas Ernst. All rights reserved.
 //
 
-
-// tracer
-
-func ==(lhs: Tracer.Level, rhs: Tracer.Level) -> Bool {
-    return lhs.rawValue == rhs.rawValue
-}
-
-func <(lhs: Tracer.Level, rhs: Tracer.Level) -> Bool {
-    return lhs.rawValue < rhs.rawValue
-}
-
-func <=(lhs: Tracer.Level, rhs: Tracer.Level) -> Bool {
-    return lhs.rawValue <= rhs.rawValue
-}
-
-func >=(lhs: Tracer.Level, rhs: Tracer.Level) -> Bool {
-    return lhs.rawValue >= rhs.rawValue
-}
-
-func >(lhs: Tracer.Level, rhs: Tracer.Level) -> Bool {
-    return lhs.rawValue > rhs.rawValue
-}
-
+/// `Tracer` is a helper class that offers tracing functions
 public class Tracer {
     // -D DEBUG !
     #if DEBUG
@@ -38,7 +16,7 @@ public class Tracer {
     #endif
     // local classes
     
-    enum Level : Int , Comparable {
+    public enum Level : Int , Comparable {
         case OFF = 0
         case LOW
         case MEDIUM
@@ -66,7 +44,7 @@ public class Tracer {
         return formatter.stringFromDate(NSDate())
     }
     
-    class func setTraceLevel(path : String, level : Level)  -> Void {
+    public class func setTraceLevel(path : String, level : Level)  -> Void {
         traceLevels[path] = level;
         
         modifications += 1
@@ -96,11 +74,31 @@ public class Tracer {
         return level!
     }
     
-    class func trace(path : String, level : Level, message : String) -> Void {
+    public class func trace(path : String, level : Level, message : String) -> Void {
         if getTraceLevel(path).rawValue >= level.rawValue {
             // format
             
             print("\(now()) [\(path)]: \(message)")
         }
     }
+}
+
+public func ==(lhs: Tracer.Level, rhs: Tracer.Level) -> Bool {
+    return lhs.rawValue == rhs.rawValue
+}
+
+public func <(lhs: Tracer.Level, rhs: Tracer.Level) -> Bool {
+    return lhs.rawValue < rhs.rawValue
+}
+
+public func <=(lhs: Tracer.Level, rhs: Tracer.Level) -> Bool {
+    return lhs.rawValue <= rhs.rawValue
+}
+
+public func >=(lhs: Tracer.Level, rhs: Tracer.Level) -> Bool {
+    return lhs.rawValue >= rhs.rawValue
+}
+
+public func >(lhs: Tracer.Level, rhs: Tracer.Level) -> Bool {
+    return lhs.rawValue > rhs.rawValue
 }

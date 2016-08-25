@@ -45,7 +45,6 @@ class BeanDescriptorTests: XCTestCase {
 
     func testProperties() throws {
         let bean = try BeanDescriptor.forClass(Derived.self)
-        let bean1 = try BeanDescriptor.forClass(Bar.self)
 
         let foo = Foo()
         
@@ -63,6 +62,8 @@ class BeanDescriptorTests: XCTestCase {
 
         // test creator
 
-        let copy1 = bean["strings"].getFactory()()
+        let array = bean["strings"].getFactory()()
+
+        XCTAssert(array is Array<String>)
     }
 }

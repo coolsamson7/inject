@@ -14,7 +14,7 @@ public class DelegatingLog: LogManager.Log {
 
     // MARK: init
 
-    init(name : String, delegate : LogManager.Log) {
+    public init(name : String, delegate : LogManager.Log) {
         self.delegate = delegate
 
         super.init(name: name)

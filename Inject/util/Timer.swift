@@ -5,7 +5,7 @@
 
 import Foundation
 
-struct Timer : CustomStringConvertible {
+public struct Timer : CustomStringConvertible {
     // MARK: class methods
 
     static func measure(block: (() throws -> AnyObject?), times : Int = 1) throws -> Void {
@@ -29,7 +29,7 @@ struct Timer : CustomStringConvertible {
 
     // MARK: constructor
 
-    init() {
+    public init() {
         begin = CFAbsoluteTimeGetCurrent()
         end = 0
     }
@@ -62,7 +62,7 @@ struct Timer : CustomStringConvertible {
 
     // CustomStringConvertible
 
-    var description:String {
+    public var description:String {
         let time = duration
 
         if (time > 100) {

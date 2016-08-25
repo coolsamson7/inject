@@ -158,7 +158,7 @@ public class Trigger {
 
     // init
 
-    init(state : Bool?) {
+    public init(state : Bool?) {
         cachedState = state;
     }
 

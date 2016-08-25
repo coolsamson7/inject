@@ -7,7 +7,7 @@
 //
 
 /// this protocol gives a bean the chance to get informed about the `Environment` that constructed it
-protocol EnvironmentAware {
+public protocol EnvironmentAware {
     /// the setter will be called by the environment
 
     var environment: Environment? { get set }

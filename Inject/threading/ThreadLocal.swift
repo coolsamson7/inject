@@ -11,7 +11,7 @@ public class ThreadLocal<T> {
     // MARK: types
 
     /// a generator function for initial values
-    typealias Generator = () -> T
+    public typealias Generator = () -> T
     
     // MARK: instance data
     
@@ -22,7 +22,7 @@ public class ThreadLocal<T> {
 
     // Create a new `ThreadLocal` given a generator for inital values
     /// - Parameter generator : the generator
-    init(generator : Generator) {
+    public init(generator : Generator) {
         self.generator = generator
         self.id =  NSUUID().UUIDString
     }

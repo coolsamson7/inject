@@ -13,7 +13,7 @@ final public class Box<T> {
     
     // init
     
-    init(_ value: T) {
+    public init(_ value: T) {
         self.value = value
     }
 }

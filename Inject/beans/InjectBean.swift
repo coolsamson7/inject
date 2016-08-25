@@ -18,7 +18,7 @@ public class InjectBean : Inject {
 
     /// Create a new `InjectBean`
     /// - Parameter id: an optional id
-    init(id : String? = nil) {
+    public init(id : String? = nil) {
         self.id = id
     }
 }

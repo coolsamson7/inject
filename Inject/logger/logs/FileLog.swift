@@ -20,7 +20,7 @@ public class FileLog: LogManager.Log {
     /// - Parameter fileName: the file name
     /// - Parameter formatter: the corresponding formatter
     /// - Parameter synchronize: if `true` the write operations is synchronized
-    init(name : String, fileName : String, formatter: LogFormatter? = nil, synchronize : Bool = true, colorize : Bool = false) throws {
+    public init(name : String, fileName : String, formatter: LogFormatter? = nil, synchronize : Bool = true, colorize : Bool = false) throws {
         if synchronize {
             mutex = Mutex()
         }

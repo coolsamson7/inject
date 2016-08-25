@@ -22,7 +22,7 @@ public class PlistConfigurationSource : AbstractConfigurationSource {
 
     // MARK: init
 
-    override init() {
+    override public init() {
         super.init()
     }
 

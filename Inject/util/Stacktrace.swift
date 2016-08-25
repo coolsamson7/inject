@@ -76,7 +76,7 @@ public class Stacktrace : CustomStringConvertible {
 
     // MARK: init
 
-    init(frames : [String] = NSThread.callStackSymbols()) {
+    public init(frames : [String] = NSThread.callStackSymbols()) {
         self.frames = frames.map({Frame(line: $0)})
     }
 

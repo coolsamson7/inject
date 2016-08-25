@@ -31,7 +31,7 @@ public class Operation<C> : CustomStringConvertible {
 
     // init
 
-    init(source: Property<C>, target: Property<C>) {
+    public init(source: Property<C>, target: Property<C>) {
         self.source = source
         self.target = target
     }
@@ -60,7 +60,7 @@ public class XFormer<C> {
 
     // MARK: init
 
-    init(operations: [Operation<C>]) {
+    public init(operations: [Operation<C>]) {
         self.operations = operations
     }
 
@@ -86,7 +86,7 @@ public class BeanProperty<C> : Property<C> {
 
     // MARK: init
 
-    init(property: BeanDescriptor.PropertyDescriptor) {
+    public init(property: BeanDescriptor.PropertyDescriptor) {
         self.property = property
     }
 

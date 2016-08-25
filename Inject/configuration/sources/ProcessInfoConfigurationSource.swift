@@ -10,7 +10,7 @@
 public class ProcessInfoConfigurationSource : AbstractConfigurationSource {
     // init
 
-    override init() {
+    override public init() {
         super.init(url: "process info", mutable: false, canOverrule: true)
     }
 

@@ -39,7 +39,7 @@ public class AbstractBeanScope : NSObject, BeanScope, EnvironmentAware {
         }
     }
 
-    var environment: Environment? {
+    public var environment: Environment? {
         get {
             return nil
         }
@@ -50,12 +50,12 @@ public class AbstractBeanScope : NSObject, BeanScope, EnvironmentAware {
 
     // MARK: init
 
-    override init() {
+    override public init() {
         _name = ""
         super.init()
     }
 
-    init(name : String) {
+    public init(name : String) {
         self._name = name
     }
 

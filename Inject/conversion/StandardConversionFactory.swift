@@ -41,7 +41,7 @@ public class StandardConversionFactory : ConversionFactory {
     
     // MARK: init
 
-    init() {
+    public init() {
         // String
         
         register(String.self, targetType: String.self, conversion: {$0})

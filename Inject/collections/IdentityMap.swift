@@ -15,8 +15,8 @@ public class ObjectIdentityKey: Hashable {
     private var hash: Int
     
     // init
-    
-    init(object: AnyObject) {
+
+    public init(object: AnyObject) {
         self.object = object
         self.hash = unsafeAddressOf(object).hashValue
     }

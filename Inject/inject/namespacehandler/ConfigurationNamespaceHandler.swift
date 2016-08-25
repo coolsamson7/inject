@@ -90,12 +90,12 @@ public class ConfigurationNamespaceHandler : NamespaceHandler {
     }
     
     // init
-    
-    init() {
+
+    public init() {
         super.init(namespace: "")
     }
     
-    override init(namespace : String) {
+    override public init(namespace : String) {
         super.init(namespace: namespace)
     }
     

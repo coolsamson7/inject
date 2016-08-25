@@ -95,8 +95,8 @@ public class BeanDescriptor : CustomStringConvertible {
         var inject : Inject?
         
         // MARK: constructor
-        
-        init(bean: BeanDescriptor, name: String, index: Int, overallIndex: Int, type: Any.Type, elementType: Any.Type?, factory : Factory, optional : Bool) {
+
+        public init(bean: BeanDescriptor, name: String, index: Int, overallIndex: Int, type: Any.Type, elementType: Any.Type?, factory : Factory, optional : Bool) {
             self.bean = bean
             self.name = name
             self.type = type
@@ -274,8 +274,8 @@ public class BeanDescriptor : CustomStringConvertible {
     internal var protocols = [BeanDescriptor]()
 
     // MARK: constructor
-    
-    init(type: Any.Type) throws {
+
+    public init(type: Any.Type) throws {
         self.type = type
 
         if (Tracer.ENABLED) {
@@ -295,7 +295,7 @@ public class BeanDescriptor : CustomStringConvertible {
         }
     }
 
-    init(instance: AnyObject, mirror : Mirror? = nil) throws {
+    public init(instance: AnyObject, mirror : Mirror? = nil) throws {
         if (Tracer.ENABLED) {
             Tracer.trace("inject.beans", level: .HIGH, message: "create descriptor for \(instance.dynamicType)")
         }

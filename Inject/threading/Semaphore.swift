@@ -15,7 +15,7 @@ public class Semaphore {
 
     /// Create a new `Semaphore` given an initial count
     /// - Parameter value: the initial value or 0
-    init(value: Int = 0) {
+    public init(value: Int = 0) {
         semaphore = dispatch_semaphore_create(value)
     }
 

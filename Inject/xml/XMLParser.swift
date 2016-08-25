@@ -187,8 +187,8 @@ public class XMLParser: NSObject {
         var _error : XMLParserErrors? = nil
         
         // init
-        
-        init(parser : XMLParser) {
+
+        internal init(parser : XMLParser) {
             self.parser = parser
         }
         

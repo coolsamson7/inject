@@ -40,8 +40,8 @@ public class InjectConfigurationValue : Inject {
     var defaultValue : Any?
     
     // MARK: init
-    
-    init(namespace : String = "", key : String, defaultValue : Any? = nil) {
+
+    public init(namespace : String = "", key : String, defaultValue : Any? = nil) {
         self.namespace = namespace
         self.key = key
         self.defaultValue = defaultValue

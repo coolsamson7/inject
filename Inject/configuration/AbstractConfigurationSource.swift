@@ -17,17 +17,17 @@ public class AbstractConfigurationSource : NSObject, ConfigurationSource, Bean, 
     
     // MARK: init
     
-    override init() {
+    override public init() {
     }
 
-    init(configurationManager : ConfigurationManager, url : String, mutable : Bool = false, canOverrule : Bool = false) {
+    public init(configurationManager : ConfigurationManager, url : String, mutable : Bool = false, canOverrule : Bool = false) {
         self.configurationManager = configurationManager
         self._url = url
         self._mutable = mutable
         self._canOverrule = canOverrule
     }
-    
-    init(url : String, mutable : Bool, canOverrule : Bool) {
+
+    public init(url : String, mutable : Bool, canOverrule : Bool) {
         self._url = url
         self._mutable = mutable
         self._canOverrule = canOverrule

@@ -214,7 +214,7 @@ public class LogManager {
 
         // MARK: init
 
-        init(name : String, formatter : LogFormatter? = nil, colorize : Bool = false) {
+        public init(name : String, formatter : LogFormatter? = nil, colorize : Bool = false) {
             self.name = name
             self.colorize = colorize
             self.formatter = formatter != nil ? formatter! : Log.defaultFormatter
@@ -285,7 +285,7 @@ public class LogManager {
     }
 
     /// Create a new `LogManager` which will overwrite the singleton!
-    init() {
+    public init() {
         LogManager.instance = self // simply override...good enough
     }
 
