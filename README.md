@@ -55,7 +55,7 @@ For detailed information please visit
 
 * The [Wiki](https://github.com/coolsamson7/inject/wiki) and
 * the generated [API Docs](http://cocoadocs.org/docsets/inject/1.0.2/)
-* or simply paly arounf with the integrated playground
+* or simply play around with the included playground
 
 # Examples
 
