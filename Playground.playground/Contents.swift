@@ -29,7 +29,7 @@ logger.warn("ouch!") // this is a autoclosure!
 
 // a post processor
 
-class SamplePostProcessor : NSObject, BeanPostProcessor {
+class SamplePostProcessor : BeanPostProcessor {
     // implement BeanPostProcessor
     
     func process(bean : AnyObject) throws -> AnyObject {
@@ -41,7 +41,7 @@ class SamplePostProcessor : NSObject, BeanPostProcessor {
 
 // the famous foo
 
-class Foo : NSObject, Bean, BeanDescriptorInitializer {
+class Foo : NSObject, Bean, BeanDescriptorInitializer { // the inejction requires a NSObject
     // instance data
     
     var id : String = ""
@@ -109,6 +109,7 @@ class Bar : NSObject, EnvironmentAware {
 
 // a factory
 
+// this is the only class that needs to derive from NSObject since we do property injection
 class BazFactory : NSObject, FactoryBean {
     // instance data
     
@@ -141,7 +142,7 @@ class BazFactory : NSObject, FactoryBean {
 
 // baz
 
-class Baz : NSObject {
+class Baz : Initializable {
     // instance data
     
     var factory : String = "" // that's my factory
@@ -149,20 +150,23 @@ class Baz : NSObject {
     
     // init
     
-    override init() {
-        super.init()
+    required init() {
     }
     
     // CustomStringConvertible
     
-    override internal var description: String {
+    internal var description: String {
         return "baz[id: \(id), factory: \(factory)]"
     }
 }
 
+// setup tracing
+
+Tracer.setTraceLevel("inject", level : .FULL)
+
 // create the environment
 
-let environment = try Environment(name: "environment", traceOrigin: true)
+let environment = try Environment(name: "environment", traceOrigin: true) // track the origin for debug purposes
 
 try environment
     // add process info 
@@ -172,8 +176,8 @@ try environment
     // some manual settings
     
     .define(environment.settings()
-       .setValue(key: "number", value: "1")
-       .setValue(key: "id", value: "id!")
+        .setValue("foo", key: "number", value: "1")
+        .setValue("foo", key: "id", value: "id!")
     )
     
     // a post processor
@@ -184,12 +188,11 @@ try environment
     
     .define(environment.bean(Foo.self, factory: {
         let foo = Foo()
-        
     
-        foo.id     = try environment.getConfigurationValue(String.self, key: "id")
-        foo.number = try environment.getConfigurationValue(Int.self, key: "number", defaultValue: -1)
+        foo.id     = try environment.getConfigurationValue(String.self, namespace: "foo", key: "id")
+        foo.number = try environment.getConfigurationValue(Int.self, namespace: "foo", key: "number", defaultValue: -1)
         
-        foo.bar = try environment.getBean(Bar.self)
+        //foo.bar = try environment.getBean(Bar.self)
         
         return foo
     })
@@ -205,6 +208,10 @@ try environment
         .target(Baz.self)
         .property("name", value: "baz factory")
         .property("id", value: "generated id"))
+
+    // go forrest
+    
+     .startup()
 
 // create report
 
@@ -222,14 +229,13 @@ print("foo: \(foo)")
 
 // fetch a bar
 
-let bar = try environment.getBean(Foo.self)
+let bar = try environment.getBean(Bar.self)
 
 print("bar: \(bar)")
 
 // let the factory create a baz
 
 let baz = try environment.getBean(Baz.self)
-
 
 print("baz created by factory: \(baz)")
 
@@ -238,5 +244,16 @@ print("baz created by factory: \(baz)")
 let foos = try environment.getBeansByType(Foo.self)
 
 print("foos: \(foos)")
+
+// check error logging :-)
+
+do {
+    try environment.getBean(String.self)
+}
+catch {
+    logger.error(error, message: "")
+}
+
+
 
 
