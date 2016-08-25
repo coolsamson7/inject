@@ -887,13 +887,13 @@ public class Environment: BeanFactory {
         // MARK: instance data
 
         let declaration : Environment.BeanDeclaration
-        let context: Environment
+        let environment: Environment
 
         // init
 
-        init(declaration : Environment.BeanDeclaration, context: Environment) {
+        init(declaration : Environment.BeanDeclaration, environment: Environment) {
             self.declaration = declaration
-            self.context = context
+            self.environment = environment
         }
 
         // BeanScope
@@ -909,8 +909,8 @@ public class Environment: BeanFactory {
         }
 
         func get(bean : Environment.BeanDeclaration, factory : BeanFactory) throws -> AnyObject {
-            if let factoryBean = try declaration.getInstance(context) as? FactoryBean {
-                return try factoryBean.create()
+            if let factoryBean = try declaration.getInstance(environment) as? FactoryBean {
+                return try environment.runPostProcessors(try factoryBean.create())
             }
 
             fatalError("cannot happen")
@@ -1647,7 +1647,7 @@ public class Environment: BeanFactory {
 
             let bean = BeanDeclaration()
 
-            bean.scope = BeanFactoryScope(declaration : declaration, context: self)
+            bean.scope = BeanFactoryScope(declaration : declaration, environment: self)
             bean.requires(bean: declaration)
             bean.clazz = target
 
