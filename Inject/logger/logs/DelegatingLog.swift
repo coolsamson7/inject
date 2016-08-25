@@ -20,7 +20,7 @@ public class DelegatingLog: LogManager.Log {
         super.init(name: name)
     }
 
-    // MARK: override Destination
+    // MARK: override LogManager.Log
 
     override func log(entry : LogManager.LogEntry) -> Void {
         delegate.log(entry)

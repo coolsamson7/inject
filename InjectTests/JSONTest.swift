@@ -79,8 +79,6 @@ class JSONTests: XCTestCase {
 
         let res = try! jsonMapper.asJSON(product)
 
-        print(res)
-
         // json -> bean
 
         let result = try! jsonMapper.fromJSON(Product.self, json: res)

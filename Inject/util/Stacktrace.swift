@@ -25,10 +25,9 @@ public class Stacktrace : CustomStringConvertible {
             location = line
 
             func split(str : String) -> [String] {
-                let range = Range<String.Index>(start: str.startIndex, end: str.endIndex)
                 var words = [String]()
 
-                str.enumerateSubstringsInRange(range, options: .ByWords) { (substring, _, _, _) -> () in
+                str.enumerateSubstringsInRange(str.rangeOfString(str)!, options: .ByWords) { (substring, _, _, _) -> () in
                     words.append(substring!)
                 }
 
@@ -50,7 +49,7 @@ public class Stacktrace : CustomStringConvertible {
                 let brackets = location.indexOf("(")
                 if brackets >= 0 {
                     if location[brackets - 1] == "." {
-                        // LogManager.Logger.(fatal <A> ( ... ) ...
+                        // caution with generic functions.... LogManager.Logger.(fatal <A> ( ... ) ...
                         location = location[0 ..< brackets] + split(location.substring(from: brackets))[0]
                     }
                     else {
@@ -77,8 +76,8 @@ public class Stacktrace : CustomStringConvertible {
 
     // MARK: init
 
-    init(frames : [String]) {
-        self.frames = frames/*NSThread.callStackSymbols()*/.map({Frame(line: $0)})
+    init(frames : [String] = NSThread.callStackSymbols()) {
+        self.frames = frames.map({Frame(line: $0)})
     }
 
     // MARK: implement CustomStringConvertible

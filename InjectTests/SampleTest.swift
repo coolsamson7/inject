@@ -48,6 +48,12 @@ class Foo : NSObject, Bean, BeanDescriptorInitializer {
     func initializeBeanDescriptor(beanDescriptor : BeanDescriptor) {
         beanDescriptor["bar"].inject(InjectBean())
     }
+    
+    // CustomStringConvertible
+    
+    override internal var description: String {
+        return "foo[id: \(id), number: \(number), bar: \(bar)]"
+    }
 }
 
 class Bar : NSObject, EnvironmentAware {
@@ -134,13 +140,13 @@ class SampleScope : AbstractBeanScope {
         super.init(name: "sample")
     }
 
-    public override func prepare(bean : Environment.BeanDeclaration, factory : BeanFactory) throws {
+    override func prepare(bean : Environment.BeanDeclaration, factory : BeanFactory) throws {
         if !bean.lazy {
             try get(bean, factory: factory)
         }
     }
 
-    public override func get(bean : Environment.BeanDeclaration, factory : BeanFactory) throws -> AnyObject {
+    override func get(bean : Environment.BeanDeclaration, factory : BeanFactory) throws -> AnyObject {
         if bean.singleton == nil {
             bean.singleton = try factory.create(bean)
         }
@@ -185,10 +191,12 @@ class SampleTest: XCTestCase {
 
         print(environment.report())
 
-        var baz = try! environment.getBean(Baz.self)
+        let baz = try! environment.getBean(Baz.self)
+        
+        XCTAssert(baz.id == "id")
     }
 
-    // TODO: + explicit dependency + factory sample!
+
    func testFluent() {
         let environment = try! Environment(name: "fluent environment", traceOrigin: true)
 
@@ -199,12 +207,12 @@ class SampleTest: XCTestCase {
 
            .define(environment.bean(SamplePostProcessor.self))
 
-        .define(environment.bean(Foo.self, id: "foo-1")
-        .property("id", value: "foo-1")
-        .property("number", resolve: "${dunno=1}"))
+           .define(environment.bean(Foo.self, id: "foo-1")
+              .property("id", value: "foo-1")
+              .property("number", resolve: "${dunno=1}"))
 
            .define(environment.bean(Foo.self, id: "foo-prototype")
-              .scope(environment.scope("prototype"))
+              .scope("prototype")
               .property("id", value: "foo-prototype")
               .property("number", resolve: "${com.foo:bar=1}"))
 
@@ -235,9 +243,13 @@ class SampleTest: XCTestCase {
 
        print(environment.report())
 
-       var foos = try! environment.getBeansByType(Foo.self)
+       let foos = try! environment.getBeansByType(Foo.self)
+    
+       XCTAssert(foos.count == 4)
 
-       var baz = try! environment.getBean(Baz.self)
+       let baz = try! environment.getBean(Baz.self)
+
+       XCTAssert(baz.id == "baz")
     }
 
 
@@ -246,15 +258,15 @@ class SampleTest: XCTestCase {
         var number : Int = 0
         var other : AnotherSwift?
 
-        // BeanDescriptorInitializer
+        // MARK: init
 
         required init() {
         }
 
-        // implement BeanDescriptorInitializer
+        //  MARK: implement BeanDescriptorInitializer
 
         func initializeBeanDescriptor(beanDescriptor : BeanDescriptor) {
-            try! beanDescriptor.implements(SwiftProtocol.self)
+            try! beanDescriptor.implements(SwiftProtocol.self, Initializable.self, BeanDescriptorInitializer.self)
         }
     }
 
@@ -262,16 +274,18 @@ class SampleTest: XCTestCase {
         var name : String?
         var number : Int = 0
 
-        // Initializable
+        //  MARK: init
 
         override init() {
             super.init()
         }
 
-        // implement BeanDescriptorInitializer
+        //  MARK: implement BeanDescriptorInitializer
 
         func initializeBeanDescriptor(beanDescriptor : BeanDescriptor) {
-            try! beanDescriptor["number"].inject(InjectConfigurationValue(key: "key", defaultValue: -1))
+            beanDescriptor["number"].inject(InjectConfigurationValue(key: "key", defaultValue: -1))
+
+            try! beanDescriptor.implements(BeanDescriptorInitializer.self, Initializable.self)
         }
     }
 
@@ -295,25 +309,26 @@ class SampleTest: XCTestCase {
                .scope("sample")
                .implements(SwiftProtocol.self))
 
-        .define(environment.bean(AnotherSwift.self, factory: AnotherSwift.init)/*{
-            let swift = AnotherSwift()
-
-            swift.name = "other swift"
-
-            return swift
-        }*/
-                )
+        .define(environment.bean(AnotherSwift.self, factory: AnotherSwift.init))
 
         // fetch
 
-        let swift = try! environment.getBean(SwiftProtocol.self)
+        let swiftProtocol = try! environment.getBean(SwiftProtocol.self)
         let other = try! environment.getBean(AnotherSwift.self)
 
-       let xxx =  try! environment.getBeansByType(SwiftProtocol.self)
+        XCTAssert(swiftProtocol is Swift)
+        XCTAssert(other.number == -1)
 
-        let yyy =  try! environment.getBeansByType(Initializable.self)
-        let zzz =  try! environment.getBeansByType(BeanDescriptorInitializer.self)
+        let swiftProtocols =  try! environment.getBeansByType(SwiftProtocol.self)
 
-        print(xxx)
+        XCTAssert(swiftProtocols.count == 1)
+
+        let initializables = try! environment.getBeansByType(Initializable.self)
+
+        XCTAssert(initializables.count == 2)
+
+        let descriptoInitializers =  try! environment.getBeansByType(BeanDescriptorInitializer.self)
+
+        XCTAssert(descriptoInitializers.count == 2)
     }
 }

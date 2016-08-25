@@ -30,7 +30,7 @@ public class QueuedLog: DelegatingLog {
         super.init(name: name, delegate: delegate)
     }
 
-    // MARK: override Destination
+    // MARK: override LogManager.Log
 
     override func log(entry : LogManager.LogEntry) -> Void {
         dispatch_async(queue, {self.delegate.log(entry)})

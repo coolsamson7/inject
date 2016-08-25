@@ -22,7 +22,7 @@ public class NSLogLog: LogManager.Log {
         super.init(name: name, formatter: formatter, colorize: colorize)
     }
 
-    // MARK: override Destination
+    // MARK: override LogManager.Log
 
     override func log(entry : LogManager.LogEntry) -> Void {
         if let mutex = self.mutex {

@@ -192,7 +192,7 @@ class BeanFactoryTests: XCTestCase {
 
            .define(parent.bean(FooBean.self, id: "foo")
                .property("name", resolve: "${andi=Andreas?}")
-               .property("age", resolve: "${SIMULATOR_MAINSCREEN_HEIGHT=51}")) // TODO?
+               .property("age", resolve: "${SIMULATOR_MAINSCREEN_HEIGHT=51}"))
 
            /*.define(parent.bean(Bar.self)
                .id("bar")

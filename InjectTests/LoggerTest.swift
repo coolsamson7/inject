@@ -27,7 +27,9 @@ class LoggerTests: XCTestCase {
 
         // MARK: override Destination
 
-        override func log(entry : LogManager.LogEntry) -> Void { print(format(entry))
+        override func log(entry : LogManager.LogEntry) -> Void {
+            print(format(entry))
+            
             callback(entry)
         }
     }
@@ -41,10 +43,8 @@ class LoggerTests: XCTestCase {
         let formatter = LogFormatter.timestamp("dd/M/yyyy, H:mm:s") + " [" + LogFormatter.logger() + "] " + LogFormatter.thread() + " " + LogFormatter.level() + " " + LogFormatter.file() + " " + LogFormatter.function() + " " + LogFormatter.line() + " - " + LogFormatter.message()
 
         var logs = 0
-        var lastEntry : LogManager.LogEntry? = nil
-        let testLog = TestLog(name: "console", formatter: formatter, callback: {
+        let testLog = TestLog(name: "console", formatter: formatter, callback: {_ in 
             logs += 1
-            lastEntry = $0
         })
 
         manager
@@ -81,11 +81,11 @@ class LoggerTests: XCTestCase {
         // FATAL
         // OFF
 
-        //logger.debug("com")
-        //logger.info("com")
-        //logger.warn("com")
+        logger.debug("com")
+        logger.info("com")
+        logger.warn("com")
         logger.fatal(BeanDescriptorErrors.Exception(message: "ouch"), message: "com")
 
-        //XCTAssert(logs == 2)
+        XCTAssert(logs == 2)
     }
 }

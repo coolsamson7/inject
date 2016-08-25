@@ -167,20 +167,24 @@ public class BeanDescriptor : CustomStringConvertible {
             }
         }
         
-        public func autowire(value : Bool = true) {
+        public func autowire(value : Bool = true) -> Self {
             autowired = value
             
             if value {
                 inject(InjectBean())
             }
+
+            return self
         }
         
-        public func inject(inject : Inject) {
+        public func inject(inject : Inject) -> Self {
             self.inject = inject
             
             if inject is InjectBean {
                 autowired = true
             }
+
+            return self
         }
 
         // MARK: internal
@@ -223,7 +227,7 @@ public class BeanDescriptor : CustomStringConvertible {
             return value as! AnyObject // Strings...
         }
         
-        // CustomStringConvertible
+        // MARK: implement CustomStringConvertible
         
         public var description: String {
             get {

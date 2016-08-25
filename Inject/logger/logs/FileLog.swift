@@ -65,7 +65,7 @@ public class FileLog: LogManager.Log {
         }
     }
 
-    // MARK: override Destination
+    // MARK: override LogManager.Log
 
     override func log(entry : LogManager.LogEntry) -> Void {
         if let mutex = self.mutex {
