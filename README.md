@@ -15,8 +15,7 @@
 In addition to the core a number of other concepts are implemented
 * basic reflection and type introspection features 
 * configuration framework
-* logging framework
-* tracing framework
+* logging &  tracing framework
 * concurrency classes
 * xml parser
 * type conversion facilities
@@ -25,7 +24,7 @@ But let's come back to the dependency container again :-)
 
 # What's a dependency injection container anyway?
 
-The basic idea is to have one central object that knows about all kind of different object types and object dependencies and whose task is to instantiate and assemble them appropriately by populating fields ( with property setters, methods or appropriate constructor calls ). Classes do not have to know anything about the current infrastructure - e.g. implemenation details for protocols, or specific configuration values - as this know how is solely in the responsiblity of the container and injected into the classes.
+The basic idea is to have one central object that knows about all kind of different object types and object dependencies and whose task is to instantiate and assemble them appropriately by populating fields ( with property setters, methods or appropriate constructor calls ). Classes do not have to know anything about the current infrastructure - e.g. specific  protocol implementation, or specific configuration values - as this know how is solely in the responsiblity of the container and injected into the classes.
 
 If you think about unit testing, where service implementations need to be exchanged by some kind of local variants ( e.g. mocks ) you get a feeling for the benefits.
 
@@ -34,7 +33,7 @@ The other big benefit is that the lifecycle of objects is also managed by a cent
 # Features
 
 Here is a summary of the supported features
-* specifiction of beans via a fluent interface or xml
+* specification of beans via a fluent interface or xml
 * full dependency management including cycle detection 
 * all defintions are checked for typesafeness
 * integrated management of configuration values
@@ -56,6 +55,7 @@ For detailed information please visit
 
 * The [Wiki](https://github.com/coolsamson7/inject/wiki) and
 * the generated [API Docs](http://cocoadocs.org/docsets/inject/1.0.2/)
+* or simply paly arounf with the integrated playground
 
 # Examples
 
@@ -359,6 +359,9 @@ The queueded log destination uses a dispatch queue. As a default a serial queue 
 ## Requirements
 
 - iOS 8.0+
+- OSX 10.9
+- WatchOS 2.0
+- TvOS 9.0
 - Xcode 7.0+
 
 # Installation
@@ -378,7 +381,7 @@ Then run `pod install` command. For details of the installation and usage of Coc
 # Limitations
 
 Depending on the specific bean definition, it may be required that the corresponding classes derive from `NSObject`.
-This limitation is due to the - missing - `Swift` support for relection. As soon as the language evolves i would change that.. 
+This limitation is due to the - missing - `Swift` support for relection. As soon as the language evolves i would change that. 
 
 # Roadmap
 * support more package managers
