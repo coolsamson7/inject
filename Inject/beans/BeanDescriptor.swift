@@ -93,6 +93,7 @@ public class BeanDescriptor : CustomStringConvertible {
         var overallIndex: Int
         var autowired = false
         var inject : Inject?
+        var constraint : TypeDescriptor? = nil
         
         // MARK: constructor
 
@@ -165,6 +166,32 @@ public class BeanDescriptor : CustomStringConvertible {
                     throw BeanDescriptorErrors.CannotSetNil(message: "nil not allowed for property \(self.name)")
                 }
             }
+        }
+        
+        public func isValid(value : Any) -> Bool {
+            if value.dynamicType == self.type { // is assignable?
+                if constraint != nil {
+                    return constraint!.isValid(value)
+                }
+                else {
+                    return true
+                }
+            }
+            
+            else {
+                return false
+            }
+        }
+        
+        public func type(type : TypeDescriptor) -> Self {
+            if type.getType() == self.type {
+                self.constraint = type
+            }
+            else {
+                fatalError("type constraint does not match base type")
+            }
+            
+            return self
         }
         
         public func autowire(value : Bool = true) -> Self {

@@ -38,6 +38,16 @@ public class Constraint<T> {
     }
 }
 
+/// concatenate two constraints by and
+public func &&<T> (left: Constraint<T>, right: Constraint<T>) -> Constraint<T> {
+    return left.and(right)
+}
+
+/// concatenate two constraints by or
+public func ||<T> (left: Constraint<T>, right: Constraint<T>) -> Constraint<T> {
+    return left.or(right)
+}
+
 // logical constraints
 
 // And operator

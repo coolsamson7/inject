@@ -8,43 +8,59 @@
 //
 import Foundation
 
-/// base class for all types
-public class TypeDescriptor<T> {
+/// non generic base class for types
+public class TypeDescriptor {
     // MARK: instance data
-
-    var constraint : Constraint<T>
+    
     var type : Any.Type
 
     // MARK: init
-
-    public init(constraint : Constraint<T>) {
-        self.constraint = constraint
-        self.type = T.self
+    
+    init(type : Any.Type) {
+        self.type = type
     }
-
+    
     // MARK: public
-
+    
     /// Return the underlying type
     /// Returns: the base type
     public func getType() -> Any.Type {
         return type
     }
-
-    /// Return `true` if the argument is value, `false` otherwise
-    /// Returns: the valid state
-    public func isValid(object : T) -> Bool {
-        return constraint.eval(object)
-    }
-
+    
     /// Return `true` if the argument is value, `false` otherwise
     /// Returns: the valid state
     public func isValid(value : Any) -> Bool {
-        return isValid(value as! T)
+        return  true
+    }
+}
+
+/// generic base class for all types
+public class GenericTypeDescriptor<T> : TypeDescriptor {
+    // MARK: instance data
+
+    var constraint : Constraint<T>
+    
+    // MARK: init
+
+    public init(constraint : Constraint<T>) {
+        self.constraint = constraint
+        
+        super.init(type: T.self)
+    }
+
+    // MARK: override TypeDesriptor
+
+
+    /// Return `true` if the argument is value, `false` otherwise
+    /// Returns: the valid state
+    override public func isValid(object : Any) -> Bool {
+        return constraint.eval(object as! T)
     }
 }
 
 // typedescriptor for `Equatable`s
-public class EquatableTypeDescriptor<T : Equatable> : TypeDescriptor<T> {
+public class EquatableTypeDescriptor<T : Equatable> : GenericTypeDescriptor<T> {
     // MARK: convenience functions
 
     public class func equal<T : Equatable>(value : T) -> Constraint<T>  {
