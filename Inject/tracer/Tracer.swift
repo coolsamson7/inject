@@ -12,7 +12,7 @@ public class Tracer {
     #if DEBUG
     static var ENABLED = true
     #else
-    static var ENABLED = false
+    static var ENABLED = true
     #endif
     // local classes
     
