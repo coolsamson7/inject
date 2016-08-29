@@ -122,6 +122,10 @@ public class AbstractConfigurationSource : NSObject, Bean, BeanDescriptorInitial
     }
 ```
 
+The protocol `BeanDescriptorInitializer` can be implemented for thus purpose in order to add inejctions to properties. Valid values are:
+* `InjectBean` an injection for a specific object type
+* `InjectConfigurationValue` an injection of a configuration value
+
 **Scopes**
 
 Scopes determine when and how often a bean instance is created. 
@@ -351,6 +355,7 @@ The `error` and `fatal` functions are called with an `ErrorType` argument. Both 
 Provided log destinations are
 * console
 * file
+* rolling file log (logs get copied every day) 
 * nslog
 * queued log destination
 
