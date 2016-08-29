@@ -7,14 +7,14 @@
 //
 
 /// A `DelegatingLog` simply delegates all calls to a delegate
-public class DelegatingLog: LogManager.Log {
+public class DelegatingLog<T : LogManager.Log> : LogManager.Log {
     // MARK: instance data
 
-    var delegate : LogManager.Log
+    var delegate : T?
 
     // MARK: init
 
-    public init(name : String, delegate : LogManager.Log) {
+    public init(name : String, delegate : T?) {
         self.delegate = delegate
 
         super.init(name: name)
@@ -23,6 +23,6 @@ public class DelegatingLog: LogManager.Log {
     // MARK: override LogManager.Log
 
     override func log(entry : LogManager.LogEntry) -> Void {
-        delegate.log(entry)
+        delegate!.log(entry)
     }
 }

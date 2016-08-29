@@ -7,9 +7,10 @@
 //
 
 /// A `FileLog` logs entries in a file
-public class FileLog: LogManager.Log {
+public class FileLog : LogManager.Log {
     // MARK: init
 
+    var url : NSURL
     var mutex : Mutex?
     var fileHandle: NSFileHandle?
 
@@ -25,6 +26,8 @@ public class FileLog: LogManager.Log {
             mutex = Mutex()
         }
 
+        self.url = NSURL(fileURLWithPath: fileName)
+
         super.init(name: name, formatter: formatter, colorize: colorize)
 
         fileHandle = try openFile(fileName)
@@ -32,6 +35,14 @@ public class FileLog: LogManager.Log {
 
     deinit {
        closeFile()
+    }
+
+    // MARK: public
+
+    public func lastModificationDate() -> NSDate {
+        let attributes = try! url.resourceValuesForKeys([NSURLContentModificationDateKey, NSURLNameKey])
+
+        return attributes[NSURLContentModificationDateKey] as! NSDate
     }
 
     // MARK: internal
@@ -54,13 +65,17 @@ public class FileLog: LogManager.Log {
     }
 
     func closeFile() {
-        fileHandle?.closeFile()
+        if fileHandle != nil {
+            fileHandle?.closeFile()
+
+            fileHandle = nil
+        }
     }
 
     func reallyLog(entry : LogManager.LogEntry) -> Void {
         fileHandle!.seekToEndOfFile()
 
-        if let data = format(entry).dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false) {
+        if let data = (format(entry) + "\n").dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false) {
             fileHandle!.writeData(data)
         }
     }

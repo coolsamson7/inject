@@ -7,7 +7,7 @@
 //
 
 /// A `QueuedLog` is a delegating log that executes all log requests asynchronously by queuing to a dispatch queue
-public class QueuedLog: DelegatingLog {
+public class QueuedLog<T : LogManager.Log> : DelegatingLog<T> {
     // MARK: instance data
 
     var queue : dispatch_queue_t
@@ -18,7 +18,7 @@ public class QueuedLog: DelegatingLog {
     /// - Parameter name: the log name
     /// - Parameter delegate: the delegate log
     /// - Parameter queue: a specific queue which defaults to a serial queue named 'logging-queue'
-    public init(name : String, delegate : LogManager.Log, queue : dispatch_queue_t? = nil) {
+    public init(name : String, delegate : T?, queue : dispatch_queue_t? = nil) {
         if queue != nil {
             self.queue = queue!
 
@@ -33,6 +33,6 @@ public class QueuedLog: DelegatingLog {
     // MARK: override LogManager.Log
 
     override func log(entry : LogManager.LogEntry) -> Void {
-        dispatch_async(queue, {self.delegate.log(entry)})
+        dispatch_async(queue, {self.delegate!.log(entry)})
     }
 }
