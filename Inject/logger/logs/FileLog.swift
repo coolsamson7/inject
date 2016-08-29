@@ -60,7 +60,9 @@ public class FileLog : LogManager.Log {
             return handle
         }
         else {
-            fatalError("could not open file \(fileName)")
+            LogManager.fatal("could not open file \(fileName)")
+
+            fatalError("darn") // is already done by the fatal call
         }
     }
 

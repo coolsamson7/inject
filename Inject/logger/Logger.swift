@@ -246,7 +246,26 @@ public class LogManager {
 
     static var instance = LogManager(initial: true) // just to make sure that instance is never nil :-)
 
+    // this logger is used fot internal log entries on the console...
+
+    static var fatalLogger = Logger(path: "", level: .ALL, logs: [
+            ConsoleLog(
+                    name: "fatal",
+                    formatter: LogFormatter.timestamp()  + " - " + LogFormatter.message()
+                    )
+    ])
+
     // MARK: class funcs
+
+    static func error<T>(@autoclosure message: () -> T, file: String = #file, function: String = #function, line: Int = #line, column: Int = #column) -> Void {
+        fatalLogger.log(.ERROR, message: message, file: file, function: function, line: line, column: column)
+    }
+
+    static func fatal<T>(@autoclosure message: () -> T, file: String = #file, function: String = #function, line: Int = #line, column: Int = #column) -> Void {
+        fatalLogger.log(.FATAL, message: message, file: file, function: function, line: line, column: column)
+
+        fatalError("\(message())")
+    }
 
     /// Return a `Logger` given a specific class. This function will build the fully qualified class name and try to find an appropriate logger
     /// - Parameter forClass: the specific class

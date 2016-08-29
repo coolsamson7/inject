@@ -73,7 +73,12 @@ public class RollingFileLog : DelegatingLog<FileLog> {
     public func createLogDirectory(directoryPath : String)  throws -> NSURL {
         let url = NSURL(fileURLWithPath: directoryPath, isDirectory: true)
 
-        try fileManager.createDirectoryAtURL(url, withIntermediateDirectories: true, attributes: nil)
+        do {
+            try fileManager.createDirectoryAtURL(url, withIntermediateDirectories: true, attributes: nil)
+        }
+        catch {
+            LogManager.fatal("could not create root directory \(directoryPath)")
+        }
 
         return url
     }
@@ -94,7 +99,7 @@ public class RollingFileLog : DelegatingLog<FileLog> {
     func lookupCopies(url : NSURL) throws -> [(url: NSURL, date: NSDate)] {
         var files : [NSURL] = try fileManager.contentsOfDirectoryAtURL(url, includingPropertiesForKeys: nil, options: [])
 
-        files.sortInPlace({$0.lastPathComponent! < $1.lastPathComponent!})
+        files.sortInPlace({$0.lastPathComponent! < $1.lastPathComponent!}) // actually not needed when comparing days...
 
         return files.filter({try! nameAndDate($0.lastPathComponent!).name != nil}).map({ ($0, try! nameAndDate($0.lastPathComponent!).date!) })
     }
@@ -105,7 +110,12 @@ public class RollingFileLog : DelegatingLog<FileLog> {
         if mostRecentLog != nil && daysBetween(now, and: mostRecentLog!) > 0 {
             // copy current to historic
 
-            try fileManager.moveItemAtPath(logName(), toPath: logName(forDate: mostRecentLog))
+            do {
+                try fileManager.moveItemAtPath(logName(), toPath: logName(forDate: mostRecentLog))
+            }
+            catch {
+                LogManager.error("\(error) while trying to move \(logName())")
+            }
 
             // create new
 
@@ -114,13 +124,21 @@ public class RollingFileLog : DelegatingLog<FileLog> {
 
         // cleanup the rest
 
-        let copies = try lookupCopies(directory!) // (url, date) sorted by name which contains the date...
-
-        for copy in copies {
-            if daysBetween(copy.date, and: now) > keepDays {
-                try fileManager.removeItemAtURL(copy.url)
-            }
-        } // for
+       do {
+            for copy in try lookupCopies(directory!) { // (url, date) sorted by name which contains the date...
+                if daysBetween(copy.date, and: now) > keepDays {
+                    do {
+                        try fileManager.removeItemAtURL(copy.url)
+                    }
+                    catch {
+                        LogManager.error("\(error) while trying to remove \(logName())")
+                    }
+                }
+            } // for
+       }
+       catch {
+           LogManager.error("\(error) while trying to lookup historic logs")
+       }
     }
 
     func nameAndDate(fileName: String) throws -> (name : String?, date : NSDate?) {
