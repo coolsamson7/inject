@@ -37,7 +37,7 @@ class LoggerTests: XCTestCase {
 
     // MARK: local classes
 
-    func testRollingFile() throws {
+    /*func testRollingFile() throws {
         let manager = LogManager();
 
         let formatter = LogFormatter.timestamp("dd/M/yyyy, H:mm:s") + " [" + LogFormatter.logger() + "] " + LogFormatter.thread() + " " + LogFormatter.level() + " " + LogFormatter.file() + " " + LogFormatter.function() + " " + LogFormatter.line() + " - " + LogFormatter.message()
@@ -46,7 +46,7 @@ class LoggerTests: XCTestCase {
         .registerLogger("", level : .ALL, logs: [try RollingFileLog(name: "log", directory: "/Users/andreasernst/Documents/Projects/inject/", baseName: "log",formatter: formatter, keepDays: 2 )])
 
         manager.getLogger(forName: "").info("hellooooo")
-    }
+    }*/
 
     func testLogger() {
         let manager = LogManager();
