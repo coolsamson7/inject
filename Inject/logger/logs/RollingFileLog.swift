@@ -15,7 +15,7 @@ public class RollingFileLog : DelegatingLog<FileLog> {
 
     var fileManager = NSFileManager.defaultManager()
     var calendar = NSCalendar.currentCalendar()
-    var mutex : Mutex?
+    var mutex = Mutex()
     var baseName : String
     var dateFormatter = NSDateFormatter()
     var keepDays : Int
@@ -30,19 +30,14 @@ public class RollingFileLog : DelegatingLog<FileLog> {
     /// - Parameter directory: the directory name
     /// - Parameter baseName: the file name
     /// - Parameter formatter: the corresponding formatter
-    /// - Parameter synchronize: if `true` the write operations is synchronized
-    public init(name : String, directory : String, baseName : String, formatter: LogFormatter? = nil, synchronize : Bool = true, keepDays : Int) throws {
+    public init(name : String, directory : String, baseName : String, formatter: LogFormatter? = nil, keepDays : Int) throws {
         self.baseName = baseName
         self.keepDays = keepDays
-
-        if synchronize {
-            mutex = Mutex()
-        }
 
         // both must match so no parameter...hmmm
 
         dateFormatter.dateFormat = "yyyy-MM-dd"
-        regexp = try NSRegularExpression(pattern: "\\b([a-z|_|A-Z|\\-]+)\\-(\\d{4,4}\\-\\d{2,2}\\-\\d{2,2})\\.log\\b", options: [])
+        regexp = try NSRegularExpression(pattern: "\\b([a-z|_|A-Z|\\-]+)\\-(\\d{4}\\-\\d{2}\\-\\d{2})\\.log\\b", options: [])
 
         // super
 
@@ -53,22 +48,26 @@ public class RollingFileLog : DelegatingLog<FileLog> {
         self.formatter = formatter != nil ? formatter! : LogManager.Log.defaultFormatter
 
         let exists = fileManager.fileExistsAtPath(logName())
-        let now =  NSDate()
+        mostRecentLog = NSDate()
         delegate = try! createFileLog()
 
         if exists {
             mostRecentLog = delegate!.lastModificationDate()
         }
-        else {
-            mostRecentLog = now
-        }
 
         // initial cleanup
 
-        try cleanup(now)
+        try cleanup(NSDate())
     }
 
     // MARK: internal
+
+    func dateRegex(pattern : String) -> String {
+        //regexp = try NSRegularExpression(pattern: "\\b([a-z|_|A-Z|\\-]+)\\-(\\d{4}\\-\\d{2}\\-\\d{2})\\.log\\b", options: [])
+
+
+        return ""
+    }
 
     public func createLogDirectory(directoryPath : String)  throws -> NSURL {
         let url = NSURL(fileURLWithPath: directoryPath, isDirectory: true)
@@ -177,20 +176,22 @@ public class RollingFileLog : DelegatingLog<FileLog> {
     }
 
     class func createFileLog(name: String, fileName: String, formatter: LogFormatter?) throws -> FileLog {
-        return try FileLog(name: name, fileName: fileName, formatter: formatter)
+        return try FileLog(name: name, fileName: fileName, formatter: formatter, synchronize: false)
     }
 
     // MARK: override LogManager.Log
 
     override func log(entry : LogManager.LogEntry) -> Void {
-        if daysBetween(entry.timestamp, and: mostRecentLog!) > 0 {
-            try! cleanup(entry.timestamp)
+        mutex.synchronized {
+            if self.daysBetween(entry.timestamp, and: self.mostRecentLog!) > 0 {
+                try! self.cleanup(entry.timestamp)
+            }
+
+            self.mostRecentLog = entry.timestamp
+
+            // delegate
+
+            self.delegate!.log(entry)
         }
-
-        mostRecentLog = entry.timestamp
-
-        // delegate
-
-        delegate!.log(entry)
     }
 }
