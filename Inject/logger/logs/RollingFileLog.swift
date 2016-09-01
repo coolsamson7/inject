@@ -57,7 +57,7 @@ public class RollingFileLog : DelegatingLog<FileLog> {
 
         // initial cleanup
 
-        try cleanup(NSDate())
+        cleanup(NSDate())
     }
 
     // MARK: internal
@@ -103,7 +103,7 @@ public class RollingFileLog : DelegatingLog<FileLog> {
         return files.filter({try! nameAndDate($0.lastPathComponent!).name != nil}).map({ ($0, try! nameAndDate($0.lastPathComponent!).date!) })
     }
 
-    func cleanup(now : NSDate) throws {
+    func cleanup(now : NSDate) {
         // copy current log
 
         if mostRecentLog != nil && daysBetween(now, and: mostRecentLog!) > 0 {
@@ -184,7 +184,7 @@ public class RollingFileLog : DelegatingLog<FileLog> {
     override func log(entry : LogManager.LogEntry) -> Void {
         mutex.synchronized {
             if self.daysBetween(entry.timestamp, and: self.mostRecentLog!) > 0 {
-                try! self.cleanup(entry.timestamp)
+                self.cleanup(entry.timestamp)
             }
 
             self.mostRecentLog = entry.timestamp
