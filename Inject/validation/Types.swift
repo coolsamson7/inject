@@ -9,7 +9,7 @@
 import Foundation
 
 /// non generic base class for types
-public class TypeDescriptor {
+open class TypeDescriptor {
     // MARK: instance data
     
     var type : Any.Type
@@ -24,19 +24,19 @@ public class TypeDescriptor {
     
     /// Return the underlying type
     /// Returns: the base type
-    public func getType() -> Any.Type {
+    open func getType() -> Any.Type {
         return type
     }
     
     /// Return `true` if the argument is value, `false` otherwise
     /// Returns: the valid state
-    public func isValid(value : Any) -> Bool {
+    open func isValid(_ value : Any) -> Bool {
         return  true
     }
 }
 
 /// generic base class for all types
-public class GenericTypeDescriptor<T> : TypeDescriptor {
+open class GenericTypeDescriptor<T> : TypeDescriptor {
     // MARK: instance data
 
     var constraint : Constraint<T>
@@ -54,20 +54,20 @@ public class GenericTypeDescriptor<T> : TypeDescriptor {
 
     /// Return `true` if the argument is value, `false` otherwise
     /// Returns: the valid state
-    override public func isValid(object : Any) -> Bool {
+    override open func isValid(_ object : Any) -> Bool {
         return constraint.eval(object as! T)
     }
 }
 
 // typedescriptor for `Equatable`s
-public class EquatableTypeDescriptor<T : Equatable> : GenericTypeDescriptor<T> {
+open class EquatableTypeDescriptor<T : Equatable> : GenericTypeDescriptor<T> {
     // MARK: convenience functions
 
-    public class func equal<T : Equatable>(value : T) -> Constraint<T>  {
+    open class func equal<T : Equatable>(_ value : T) -> Constraint<T>  {
         return ClosureConstraint<T>(closure: {$0 == value})
     }
 
-    public class func nonEqual<T : Equatable>(value : T) -> Constraint<T>  {
+    open class func nonEqual<T : Equatable>(_ value : T) -> Constraint<T>  {
         return ClosureConstraint<T>(closure: {$0 != value})
     }
 
@@ -79,22 +79,22 @@ public class EquatableTypeDescriptor<T : Equatable> : GenericTypeDescriptor<T> {
 }
 
 // typedescriptor for `Comparable`s
-public class ComparableTypeDescriptor<T : Comparable> : EquatableTypeDescriptor<T> {
+open class ComparableTypeDescriptor<T : Comparable> : EquatableTypeDescriptor<T> {
     // MARK: convenience functions
 
-    public class func lessEqual<T : Comparable>(value : T) -> Constraint<T>  {
+    open class func lessEqual<T : Comparable>(_ value : T) -> Constraint<T>  {
         return ClosureConstraint<T>(closure: {$0 <= value})
     }
 
-    public class func less<T : Comparable>(value : T) -> Constraint<T>  {
+    open class func less<T : Comparable>(_ value : T) -> Constraint<T>  {
         return ClosureConstraint<T>(closure: {$0 < value})
     }
 
-    public class func greaterEqual<C : Comparable>(value : C) -> Constraint<C>  {
+    open class func greaterEqual<C : Comparable>(_ value : C) -> Constraint<C>  {
         return ClosureConstraint<C>(closure: {$0 >= value})
     }
 
-    public class func greater<T : Comparable>(value : T) -> Constraint<T>  {
+    open class func greater<T : Comparable>(_ value : T) -> Constraint<T>  {
         return ClosureConstraint<T>(closure: {$0 > value})
     }
 
@@ -107,7 +107,7 @@ public class ComparableTypeDescriptor<T : Comparable> : EquatableTypeDescriptor<
 
 // numeric
 
-public class NumericTypeDescriptor<T : Comparable> : ComparableTypeDescriptor<T> {
+open class NumericTypeDescriptor<T : Comparable> : ComparableTypeDescriptor<T> {
     // MARK: init
 
     public override init(constraint : Constraint<T>) {
@@ -117,10 +117,10 @@ public class NumericTypeDescriptor<T : Comparable> : ComparableTypeDescriptor<T>
 
 // string
 
-public class StringTypeDescriptor : ComparableTypeDescriptor<String> {
+open class StringTypeDescriptor : ComparableTypeDescriptor<String> {
     // MARK: convenience functions
 
-    public class func length(max : Int) -> Constraint<String> {
+    open class func length(_ max : Int) -> Constraint<String> {
         return ClosureConstraint<String>(closure: {$0.characters.count <= max})
     }
 

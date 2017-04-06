@@ -6,9 +6,9 @@
 //  Copyright © 2016 Andreas Ernst. All rights reserved.
 //
 
-public enum ConfigurationErrors : ErrorType , CustomStringConvertible {
-    case ParseError(message:String)
-    case Exception(message:String)
+public enum ConfigurationErrors : Error , CustomStringConvertible {
+    case parseError(message:String)
+    case exception(message:String)
     
     // CustomStringConvertible
     
@@ -16,10 +16,10 @@ public enum ConfigurationErrors : ErrorType , CustomStringConvertible {
         let builder = StringBuilder();
         
         switch self {
-        case .ParseError(let type):
-            builder.append("\(self.dynamicType).ParseError: \(type)");
-        case .Exception(let message):
-            builder.append("\(self.dynamicType).Exception: \(message)");
+        case .parseError(let type):
+            builder.append("\(type(of: self)).ParseError: \(type)");
+        case .exception(let message):
+            builder.append("\(type(of: self)).Exception: \(message)");
         } // switch
         
         return builder.toString()

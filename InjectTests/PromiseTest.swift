@@ -32,13 +32,13 @@ class PromiseTest: XCTestCase {
     }
 
     func testPromiseReturn() {
-        let queue = dispatch_queue_create("logging-queue", DISPATCH_QUEUE_SERIAL)
+        let queue = DispatchQueue(label: "logging-queue", attributes: [])
 
         let promise = Promise<String>()
         let future = Future<String>()
 
         promise
-           .then({ (result : String) -> Promise<String> in let promise = Promise<String>(); dispatch_async(queue, {promise.resolve(result + "1")}); return promise})
+           .then({ (result : String) -> Promise<String> in let promise = Promise<String>(); queue.async(execute: {promise.resolve(result + "1")}); return promise})
            .onSuccess({(str : String) -> Void in future.setResult(str)})
 
         promise.resolve("test")

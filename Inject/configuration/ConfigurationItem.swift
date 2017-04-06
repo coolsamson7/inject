@@ -7,7 +7,7 @@
 //
 
 /// A `ConfigurationItem` stores information about a configuration value ( name, source, type, e.g )
-public class ConfigurationItem {
+open class ConfigurationItem {
     // MARK: instance data
     
     var fqn : FQN

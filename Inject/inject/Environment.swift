@@ -6,7 +6,7 @@
 //  Copyright © 2016 Andreas Ernst. All rights reserved.
 //
 
-public typealias Resolver = (key : String) throws -> String?
+public typealias Resolver = (_ key : String) throws -> String?
 
 /// this factory creates instances by calling a specified function
 class FactoryFactory<T> : BeanFactory {
@@ -16,22 +16,22 @@ class FactoryFactory<T> : BeanFactory {
 
     // MARK: init
 
-    internal init(factory : () throws -> T ) {
+    internal init(factory : @escaping () throws -> T ) {
         self.factory = factory
     }
 
     // MARK: implement BeanFactory
 
-    func create(bean : Environment.BeanDeclaration) throws -> AnyObject {
-        return try factory() as! AnyObject
+    func create(_ bean : Environment.BeanDeclaration) throws -> AnyObject {
+        return try factory() as AnyObject
     }
 }
 
 /// `Environment`is the central class that collects bean informations and takes care of their lifecycle
-public class Environment: BeanFactory {
+open class Environment: BeanFactory {
     // MARK: local classes
 
-    public class UnresolvedScope : AbstractBeanScope {
+    open class UnresolvedScope : AbstractBeanScope {
         // MARK: init
 
         override init(name : String) {
@@ -47,7 +47,7 @@ public class Environment: BeanFactory {
 
         // MARK: implement BeanFactory
 
-        func create(declaration: BeanDeclaration) throws -> AnyObject {
+        func create(_ declaration: BeanDeclaration) throws -> AnyObject {
             return try declaration.bean.create()
         }
     }
@@ -66,19 +66,19 @@ public class Environment: BeanFactory {
 
         // MARK: implement BeanFactory
 
-        func create(bean : BeanDeclaration) throws -> AnyObject {
+        func create(_ bean : BeanDeclaration) throws -> AnyObject {
             return object
         }
     }
     
-    public class Declaration : NSObject, OriginAware {
+    open class Declaration : NSObject, OriginAware {
         // MARK: instance data
         
         var _origin : Origin?
         
         // MARK: implement OriginAware
         
-        public var origin : Origin? {
+        open var origin : Origin? {
             get {
                 return _origin
             }
@@ -96,7 +96,7 @@ public class Environment: BeanFactory {
     /// * optional id of a parent bean if, that defines common attributes that will be inherited
     /// * properties
     /// * the target class for factory beans
-    public class BeanDeclaration : Declaration {
+    open class BeanDeclaration : Declaration {
         // MARK: local classes
 
         class Require {
@@ -153,7 +153,7 @@ public class Environment: BeanFactory {
         init(instance : AnyObject) {
             self.factory = ValueFactory(object: instance)
             //self.singleton = instance // this is not done on purpose since we want the post processors to run!
-            self.clazz = instance.dynamicType
+            self.clazz = type(of: instance)
         }
 
         /// create a new `BeanDeclaration`
@@ -166,7 +166,7 @@ public class Environment: BeanFactory {
         /// set the class of this bean declaration
         /// - Parameter className: the class name
         /// - Returns: self
-        public func clazz(className : String) throws -> Self {
+        open func clazz(_ className : String) throws -> Self {
             self.clazz = try Classes.class4Name(className)
 
             return self
@@ -175,7 +175,7 @@ public class Environment: BeanFactory {
         /// set the id of this bean declaration
         /// - Parameter id: the id
         /// - Returns: self
-        public func id(id : String) -> Self {
+        open func id(_ id : String) -> Self {
             self.id = id
 
             return self
@@ -184,7 +184,7 @@ public class Environment: BeanFactory {
         /// set the `lazy' attribute of this bean declaration
         /// - Parameter lazy: if `true`, the instance will be created whenever it is requested for the first time
         /// - Returns: self
-        public func lazy(lazy : Bool = true) -> Self {
+        open func lazy(_ lazy : Bool = true) -> Self {
             self.lazy = lazy
 
             return self
@@ -193,7 +193,7 @@ public class Environment: BeanFactory {
         /// set the `abstract' attribute of this bean declaration
         /// - Parameter abstract: if `true`, the instance will not be craeted but serves only as a template for inherited beans
         /// - Returns: self
-        public func abstract(abstract : Bool = true) -> Self {
+        open func abstract(_ abstract : Bool = true) -> Self {
             self.abstract = abstract
 
             return self
@@ -202,7 +202,7 @@ public class Environment: BeanFactory {
         /// set the scope of this bean declaration
         /// - Parameter scope: the scope
         /// - Returns: self
-        public func scope(scope : BeanScope) -> Self {
+        open func scope(_ scope : BeanScope) -> Self {
             self.scope = scope
 
             return self
@@ -211,7 +211,7 @@ public class Environment: BeanFactory {
         /// set the scope of this bean declaration
         /// - Parameter scope: the scope
         /// - Returns: self
-        public func scope(scope : String) -> Self {
+        open func scope(_ scope : String) -> Self {
             self.scope = UnresolvedScope(name: scope)
 
             return self
@@ -220,7 +220,7 @@ public class Environment: BeanFactory {
         /// specifies that this bean needs to be constructed after another bean
         /// - Parameter depends: the id of the bean which needs to be constructed first
         /// - Returns: self
-        public func dependsOn(depends : String) -> Self {
+        open func dependsOn(_ depends : String) -> Self {
             requires(id: depends)
 
             return self
@@ -229,7 +229,7 @@ public class Environment: BeanFactory {
         /// specifies that this bean needs to be constructed after another bean
         /// - Parameter id: the id of the bean which needs to be constructed first
         /// - Returns: self
-        public func requires(id id: String) -> Self {
+        open func requires(id: String) -> Self {
             requires.append(Require(id: id))
 
             return self
@@ -238,7 +238,7 @@ public class Environment: BeanFactory {
         /// specifies that this bean needs to be constructed after another bean
         /// - Parameter class: the class of the bean which needs to be constructed first
         /// - Returns: self
-        public func requires(class clazz: AnyClass) -> Self {
+        open func requires(class clazz: AnyClass) -> Self {
             requires.append(Require(clazz: clazz))
 
             return self
@@ -247,7 +247,7 @@ public class Environment: BeanFactory {
         /// specifies that this bean needs to be constructed after another bean
         /// - Parameter bean: the bean which needs to be constructed first
         /// - Returns: self
-        public func requires(bean bean : BeanDeclaration) -> Self {
+        open func requires(bean : BeanDeclaration) -> Self {
             requires.append(Require(bean: bean))
 
             return self
@@ -256,7 +256,7 @@ public class Environment: BeanFactory {
         /// specifies a bean that will serve as a template
         /// - Parameter parent: the id of the parent bean
         /// - Returns: self
-        public func parent(parent : String) -> Self {
+        open func parent(_ parent : String) -> Self {
             self.parent = BeanDeclaration(id: parent)
 
             return self
@@ -270,7 +270,7 @@ public class Environment: BeanFactory {
         /// - Parameter bean: an embedded bean defining the value
         /// - Parameter inject: an `InjectBean` instance that defines how the injection shuld be carried out ( by id or by type )
         /// - Returns: self
-        public func property(name: String, value : Any? = nil, ref : String? = nil, resolve : String? = nil, bean : BeanDeclaration? = nil, inject : InjectBean? = nil) -> Self {
+        open func property(_ name: String, value : Any? = nil, ref : String? = nil, resolve : String? = nil, bean : BeanDeclaration? = nil, inject : InjectBean? = nil) -> Self {
             let property = PropertyDeclaration()
 
             property.name = name
@@ -300,7 +300,7 @@ public class Environment: BeanFactory {
         /// specifies a target class of a factory bean
         /// - Parameter clazz: the class that this factory beans creates
         /// - Returns: self
-        public func target(clazz : AnyClass) throws -> Self {
+        open func target(_ clazz : AnyClass) throws -> Self {
             self.target = clazz
 
             return self
@@ -309,7 +309,7 @@ public class Environment: BeanFactory {
         /// add a new property
         /// - Parameter property : a `PropertyDeclaration`
         /// - Returns: self
-        public func property(property: PropertyDeclaration) -> Self {
+        open func property(_ property: PropertyDeclaration) -> Self {
             properties.append(property)
 
             return self
@@ -317,7 +317,7 @@ public class Environment: BeanFactory {
 
         // specifies that the corresponding instance implements a number of types
 
-        public func implements(types : Any.Type...) throws -> Self {
+        open func implements(_ types : Any.Type...) throws -> Self {
             self.implements = types
 
             return self
@@ -325,7 +325,7 @@ public class Environment: BeanFactory {
 
         // MARK: internal
 
-        func report(builder : StringBuilder) {
+        func report(_ builder : StringBuilder) {
             builder.append(Classes.className(clazz!))
             if id != nil {
                 builder.append("[\"\(id!)\"]")
@@ -350,7 +350,7 @@ public class Environment: BeanFactory {
             builder.append("\n")
         }
         
-        func inheritFrom(parent : BeanDeclaration, loader: Environment.Loader) throws -> Void  {
+        func inheritFrom(_ parent : BeanDeclaration, loader: Environment.Loader) throws -> Void  {
             var resolveProperties = false
             if clazz == nil {
                 clazz = parent.clazz
@@ -370,7 +370,7 @@ public class Environment: BeanFactory {
             
             for property in parent.properties {
                 // only copy those properties that are not explicitly set here!
-                if properties.indexOf({$0.name == property.name}) == nil {
+                if properties.index(where: {$0.name == property.name}) == nil {
                     properties.append(property)
                 }
             }
@@ -382,13 +382,13 @@ public class Environment: BeanFactory {
             }
         }
         
-        func collect(environment: Environment, loader: Environment.Loader) throws -> Void {
+        func collect(_ environment: Environment, loader: Environment.Loader) throws -> Void {
             for property in properties {
                 try property.collect(self, environment: environment, loader: loader)
             }
         }
         
-        func connect(loader : Environment.Loader) throws -> Void {
+        func connect(_ loader : Environment.Loader) throws -> Void {
             for require in requires {
                 if let bean = require.bean {
                     loader.dependency(bean, before: self)
@@ -426,7 +426,7 @@ public class Environment: BeanFactory {
             } // if
         }
         
-        func resolve(loader : Environment.Loader) throws -> Void {
+        func resolve(_ loader : Environment.Loader) throws -> Void {
             // resolve scope?
 
             if let scope = self.scope as? UnresolvedScope {
@@ -439,30 +439,30 @@ public class Environment: BeanFactory {
                 try property.resolve(loader)
 
                 if !checkTypes(property.getType(), expected: property.property!.getPropertyType()) {
-                    throw EnvironmentErrors.TypeMismatch(message: " property \(Classes.className(clazz!)).\(property.name) expected a \(property.property!.getPropertyType()) got \(property.getType())")
+                    throw EnvironmentErrors.typeMismatch(message: " property \(Classes.className(clazz!)).\(property.name) expected a \(property.property!.getPropertyType()) got \(property.getType())")
                 }
             }
         }
 
-        func prepare(loader : Environment.Loader) throws -> Void {
+        func prepare(_ loader : Environment.Loader) throws -> Void {
             try scope!.prepare(self, factory: loader.context)
 
             // check for post processors
 
             if clazz is BeanPostProcessor.Type {
                 if (Tracer.ENABLED) {
-                    Tracer.trace("inject.runtime", level: .HIGH, message: "add post processor \(clazz)")
+                    Tracer.trace("inject.runtime", level: .high, message: "add post processor \(String(describing: clazz))")
                 }
 
                 loader.context.postProcessors.append(try self.getInstance(loader.context) as! BeanPostProcessor) // sanity checks
             }
         }
 
-        func checkTypes(type: Any.Type, expected : Any.Type) -> Bool {
+        func checkTypes(_ type: Any.Type, expected : Any.Type) -> Bool {
             if type != expected {
                 if let expectedClazz = expected as? AnyClass {
                     if let clazz = type as? AnyClass {
-                        if !clazz.isSubclassOfClass(expectedClazz) {
+                        if !clazz.isSubclass(of: expectedClazz) {
                             return false
                         }
                     }
@@ -478,13 +478,13 @@ public class Environment: BeanFactory {
             return true
         }
         
-        func getInstance(environment: Environment) throws -> AnyObject {
+        func getInstance(_ environment: Environment) throws -> AnyObject {
             return try scope!.get(self, factory: environment)
         }
         
-        func create(environment: Environment) throws -> AnyObject {
+        func create(_ environment: Environment) throws -> AnyObject {
             if (Tracer.ENABLED) {
-                Tracer.trace("inject.runtime", level: .HIGH, message: "create instance of \(clazz!)")
+                Tracer.trace("inject.runtime", level: .high, message: "create instance of \(clazz!)")
             }
             
             let result = try factory.create(self) // MARK: constructor, value, etc
@@ -492,7 +492,7 @@ public class Environment: BeanFactory {
             // make sure that the bean descriptor is initialized since we need the class hierarchy for subsequent bean requests!
 
             if _bean == nil {
-                if let beanDescriptor = BeanDescriptor.findBeanDescriptor(result.dynamicType) {
+                if let beanDescriptor = BeanDescriptor.findBeanDescriptor(type(of: result)) {
                     _bean = beanDescriptor
                 }
                 else {
@@ -513,7 +513,7 @@ public class Environment: BeanFactory {
 
                 if resolved != nil {
                     if (Tracer.ENABLED) {
-                        Tracer.trace("inject.runtime", level: .FULL, message: "set \(Classes.className(clazz!)).\(beanProperty.getName()) = \(resolved!)")
+                        Tracer.trace("inject.runtime", level: .full, message: "set \(Classes.className(clazz!)).\(beanProperty.getName()) = \(resolved!)")
                     }
 
                     try beanProperty.set(result, value: resolved)
@@ -527,10 +527,10 @@ public class Environment: BeanFactory {
         
         // CustomStringConvertible
         
-        override public var description: String {
+        override open var description: String {
             let builder = StringBuilder()
             
-            builder.append("bean(class: \(clazz)")
+            builder.append("bean(class: \(String(describing: clazz))")
             if id != nil {
                 builder.append(", id: \"\(id!)\"")
             }
@@ -548,24 +548,24 @@ public class Environment: BeanFactory {
     // these classes act as containers for various ways to reference values
 
     class ValueHolder {
-        func collect(loader : Environment.Loader, beanDeclaration : BeanDeclaration) throws -> Void {
+        func collect(_ loader : Environment.Loader, beanDeclaration : BeanDeclaration) throws -> Void {
             // noop
         }
 
-        func connect(loader : Environment.Loader, beanDeclaration : BeanDeclaration, type : Any.Type) throws -> Void {
+        func connect(_ loader : Environment.Loader, beanDeclaration : BeanDeclaration, type : Any.Type) throws -> Void {
             // noop
         }
 
-        func resolve(loader : Environment.Loader, type : Any.Type) throws -> ValueHolder {
+        func resolve(_ loader : Environment.Loader, type : Any.Type) throws -> ValueHolder {
             return  self
         }
 
-        func get(environment: Environment) throws -> Any {
-            fatalError("\(self.dynamicType).get is abstract")
+        func get(_ environment: Environment) throws -> Any {
+            fatalError("\(type(of: self)).get is abstract")
         }
 
         func getType() -> Any.Type {
-            fatalError("\(self.dynamicType).getType is abstract")
+            fatalError("\(type(of: self)).getType is abstract")
         }
     }
 
@@ -582,14 +582,14 @@ public class Environment: BeanFactory {
 
         // override
 
-        override func connect(loader : Environment.Loader, beanDeclaration : BeanDeclaration, type : Any.Type) throws -> Void {
+        override func connect(_ loader : Environment.Loader, beanDeclaration : BeanDeclaration, type : Any.Type) throws -> Void {
             ref = try loader.context.getDeclarationById(ref.id!) // replace with real declaration
 
             loader.dependency(ref, before: beanDeclaration)
         }
 
 
-        override func get(environment: Environment) throws -> Any {
+        override func get(_ environment: Environment) throws -> Any {
             return try ref.getInstance(environment)
         }
 
@@ -612,7 +612,7 @@ public class Environment: BeanFactory {
 
         // override
 
-        override func connect(loader : Environment.Loader, beanDeclaration : BeanDeclaration, type : Any.Type) throws -> Void {
+        override func connect(_ loader : Environment.Loader, beanDeclaration : BeanDeclaration, type : Any.Type) throws -> Void {
             if inject.id != nil {
                 bean = try loader.context.getDeclarationById(inject.id!)
             }
@@ -623,7 +623,7 @@ public class Environment: BeanFactory {
             loader.dependency(bean!, before: beanDeclaration)
         }
 
-        override func get(environment: Environment) throws -> Any {
+        override func get(_ environment: Environment) throws -> Any {
             return try bean!.getInstance(environment)
         }
 
@@ -645,15 +645,15 @@ public class Environment: BeanFactory {
 
         // override
 
-        override func collect(loader : Environment.Loader, beanDeclaration : BeanDeclaration) throws -> Void {
+        override func collect(_ loader : Environment.Loader, beanDeclaration : BeanDeclaration) throws -> Void {
             try loader.context.define(bean)
         }
 
-        override func connect(loader : Environment.Loader, beanDeclaration : BeanDeclaration, type : Any.Type) throws -> Void {
+        override func connect(_ loader : Environment.Loader, beanDeclaration : BeanDeclaration, type : Any.Type) throws -> Void {
             loader.dependency(bean, before: beanDeclaration)
         }
 
-        override func get(environment: Environment) throws -> Any {
+        override func get(_ environment: Environment) throws -> Any {
             return try bean.getInstance(environment)
         }
 
@@ -675,7 +675,7 @@ public class Environment: BeanFactory {
 
         // TODO
 
-        func isNumberType(type : Any.Type) -> Bool {
+        func isNumberType(_ type : Any.Type) -> Bool {
             if type == Int8.self {
                 return true
             }
@@ -715,9 +715,9 @@ public class Environment: BeanFactory {
         }
 
         // move somewhere else...
-        func coerceNumber(value: Any, type: Any.Type) throws -> (value:Any, success:Bool) {
+        func coerceNumber(_ value: Any, type: Any.Type) throws -> (value:Any, success:Bool) {
             if isNumberType(type) {
-                let conversion = StandardConversionFactory.instance.findConversion(value.dynamicType, targetType: type)
+                let conversion = StandardConversionFactory.instance.findConversion(type(of: value), targetType: type)
 
                 if conversion != nil {
                     return (try conversion!(object: value), true)
@@ -729,8 +729,8 @@ public class Environment: BeanFactory {
 
         // override
 
-        override func resolve(loader : Environment.Loader, type : Any.Type) throws -> ValueHolder {
-            if type != value.dynamicType {
+        override func resolve(_ loader : Environment.Loader, type : Any.Type) throws -> ValueHolder {
+            if type != type(of: value) {
                 // check if we can coerce numbers...
 
                 let coercion = try coerceNumber(value, type: type)
@@ -739,19 +739,19 @@ public class Environment: BeanFactory {
                     value = coercion.value
                 }
                 else {
-                    throw EnvironmentErrors.TypeMismatch(message: "could not convert a \(value.dynamicType ) into a \(type)")
+                    throw EnvironmentErrors.typeMismatch(message: "could not convert a \(type(of: value) ) into a \(type)")
                 }
             }
 
             return  self
         }
 
-        override func get(environment: Environment) throws -> Any {
+        override func get(_ environment: Environment) throws -> Any {
             return value
         }
 
         override func getType() -> Any.Type {
-            return value.dynamicType
+            return type(of: value)
         }
     }
 
@@ -768,7 +768,7 @@ public class Environment: BeanFactory {
 
         // override
 
-        override func resolve(loader : Environment.Loader, type : Any.Type) throws -> ValueHolder {
+        override func resolve(_ loader : Environment.Loader, type : Any.Type) throws -> ValueHolder {
             // replace placeholders first...
 
             value = try loader.resolve(value)
@@ -782,12 +782,12 @@ public class Environment: BeanFactory {
                     do {
                         result = try conversion(object: value)
                     }
-                            catch ConversionErrors.ConversionException( _, let targetType, _) {
-                        throw ConversionErrors.ConversionException(value: value, targetType: targetType, context: "")//[\(origin!.line):\(origin!.column)]")
+                            catch ConversionErrors.conversionException( _, let targetType, _) {
+                        throw ConversionErrors.conversionException(value: value, targetType: targetType, context: "")//[\(origin!.line):\(origin!.column)]")
                     }
                 }
                 else {
-                    throw EnvironmentErrors.TypeMismatch(message: "no conversion applicable between String and \(type)")
+                    throw EnvironmentErrors.typeMismatch(message: "no conversion applicable between String and \(type)")
                 }
             }
             // done
@@ -796,7 +796,7 @@ public class Environment: BeanFactory {
         }
     }
     
-    public class PropertyDeclaration : Declaration {
+    open class PropertyDeclaration : Declaration {
         // MARK: instance data
         
         var name  : String = ""
@@ -805,15 +805,15 @@ public class Environment: BeanFactory {
         
         // functions
         
-        func resolveProperty(beanDeclaration : BeanDeclaration, loader: Environment.Loader) throws -> Void  {
+        func resolveProperty(_ beanDeclaration : BeanDeclaration, loader: Environment.Loader) throws -> Void  {
             property = beanDeclaration.bean.findProperty(name)
             
             if property == nil {
-                throw EnvironmentErrors.UnknownProperty(property: name, bean: beanDeclaration)
+                throw EnvironmentErrors.unknownProperty(property: name, bean: beanDeclaration)
             }
         }
         
-        func collect(beanDeclaration : BeanDeclaration, environment: Environment, loader: Environment.Loader) throws -> Void {
+        func collect(_ beanDeclaration : BeanDeclaration, environment: Environment, loader: Environment.Loader) throws -> Void {
             if beanDeclaration.clazz != nil { // abstract classes
                 try resolveProperty(beanDeclaration, loader: loader)
             }
@@ -821,7 +821,7 @@ public class Environment: BeanFactory {
             try value!.collect(loader, beanDeclaration: beanDeclaration)
         }
         
-        func connect(beanDeclaration : BeanDeclaration, loader : Environment.Loader) throws -> Void {
+        func connect(_ beanDeclaration : BeanDeclaration, loader : Environment.Loader) throws -> Void {
             if property == nil {
                 // HACK...dunno why...
                 try resolveProperty(beanDeclaration, loader: loader)
@@ -830,11 +830,11 @@ public class Environment: BeanFactory {
             try value!.connect(loader, beanDeclaration: beanDeclaration, type: property!.getPropertyType())
         }
         
-        func resolve(loader : Environment.Loader) throws -> Any? {
+        func resolve(_ loader : Environment.Loader) throws -> Any? {
             return try value = value!.resolve(loader, type: property!.getPropertyType())
         }
 
-        func get(environment: Environment) throws -> Any? {
+        func get(_ environment: Environment) throws -> Any? {
             return try value!.get(environment)
         }
 
@@ -845,7 +845,7 @@ public class Environment: BeanFactory {
 
     // default scopes
 
-    public class PrototypeScope : AbstractBeanScope {
+    open class PrototypeScope : AbstractBeanScope {
         // MARK: init
 
         override init() {
@@ -854,12 +854,12 @@ public class Environment: BeanFactory {
 
         // MARK: override AbstractBeanScope
 
-        public override func get(bean : Environment.BeanDeclaration, factory : BeanFactory) throws -> AnyObject {
+        open override func get(_ bean : Environment.BeanDeclaration, factory : BeanFactory) throws -> AnyObject {
             return try factory.create(bean)
         }
     }
 
-    public class SingletonScope : AbstractBeanScope {
+    open class SingletonScope : AbstractBeanScope {
         // MARK: init
 
         override init() {
@@ -868,13 +868,13 @@ public class Environment: BeanFactory {
 
         // MARK: override AbstractBeanScope
 
-        public override func prepare(bean : Environment.BeanDeclaration, factory : BeanFactory) throws {
+        open override func prepare(_ bean : Environment.BeanDeclaration, factory : BeanFactory) throws {
             if !bean.lazy {
                 try get(bean, factory: factory)
             }
         }
 
-        public override func get(bean : Environment.BeanDeclaration, factory : BeanFactory) throws -> AnyObject {
+        open override func get(_ bean : Environment.BeanDeclaration, factory : BeanFactory) throws -> AnyObject {
             if bean.singleton == nil {
                 bean.singleton = try factory.create(bean)
             }
@@ -904,11 +904,11 @@ public class Environment: BeanFactory {
             }
         }
 
-        func prepare(bean : Environment.BeanDeclaration, factory : BeanFactory) throws {
+        func prepare(_ bean : Environment.BeanDeclaration, factory : BeanFactory) throws {
             // noop
         }
 
-        func get(bean : Environment.BeanDeclaration, factory : BeanFactory) throws -> AnyObject {
+        func get(_ bean : Environment.BeanDeclaration, factory : BeanFactory) throws -> AnyObject {
             if let factoryBean = try declaration.getInstance(environment) as? FactoryBean {
                 return try environment.runPostProcessors(try factoryBean.create())
             }
@@ -921,7 +921,7 @@ public class Environment: BeanFactory {
         }
     }
 
-    public class Loader {
+    open class Loader {
         // local classes
 
         class Dependency : Equatable {
@@ -941,7 +941,7 @@ public class Environment: BeanFactory {
 
             // methods
 
-            func addSuccessor(dependency: Dependency) -> Void {
+            func addSuccessor(_ dependency: Dependency) -> Void {
                 successors.append(dependency)
                 dependency.inCount += 1
             }
@@ -963,43 +963,43 @@ public class Environment: BeanFactory {
 
         // MARK: public
 
-        func resolve(string : String) throws -> String {
+        func resolve(_ string : String) throws -> String {
             var result = string
 
-            if let range = string.rangeOfString("${", range: string.startIndex..<string.endIndex) {
-                result = string[string.startIndex..<range.startIndex]
+            if let range = string.range(of: "${") {
+                result = string[string.startIndex..<range.lowerBound]
 
-                let eq  = string.rangeOfString("=", range: range.startIndex..<string.endIndex)
-                let end = string.rangeOfString("}", range: range.startIndex..<string.endIndex, options: .BackwardsSearch)
+                let eq  = string.range(of: "=", range: range.lowerBound..<string.endIndex)
+                let end = string.range(of: "}", options: .backwards, range: range.lowerBound..<string.endIndex)
 
                 if eq != nil {
-                    let key = string[range.endIndex ..< eq!.startIndex]
+                    let key = string[range.upperBound ..< eq!.lowerBound]
 
-                    let resolved = try resolver!(key: key)
+                    let resolved = try resolver!(key)
 
                     if (Tracer.ENABLED) {
-                        Tracer.trace("inject.configuration", level: .HIGH, message: "resolve configuration key \(key) = \(resolved)")
+                        Tracer.trace("inject.configuration", level: .high, message: "resolve configuration key \(key) = \(String(describing: resolved))")
                     }
 
                     if  resolved != nil {
                         result += resolved!
                     }
                     else {
-                        result += try resolve(string[eq!.endIndex..<end!.startIndex])
+                        result += try resolve(string[eq!.upperBound..<end!.lowerBound])
                     }
                 }
                 else {
-                    let key = string[range.endIndex ..< end!.startIndex]
-                    let resolved = try resolver!(key: key)!
+                    let key = string[range.upperBound ..< end!.lowerBound]
+                    let resolved = try resolver!(key)!
 
                     if (Tracer.ENABLED) {
-                        Tracer.trace("inject.configuration", level: .HIGH, message: "resolve configuration key \(key) = \(resolved)")
+                        Tracer.trace("inject.configuration", level: .high, message: "resolve configuration key \(key) = \(resolved)")
                     }
 
                     result += resolved
                 } // else
 
-                result += try resolve(string[end!.endIndex..<string.endIndex])
+                result += try resolve(string[end!.upperBound..<string.endIndex])
             } // if
 
             return result
@@ -1008,7 +1008,7 @@ public class Environment: BeanFactory {
         func setup() throws -> Void {
             // local function
 
-            func resolveConfiguration(key: String) throws -> String? {
+            func resolveConfiguration(_ key: String) throws -> String? {
                 let fqn = FQN.fromString(key)
 
                 if context.configurationManager.hasValue(fqn.namespace, key: fqn.key) {
@@ -1024,7 +1024,7 @@ public class Environment: BeanFactory {
 
         // MARK: internal
 
-        func getDependency(bean : Environment.BeanDeclaration) -> Dependency {
+        func getDependency(_ bean : Environment.BeanDeclaration) -> Dependency {
             var dependency = dependencies[bean]
             if dependency == nil {
                 dependency = Dependency(declaration: bean)
@@ -1036,11 +1036,11 @@ public class Environment: BeanFactory {
             return dependency!
         }
 
-        func dependency(bean : Environment.BeanDeclaration, before : Environment.BeanDeclaration) {
+        func dependency(_ bean : Environment.BeanDeclaration, before : Environment.BeanDeclaration) {
             getDependency(bean).addSuccessor(getDependency(before))
         }
 
-        func addDeclaration(declaration : Environment.BeanDeclaration) throws -> Environment.BeanDeclaration {
+        func addDeclaration(_ declaration : Environment.BeanDeclaration) throws -> Environment.BeanDeclaration {
             // add
 
             let dependency = Dependency(declaration: declaration)
@@ -1051,7 +1051,7 @@ public class Environment: BeanFactory {
             return declaration
         }
 
-        func sortDependencies(dependencies : [Dependency]) throws -> Void {
+        func sortDependencies(_ dependencies : [Dependency]) throws -> Void {
             // local functions
 
             func detectCycles() -> [[Environment.BeanDeclaration]] {
@@ -1063,7 +1063,7 @@ public class Environment: BeanFactory {
 
                 // local func
 
-                func traverse(dependency: Dependency) {
+                func traverse(_ dependency: Dependency) {
                     dependency.index = index
                     dependency.lowLink = index
 
@@ -1160,13 +1160,13 @@ public class Environment: BeanFactory {
                     index += 1
                 }
 
-                throw EnvironmentErrors.CylicDependencies(message: builder.toString())
+                throw EnvironmentErrors.cylicDependencies(message: builder.toString())
             }
         }
 
         func load() throws -> Environment {
             if (Tracer.ENABLED) {
-                Tracer.trace("inject.loader", level: .HIGH, message: "load \(context.name)")
+                Tracer.trace("inject.loader", level: .high, message: "load \(context.name)")
             }
 
             loading = true
@@ -1176,7 +1176,7 @@ public class Environment: BeanFactory {
             // collect
 
             if (Tracer.ENABLED) {
-                Tracer.trace("inject.loader", level: .HIGH, message: "collect beans")
+                Tracer.trace("inject.loader", level: .high, message: "collect beans")
             }
 
             for dependency in dependencyList {
@@ -1186,7 +1186,7 @@ public class Environment: BeanFactory {
             // connect
 
             if (Tracer.ENABLED) {
-                Tracer.trace("inject.loader", level: .HIGH, message: "connect beans")
+                Tracer.trace("inject.loader", level: .high, message: "connect beans")
             }
 
             for dependency in dependencyList {
@@ -1196,19 +1196,19 @@ public class Environment: BeanFactory {
             // sort
 
             if (Tracer.ENABLED) {
-                Tracer.trace("inject.loader", level: .HIGH, message: "sort beans")
+                Tracer.trace("inject.loader", level: .high, message: "sort beans")
             }
 
             try sortDependencies(dependencyList)
 
             // and resort local beans
 
-            context.localBeans.sortInPlace({dependencies[$0]!.index < dependencies[$1]!.index})
+            context.localBeans.sort(by: {dependencies[$0]!.index! < dependencies[$1]!.index!})
 
             // resolve
 
             if (Tracer.ENABLED) {
-                Tracer.trace("inject.loader", level: .HIGH, message: "resolve beans")
+                Tracer.trace("inject.loader", level: .high, message: "resolve beans")
             }
 
             for bean in context.localBeans {
@@ -1256,9 +1256,9 @@ public class Environment: BeanFactory {
 
         // BeanPostProcessor
 
-        func process(instance : AnyObject) throws -> AnyObject {
+        func process(_ instance : AnyObject) throws -> AnyObject {
             if (Tracer.ENABLED) {
-                Tracer.trace("inject.runtime", level: .HIGH, message: "default post process a \"\(instance.dynamicType)\"")
+                Tracer.trace("inject.runtime", level: .high, message: "default post process a \"\(type(of: instance))\"")
             }
 
             // inject
@@ -1361,7 +1361,7 @@ public class Environment: BeanFactory {
 
     /// load a xl configuration file
     /// - Parameter data: a `NSData` object referencing the config file
-    public func loadXML(data : NSData) throws -> Self {
+    open func loadXML(_ data : Data) throws -> Self {
         try XMLEnvironmentLoader(environment: self)
            .parse(data)
 
@@ -1371,7 +1371,7 @@ public class Environment: BeanFactory {
     /// startup validates all defined beans and creates all singletons in advance
     /// - Returns: self
     /// - Throws: any errors during setup
-    public func startup() throws -> Self  {
+    open func startup() throws -> Self  {
         if loader != nil {
             // check parent
 
@@ -1384,7 +1384,7 @@ public class Environment: BeanFactory {
             Environment.LOGGER.info("startup environment \(name)")
 
             if (Tracer.ENABLED) {
-                Tracer.trace("inject.runtime", level: .HIGH, message: "startup \(name)")
+                Tracer.trace("inject.runtime", level: .high, message: "startup \(name)")
             }
 
             // load
@@ -1399,7 +1399,7 @@ public class Environment: BeanFactory {
 
     /// register a named scope
     // - Parameter scope: the `BeanScope`
-    public func registerScope(scope : BeanScope) -> Void {
+    open func registerScope(_ scope : BeanScope) -> Void {
         scopes[scope.name] = scope
     }
 
@@ -1408,7 +1408,7 @@ public class Environment: BeanFactory {
     /// Return a named scope
     /// - Parameter scope: the scope name
     /// - Throws: an error if the scope is not defined
-    public func scope(scope : String) throws -> BeanScope {
+    open func scope(_ scope : String) throws -> BeanScope {
         return try getScope(scope)
     }
 
@@ -1416,7 +1416,7 @@ public class Environment: BeanFactory {
     /// - Parameter instance: the corresponding instance
     /// - Parameter id: an optional id
     /// - Returns: the new `BeanDeclaration`
-    public func bean(instance : AnyObject, id : String? = nil, file: String = #file, function: String = #function, line: Int = #line, column: Int = #column) -> Environment.BeanDeclaration {
+    open func bean(_ instance : AnyObject, id : String? = nil, file: String = #file, function: String = #function, line: Int = #line, column: Int = #column) -> Environment.BeanDeclaration {
         let result = Environment.BeanDeclaration(instance: instance)
 
         if id != nil {
@@ -1436,7 +1436,7 @@ public class Environment: BeanFactory {
     /// - Parameter lazy: the lazy attribute. default is `false`
     /// - Parameter abstract: the abstract attribute. default is `false`
     /// - Returns: the new `BeanDeclaration`
-    public func bean(className : String, id : String? = nil, lazy : Bool = false, abstract : Bool = false, file: String = #file, function: String = #function, line: Int = #line, column: Int = #column) throws -> Environment.BeanDeclaration {
+    open func bean(_ className : String, id : String? = nil, lazy : Bool = false, abstract : Bool = false, file: String = #file, function: String = #function, line: Int = #line, column: Int = #column) throws -> Environment.BeanDeclaration {
         let result = Environment.BeanDeclaration()
 
         if id != nil {
@@ -1462,7 +1462,7 @@ public class Environment: BeanFactory {
     /// - Parameter abstract:t he abstract attribute. default is `false`
     /// - Parameter factory: a factory function that will return a new instance of the specific type
     /// - Returns: the new `BeanDeclaration`
-    public func bean<T>(clazz : T.Type, id : String? = nil, lazy : Bool = false, abstract : Bool = false, file: String = #file, function: String = #function, line: Int = #line, column: Int = #column, factory : (() throws -> T)? = nil) throws -> Environment.BeanDeclaration {
+    open func bean<T>(_ clazz : T.Type, id : String? = nil, lazy : Bool = false, abstract : Bool = false, file: String = #file, function: String = #function, line: Int = #line, column: Int = #column, factory : (() throws -> T)? = nil) throws -> Environment.BeanDeclaration {
         let result = Environment.BeanDeclaration()
 
         if id != nil {
@@ -1485,7 +1485,7 @@ public class Environment: BeanFactory {
 
         }
         else {
-            throw EnvironmentErrors.Exception(message: "only classes are accepted, got \(clazz)")
+            throw EnvironmentErrors.exception(message: "only classes are accepted, got \(clazz)")
         }
 
         return result
@@ -1493,13 +1493,13 @@ public class Environment: BeanFactory {
 
     /// return a `Settings` instance tha can be used to define configuration values
     /// - Returns: a new `Settings` instance
-    public func settings(file: String = #file, function: String = #function, line: Int = #line) -> Settings {
+    open func settings(_ file: String = #file, function: String = #function, line: Int = #line) -> Settings {
         return Settings(configurationManager: self.configurationManager, url: file + " " + function + " line: " + String(line))
     }
 
     /// This class collects manual configuration values
 
-    public class Settings : AbstractConfigurationSource {
+    open class Settings : AbstractConfigurationSource {
         // MARK: instance data
 
         var items = [ConfigurationItem]()
@@ -1512,10 +1512,10 @@ public class Environment: BeanFactory {
 
         // MARK:fluent interface
 
-        public func setValue(namespace : String = "", key : String, value : Any) -> Self {
+        open func setValue(_ namespace : String = "", key : String, value : Any) -> Self {
             items.append(ConfigurationItem(
                     fqn: FQN(namespace: namespace, key: key),
-                    type: value.dynamicType,
+                    type: type(of: value),
                     value: value,
                     source: url
                     ))
@@ -1525,7 +1525,7 @@ public class Environment: BeanFactory {
 
         // MARK: implement ConfigurationSource
 
-        override public func load(configurationManager : ConfigurationManager) throws -> Void {
+        override open func load(_ configurationManager : ConfigurationManager) throws -> Void {
             for item in items {
                 try configurationManager.configurationAdded(item, source: self)
             }
@@ -1534,7 +1534,7 @@ public class Environment: BeanFactory {
 
     /// define configuration values
     /// - Parameter settings: the object that contains configuration values
-    public func define(settings : Settings) throws -> Self {
+    open func define(_ settings : Settings) throws -> Self {
         try configurationManager.addSource(settings)
 
         return self
@@ -1542,7 +1542,7 @@ public class Environment: BeanFactory {
 
     /// defines the specified `BeanDeclaration`
     /// - Returns: self
-    public func define(declaration : Environment.BeanDeclaration) throws -> Self {
+    open func define(_ declaration : Environment.BeanDeclaration) throws -> Self {
         // fix scope if not available
 
         if declaration.scope == nil {
@@ -1554,8 +1554,8 @@ public class Environment: BeanFactory {
         if loader != nil {
             try loader!.addDeclaration(declaration)
         }
-        else { for line in NSThread.callStackSymbols() {print(line)}
-            throw EnvironmentErrors.Exception(message: "environment is frozen")
+        else { for line in Thread.callStackSymbols {print(line)}
+            throw EnvironmentErrors.exception(message: "environment is frozen")
         }
 
         // remember id
@@ -1581,9 +1581,9 @@ public class Environment: BeanFactory {
 
     // MARK: internal
 
-    func inheritFrom(parent : Environment) {
+    func inheritFrom(_ parent : Environment) {
         if (Tracer.ENABLED) {
-            Tracer.trace("inject.loader", level: .HIGH, message: "inherit from \(parent.name)")
+            Tracer.trace("inject.loader", level: .high, message: "inherit from \(parent.name)")
         }
 
         self.postProcessors = parent.postProcessors
@@ -1603,33 +1603,33 @@ public class Environment: BeanFactory {
         }
     }
 
-    func getScope(name : String) throws -> BeanScope {
+    func getScope(_ name : String) throws -> BeanScope {
         let scope = scopes[name]
         if scope == nil {
-            throw EnvironmentErrors.UnknownScope(scope: name, context: "")
+            throw EnvironmentErrors.unknownScope(scope: name, context: "")
         }
         else {
             return scope!
         }
     }
     
-    func rememberId(declaration : Environment.BeanDeclaration) throws -> Void {
+    func rememberId(_ declaration : Environment.BeanDeclaration) throws -> Void {
         if let id = declaration.id {
             if byId[id] == nil {
                 byId[id] = declaration
             }
             else {
-                throw EnvironmentErrors.AmbiguousBeanById(id: id, context: "")
+                throw EnvironmentErrors.ambiguousBeanById(id: id, context: "")
             }
         }
     }
 
-    func rememberType(declaration : Environment.BeanDeclaration) throws -> Void {
+    func rememberType(_ declaration : Environment.BeanDeclaration) throws -> Void {
         // remember by type for injections
         
         var clazz : AnyClass?;
         if let valueFactory = declaration.factory as? ValueFactory {
-            clazz = valueFactory.object.dynamicType
+            clazz = type(of: valueFactory.object)
         }
         else {
             clazz = declaration.clazz // may be nil in case of a inherited bean!
@@ -1667,27 +1667,27 @@ public class Environment: BeanFactory {
         }
     }
 
-    func getCandidate(type : Any.Type) throws -> Environment.BeanDeclaration {
+    func getCandidate(_ type : Any.Type) throws -> Environment.BeanDeclaration {
         let candidates = getBeanDeclarationsByType(try BeanDescriptor.forType(type))
         
         if candidates.count == 0 {
-            throw EnvironmentErrors.NoCandidateForType(type: type)
+            throw EnvironmentErrors.noCandidateForType(type: type)
         }
         if candidates.count > 1 {
-            throw EnvironmentErrors.AmbiguousCandidatesForType(type: type)
+            throw EnvironmentErrors.ambiguousCandidatesForType(type: type)
         }
         else {
             return candidates[0]
         }
     }
     
-    func runPostProcessors(instance : AnyObject) throws -> AnyObject {
+    func runPostProcessors(_ instance : AnyObject) throws -> AnyObject {
         var result = instance
 
         // inject
         
         if (Tracer.ENABLED) {
-            Tracer.trace("inject.runtime", level: .HIGH, message: "run post processors on a \"\(result.dynamicType)\"")
+            Tracer.trace("inject.runtime", level: .high, message: "run post processors on a \"\(type(of: result))\"")
         }
 
         for processor in postProcessors {
@@ -1697,24 +1697,24 @@ public class Environment: BeanFactory {
         return result
     }
     
-    func getDeclarationById(id : String) throws -> Environment.BeanDeclaration {
+    func getDeclarationById(_ id : String) throws -> Environment.BeanDeclaration {
         let declaration = byId[id]
         
         if declaration == nil {
-            throw EnvironmentErrors.UnknownBeanById(id: id, context: "")
+            throw EnvironmentErrors.unknownBeanById(id: id, context: "")
         }
         
         return declaration!
     }
 
-    public func getBeanDeclarationsByType(type : Any.Type) -> [Environment.BeanDeclaration] {
+    open func getBeanDeclarationsByType(_ type : Any.Type) -> [Environment.BeanDeclaration] {
         return getBeanDeclarationsByType(try! BeanDescriptor.forType(type))
     }
 
-    public func getBeanDeclarationsByType(bean : BeanDescriptor) -> [Environment.BeanDeclaration] {
+    open func getBeanDeclarationsByType(_ bean : BeanDescriptor) -> [Environment.BeanDeclaration] {
         // local func
 
-        func collect(bean : BeanDescriptor, inout candidates : [Environment.BeanDeclaration]) -> Void {
+        func collect(_ bean : BeanDescriptor, candidates : inout [Environment.BeanDeclaration]) -> Void {
             let localCandidates = byType[ObjectIdentifier(bean.type)]
 
             if localCandidates != nil {
@@ -1743,7 +1743,7 @@ public class Environment: BeanFactory {
 
     /// Create a string report of all registered bean definitions
     /// - Returns: the report
-    public func report() -> String {
+    open func report() -> String {
         let builder = StringBuilder()
 
         builder.append("### ENVIRONMENT \(name) REPORT\n")
@@ -1760,7 +1760,7 @@ public class Environment: BeanFactory {
     /// - Returns: the array of instances
     /// - Throws: any errors
 
-    public func getBeansByType<T>(type : T.Type) throws -> [T] {
+    open func getBeansByType<T>(_ type : T.Type) throws -> [T] {
         let declarations = getBeanDeclarationsByType(type)
         var result : [T] = []
         for declaration in declarations {
@@ -1777,7 +1777,7 @@ public class Environment: BeanFactory {
     /// - Parameter id: an optional id
     /// - Returns: the instance
     /// - Throws: Any error
-    public func getBean<T>(type : T.Type, byId id : String? = nil) throws -> T {
+    open func getBean<T>(_ type : T.Type, byId id : String? = nil) throws -> T {
         try validate()
 
         if id != nil {
@@ -1785,17 +1785,17 @@ public class Environment: BeanFactory {
                 return try bean.getInstance(self) as! T
             }
             else {
-                throw EnvironmentErrors.UnknownBeanById(id: id!, context: "")
+                throw EnvironmentErrors.unknownBeanById(id: id!, context: "")
             }
         }
         else {
             let result = getBeanDeclarationsByType(try BeanDescriptor.forType(type))
             
             if result.count == 0 {
-                throw EnvironmentErrors.UnknownBeanByType(type: type)
+                throw EnvironmentErrors.unknownBeanByType(type: type)
             }
             else if result.count > 1 {
-                throw EnvironmentErrors.AmbiguousBeanByType(type: type)
+                throw EnvironmentErrors.ambiguousBeanByType(type: type)
             }
             else {
                 return try result[0].getInstance(self) as! T
@@ -1809,7 +1809,7 @@ public class Environment: BeanFactory {
     /// - Parameter id: an optional id
     /// - Returns: the instance
     /// - Throws: Any error
-    public func getBean(type : Any.Type, byId id : String? = nil) throws -> AnyObject {
+    open func getBean(_ type : Any.Type, byId id : String? = nil) throws -> AnyObject {
         try validate()
 
         if id != nil {
@@ -1817,17 +1817,17 @@ public class Environment: BeanFactory {
                 return try bean.getInstance(self) 
             }
             else {
-                throw EnvironmentErrors.UnknownBeanById(id: id!, context: "")
+                throw EnvironmentErrors.unknownBeanById(id: id!, context: "")
             }
         }
         else {
             let result = getBeanDeclarationsByType(try BeanDescriptor.forType(type))
 
             if result.count == 0 {
-                throw EnvironmentErrors.UnknownBeanByType(type: type )
+                throw EnvironmentErrors.unknownBeanByType(type: type )
             }
             else if result.count > 1 {
-                throw EnvironmentErrors.AmbiguousBeanByType(type: type )
+                throw EnvironmentErrors.ambiguousBeanByType(type: type )
             }
             else {
                 return try result[0].getInstance(self)
@@ -1835,7 +1835,7 @@ public class Environment: BeanFactory {
         }
     }
     
-    public func inject(object : AnyObject) throws -> Void {
+    open func inject(_ object : AnyObject) throws -> Void {
         try validate()
 
         try injector.inject(object, context: self)
@@ -1843,14 +1843,14 @@ public class Environment: BeanFactory {
 
     /// return the `ConfigurationManager` of this environment
     /// - Returns: the `ConfigurationManager`
-    public func getConfigurationManager() -> ConfigurationManager {
+    open func getConfigurationManager() -> ConfigurationManager {
         return configurationManager
     }
 
     /// Add a new configuration source
     /// - Parameter source: a `ConfigurationSource`
     /// - Returns: self
-    public func addConfigurationSource(source: ConfigurationSource) throws -> Environment {
+    open func addConfigurationSource(_ source: ConfigurationSource) throws -> Environment {
         try configurationManager.addSource(source)
 
         return self
@@ -1864,13 +1864,13 @@ public class Environment: BeanFactory {
     /// - Parameter scope: the optional scope
     /// - Returns: the value
     /// - Throws: any possible error
-    public func getConfigurationValue<T>(type : T.Type, namespace : String = "", key : String, defaultValue: T? = nil, scope : Scope? = nil) throws -> T {
+    open func getConfigurationValue<T>(_ type : T.Type, namespace : String = "", key : String, defaultValue: T? = nil, scope : Scope? = nil) throws -> T {
         return try configurationManager.getValue(type, namespace: namespace, key: key, defaultValue: defaultValue, scope: scope)
     }
     
     // MARK: implement BeanFactory
     
-    public func create(bean : Environment.BeanDeclaration) throws -> AnyObject {
+    open func create(_ bean : Environment.BeanDeclaration) throws -> AnyObject {
         return try bean.create(self)
     }
 }

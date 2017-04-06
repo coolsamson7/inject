@@ -8,5 +8,5 @@
 
 /// A `ConfigurationListener` will be informaed about configuration value changes
 public protocol ConfigurationListener {
-    func onItemChanged(namespace : String, key : String, value : Any) -> Void
+    func onItemChanged(_ namespace : String, key : String, value : Any) -> Void
 }

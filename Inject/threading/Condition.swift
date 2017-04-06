@@ -6,11 +6,11 @@
 import Foundation
 
 /// A wrapper for `pthread_cond_t`
-public class Condition {
+open class Condition {
     // MARK: instance data
 
-    private var cond = pthread_cond_t()
-    private var mutex : Mutex
+    fileprivate var cond = pthread_cond_t()
+    fileprivate var mutex : Mutex
 
     // init
 
@@ -29,17 +29,17 @@ public class Condition {
     // MARK: public
 
     /// broadcast
-    public func broadcast(){
+    open func broadcast(){
         pthread_cond_broadcast(&cond)
     }
 
     /// Signal
-    public func signal(){
+    open func signal(){
         pthread_cond_signal(&cond)
     }
 
     /// wait on this condition
-    public func wait(){
+    open func wait(){
         pthread_cond_wait(&cond, &mutex.mutex)
     }
 }

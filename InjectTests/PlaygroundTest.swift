@@ -23,7 +23,7 @@ class PlaygroundTest: XCTestCase {
     class SamplePostProcessor : BeanPostProcessor {
         // implement BeanPostProcessor
 
-        func process(bean : AnyObject) throws -> AnyObject {
+        func process(_ bean : AnyObject) throws -> AnyObject {
             print("post process \(bean)...")
 
             return bean
@@ -53,7 +53,7 @@ class PlaygroundTest: XCTestCase {
 
         // implement BeanDescriptorInitializer
 
-        func initializeBeanDescriptor(beanDescriptor : BeanDescriptor) {
+        func initializeBeanDescriptor(_ beanDescriptor : BeanDescriptor) {
             beanDescriptor["bar"].inject(InjectBean())
         }
 
@@ -156,13 +156,13 @@ class PlaygroundTest: XCTestCase {
     override class func setUp() {
         Classes.setDefaultBundle(PlaygroundTest.self)
 
-        Tracer.setTraceLevel("inject", level: .FULL)
-        Tracer.setTraceLevel("configuration", level: .FULL)
+        Tracer.setTraceLevel("inject", level: .full)
+        Tracer.setTraceLevel("configuration", level: .full)
 
         // logger
 
         LogManager()
-            .registerLogger("", level : .ALL, logs: [ConsoleLog(name: "console")])
+            .registerLogger("", level : .all, logs: [ConsoleLog(name: "console")])
 
     }
 

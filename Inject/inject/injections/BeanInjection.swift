@@ -6,7 +6,7 @@
 //  Copyright © 2016 Andreas Ernst. All rights reserved.
 //
 /// `BeanInjection` executes injections for beans based on the class `InjectBean`
-public class BeanInjection : Injection {
+open class BeanInjection : Injection {
     // MARK: init
     
     override public init() {
@@ -15,7 +15,7 @@ public class BeanInjection : Injection {
     
     // MARK:  implement Injection
     
-    override func computeValue(inject : Inject, property: BeanDescriptor.PropertyDescriptor, environment: Environment) throws -> Any {
+    override func computeValue(_ inject : Inject, property: BeanDescriptor.PropertyDescriptor, environment: Environment) throws -> Any {
         if let beanInject = inject as? InjectBean {
             if beanInject.id != nil {
                 return try environment.getBean(AnyObject.self, byId: beanInject.id!);

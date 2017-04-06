@@ -13,7 +13,7 @@
 
     <!-- a sample bean post processor which will print on stdout -->
 
-    <bean class="SamplePostProcessor"/>
+    <bean class="Inject.SamplePostProcessor"/>
 
     <!-- foo -->
 

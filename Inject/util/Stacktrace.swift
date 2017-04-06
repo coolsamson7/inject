@@ -8,7 +8,7 @@
 
 /// `Stacktrace` stores s swift stacktrace
 
-public class Stacktrace : CustomStringConvertible {
+open class Stacktrace : CustomStringConvertible {
     // MARK: local classes
 
     struct Frame : CustomStringConvertible {
@@ -24,10 +24,10 @@ public class Stacktrace : CustomStringConvertible {
         init(line : String) {
             location = line
 
-            func split(str : String) -> [String] {
+            func split(_ str : String) -> [String] {
                 var words = [String]()
 
-                str.enumerateSubstringsInRange(str.rangeOfString(str)!, options: .ByWords) { (substring, _, _, _) -> () in
+                str.enumerateSubstrings(in: str.range(of: str)!, options: .byWords) { (substring, _, _, _) -> () in
                     words.append(substring!)
                 }
 
@@ -39,9 +39,9 @@ public class Stacktrace : CustomStringConvertible {
             module   = elements[1]
             pointer  = elements[2]
             self.line     = elements[elements.count - 1]
-            location = _stdlib_demangleName(elements[3])
+            location = elements[3]; // FIXIT TODO _stdlib_demangleName(elements[3])
 
-            if location.containsString(".") {  // <module>.<class>.<function>
+            if location.contains(".") {  // <module>.<class>.<function>
                 let dot = location.indexOf(".")
 
                 location =  location.substring(from: dot + 1) // remove module
@@ -76,13 +76,13 @@ public class Stacktrace : CustomStringConvertible {
 
     // MARK: init
 
-    public init(frames : [String] = NSThread.callStackSymbols()) {
+    public init(frames : [String] = Thread.callStackSymbols) {
         self.frames = frames.map({Frame(line: $0)})
     }
 
     // MARK: implement CustomStringConvertible
 
-    public var description: String {
+    open var description: String {
         let builder = StringBuilder()
 
         for frame in frames {

@@ -7,7 +7,7 @@
 //
 
 /// This log simply calls 'print()'
-public class ConsoleLog: LogManager.Log {
+open class ConsoleLog: LogManager.Log {
     // MARK: init
 
     var mutex : Mutex?
@@ -29,7 +29,7 @@ public class ConsoleLog: LogManager.Log {
 
     // MARK: override LogManager.Log
 
-    override func log(entry : LogManager.LogEntry) -> Void {
+    override func log(_ entry : LogManager.LogEntry) -> Void {
         if let mutex = self.mutex {
             mutex.synchronized {
                 print(self.format(entry))

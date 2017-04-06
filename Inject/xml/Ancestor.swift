@@ -10,5 +10,5 @@
 public protocol Ancestor {
     /// informs this instance about a new child
     /// - Parameter chidl: any child
-    func addChild(child : AnyObject) -> Void
+    func addChild(_ child : AnyObject) -> Void
 }

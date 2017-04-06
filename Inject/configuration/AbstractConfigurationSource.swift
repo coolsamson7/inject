@@ -7,7 +7,7 @@
 //
 
 /// Base class for a `ConfigurationSource`
-public class AbstractConfigurationSource : NSObject, ConfigurationSource, Bean, BeanDescriptorInitializer {
+open class AbstractConfigurationSource : NSObject, ConfigurationSource, Bean, BeanDescriptorInitializer {
     // MARK: instance data
     
     var _url : String = ""
@@ -35,39 +35,39 @@ public class AbstractConfigurationSource : NSObject, ConfigurationSource, Bean, 
     
     // MARK: implement BeanDescriptorInitializer
     
-    public func initializeBeanDescriptor(beanDescriptor : BeanDescriptor) {
+    open func initializeBeanDescriptor(_ beanDescriptor : BeanDescriptor) {
         beanDescriptor["configurationManager"].autowire()
     }
     
     // MARK: implement Bean
     
-    public func postConstruct() throws -> Void {
+    open func postConstruct() throws -> Void {
         try configurationManager!.addSource(self)
     }
     
     // MARK: implement ConfigurationSource
     
-    public func load(configurationManager : ConfigurationManager) throws -> Void {
+    open func load(_ configurationManager : ConfigurationManager) throws -> Void {
         // noop
     }
 
-    public func startListening(configurationManager : ConfigurationManager, seconds : Int) -> Void {
+    open func startListening(_ configurationManager : ConfigurationManager, seconds : Int) -> Void {
         // noop
     }
 
-    public var url : String {
+    open var url : String {
         get {
             return _url
         }
     }
 
-    public var mutable : Bool {
+    open var mutable : Bool {
         get {
             return _mutable
         }
     }
 
-    public var canOverrule : Bool {
+    open var canOverrule : Bool {
         get {
             return _canOverrule
         }

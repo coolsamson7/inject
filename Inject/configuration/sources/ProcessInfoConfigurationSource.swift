@@ -7,7 +7,7 @@
 //
 
 /// A configuration source based on the process info
-public class ProcessInfoConfigurationSource : AbstractConfigurationSource {
+open class ProcessInfoConfigurationSource : AbstractConfigurationSource {
     // init
 
     override public init() {
@@ -20,8 +20,8 @@ public class ProcessInfoConfigurationSource : AbstractConfigurationSource {
 
     // override
 
-    override public func load(configurationManager : ConfigurationManager) throws -> Void {
-        let dict = NSProcessInfo.processInfo().environment
+    override open func load(_ configurationManager : ConfigurationManager) throws -> Void {
+        let dict = ProcessInfo.processInfo.environment
 
         // noop
 

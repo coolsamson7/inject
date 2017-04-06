@@ -6,7 +6,7 @@
 //  Copyright © 2016 Andreas Ernst. All rights reserved.
 //
 /// `ConfigurationNamespaceHandler` is a `NamespaceHandler` that is used to define confiuration values
-public class ConfigurationNamespaceHandler : NamespaceHandler {
+open class ConfigurationNamespaceHandler : NamespaceHandler {
     // MARK: local classes
     
     // the source
@@ -30,7 +30,7 @@ public class ConfigurationNamespaceHandler : NamespaceHandler {
         
         // override
         
-        override func load(configurationManager : ConfigurationManager) throws -> Void {
+        override func load(_ configurationManager : ConfigurationManager) throws -> Void {
             for item in items {
                 try configurationManager.configurationAdded(item, source: self)
             }
@@ -50,7 +50,7 @@ public class ConfigurationNamespaceHandler : NamespaceHandler {
         
         // Ancestor
         
-        func addChild(child : AnyObject) -> Void {
+        func addChild(_ child : AnyObject) -> Void {
             if let define = child as? Define {
                 definitions.append(define)
             }
@@ -101,7 +101,7 @@ public class ConfigurationNamespaceHandler : NamespaceHandler {
     
     // override
     
-    override func register(loader : XMLEnvironmentLoader) throws {
+    override func register(_ loader : XMLEnvironmentLoader) throws {
         try super.register(loader)
 
         try loader.register(
@@ -116,7 +116,7 @@ public class ConfigurationNamespaceHandler : NamespaceHandler {
         )
     }
     
-    override func process(namespaceAware : NamespaceAware,  environment : Environment) throws -> Void {
+    override func process(_ namespaceAware : NamespaceAware,  environment : Environment) throws -> Void {
         if let configuration = namespaceAware as? Configuration {
             let url = "configuration snippets"
             let namespace = configuration.configurationNamespace
@@ -133,11 +133,11 @@ public class ConfigurationNamespaceHandler : NamespaceHandler {
                 }
                 
                 if define.key == nil {
-                    ConfigurationErrors.ParseError(message: "missing key");
+                    ConfigurationErrors.parseError(message: "missing key");
                 }
                 
                 if define.value == nil {
-                    ConfigurationErrors.ParseError(message: "missing value");
+                    ConfigurationErrors.parseError(message: "missing value");
                 }
                 
                 var type : Any.Type;
@@ -150,7 +150,7 @@ public class ConfigurationNamespaceHandler : NamespaceHandler {
                 case "Bool":
                     type = Bool.self
                 default:
-                    throw ConfigurationErrors.ParseError(message: "unknown type \"\(define.type)\"");
+                    throw ConfigurationErrors.parseError(message: "unknown type \"\(String(describing: define.type))\"");
                 }
                 
                 let item = ConfigurationItem(

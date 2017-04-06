@@ -7,7 +7,7 @@
 //
 
 /// central class that collects `ConfigurationSource`'s and is able to retrieve configuration values.
-public class ConfigurationManager : NSObject, ConfigurationAdministration, ConfigurationProvider {
+open class ConfigurationManager : NSObject, ConfigurationAdministration, ConfigurationProvider {
     // local class
     
     class ScopeAndName : Hashable {
@@ -82,11 +82,11 @@ public class ConfigurationManager : NSObject, ConfigurationAdministration, Confi
     
     // private
     
-    private func getItem(scope : Scope, fqn : FQN) -> ConfigurationItem? {
+    fileprivate func getItem(_ scope : Scope, fqn : FQN) -> ConfigurationItem? {
         return items[ScopeAndName(scope : scope, fqn : fqn)]
     }
     
-    private func resolveEffectiveConfigurationItem(scope : Scope, fqn : FQN,  scopeAndName : ScopeAndName) -> ConfigurationItem? {
+    fileprivate func resolveEffectiveConfigurationItem(_ scope : Scope, fqn : FQN,  scopeAndName : ScopeAndName) -> ConfigurationItem? {
         var resultItem = items[scopeAndName];
         if resultItem == nil  {
             let parentScope = scope.getParentScope();
@@ -102,7 +102,7 @@ public class ConfigurationManager : NSObject, ConfigurationAdministration, Confi
         return resultItem;
     }
     
-    private func getEffectiveConfigurationItem(scope : Scope, fqn : FQN) -> ConfigurationItem? {
+    fileprivate func getEffectiveConfigurationItem(_ scope : Scope, fqn : FQN) -> ConfigurationItem? {
         let scopeAndName = ScopeAndName(scope: scope, fqn: fqn);
         
         var resultItem = cachedItems[scopeAndName];
@@ -114,8 +114,8 @@ public class ConfigurationManager : NSObject, ConfigurationAdministration, Confi
         return resultItem === ConfigurationManager.NOT_FOUND ? nil : resultItem;
     }
     
-    func maybeConvert(type : Any.Type, value : Any) throws -> Any {
-        var valueType : Any.Type = value.dynamicType
+    func maybeConvert(_ type : Any.Type, value : Any) throws -> Any {
+        var valueType : Any.Type = type(of: value)
         
         if type != valueType {
             // strange things happen with strings that occur in different layouts... NSContiguousString, NSTaggedPointerString, etc.
@@ -145,7 +145,7 @@ public class ConfigurationManager : NSObject, ConfigurationAdministration, Confi
         return value
     }
 
-    public func report() -> String {
+    open func report() -> String {
         let builder = StringBuilder()
 
         builder.append("### Configuration Report\n\n")
@@ -188,25 +188,25 @@ public class ConfigurationManager : NSObject, ConfigurationAdministration, Confi
 
     // ConfigurationAdministration
     
-    public func addSource(source : ConfigurationSource) throws -> Void {
+    open func addSource(_ source : ConfigurationSource) throws -> Void {
         sources.append(source)
         
         try source.load(self)
     }
 
-    public func configurationAdded(item: ConfigurationItem , source : ConfigurationSource) throws -> Void {
+    open func configurationAdded(_ item: ConfigurationItem , source : ConfigurationSource) throws -> Void {
         let existingItem =  getItem(item.scope, fqn: item.fqn)
         
         if existingItem != nil {
             if existingItem!.scope == item.scope && !source.canOverrule {
-                throw ConfigurationErrors.Exception(message: "attempt to override item \(existingItem!.fqn) from resource \(existingItem!.source) with resource \(source.url)");
+                throw ConfigurationErrors.exception(message: "attempt to override item \(existingItem!.fqn) from resource \(existingItem!.source) with resource \(source.url)");
             }
         }
         
         try configurationChanged(item);
     }
 
-    public func configurationChanged(item: ConfigurationItem) throws -> Void {
+    open func configurationChanged(_ item: ConfigurationItem) throws -> Void {
         items[ScopeAndName(scope : item.scope, fqn : item.fqn)] = item
         
         let listenerData = listeners[item.fqn]
@@ -221,7 +221,7 @@ public class ConfigurationManager : NSObject, ConfigurationAdministration, Confi
     
     // ConfigurationProvider
     
-    public func addListener(namespace : String = "", key : String,  listener : ConfigurationListener , expectedType : Any.Type, scope : Scope = Scope.WILDCARD) -> Void {
+    open func addListener(_ namespace : String = "", key : String,  listener : ConfigurationListener , expectedType : Any.Type, scope : Scope = Scope.WILDCARD) -> Void {
         let fqn = FQN(namespace: namespace, key: key)
         
         if listeners[fqn] == nil {
@@ -232,64 +232,64 @@ public class ConfigurationManager : NSObject, ConfigurationAdministration, Confi
         }
     }
 
-    public func getConfigurationItem(namespace : String = "", key : String) -> ConfigurationItem? {
+    open func getConfigurationItem(_ namespace : String = "", key : String) -> ConfigurationItem? {
         return items[ScopeAndName(scope : scope, fqn: FQN(namespace: namespace, key: key))]
     }
 
-    public func hasValue(namespace : String = "", key : String, scope : Scope? = nil) -> Bool {
+    open func hasValue(_ namespace : String = "", key : String, scope : Scope? = nil) -> Bool {
         return getEffectiveConfigurationItem(scope != nil ? scope! : self.scope, fqn: FQN(namespace: namespace, key: key)) != nil
     }
     
-    public func getValue(type : Any.Type, namespace : String = "", key : String, defaultValue: Any? = nil, scope : Scope? = nil) throws -> Any {
+    open func getValue(_ type : Any.Type, namespace : String = "", key : String, defaultValue: Any? = nil, scope : Scope? = nil) throws -> Any {
         let resultItem = getEffectiveConfigurationItem(scope != nil ? scope! : self.scope, fqn: FQN(namespace: namespace, key: key));
         
         if resultItem == nil {
             if defaultValue != nil {
                 if (Tracer.ENABLED) {
-                    Tracer.trace("configuration", level: .HIGH, message: "\(namespace).\(key) = default value \(defaultValue)")
+                    Tracer.trace("configuration", level: .high, message: "\(namespace).\(key) = default value \(String(describing: defaultValue))")
                 }
                 
                 return try maybeConvert(type, value: defaultValue!)
             }
             else {
-                throw ConfigurationErrors.Exception(message: "neither configuration value\(namespace):\(key) nor default found");//return defaultValue
+                throw ConfigurationErrors.exception(message: "neither configuration value\(namespace):\(key) nor default found");//return defaultValue
             }
         }
         else {
             if (Tracer.ENABLED) {
-                Tracer.trace("configuration", level: .HIGH, message: "\(namespace).\(key) = \(resultItem!.value)")
+                Tracer.trace("configuration", level: .high, message: "\(namespace).\(key) = \(resultItem!.value)")
             }
             
             if resultItem!.dynamic {
-                throw ConfigurationErrors.Exception(message: "the dynamic configuration value\(namespace):\(key) cannot be fetched via getValue");
+                throw ConfigurationErrors.exception(message: "the dynamic configuration value\(namespace):\(key) cannot be fetched via getValue");
             }
             
             return try maybeConvert(type, value: resultItem!.value)
         }
     }
 
-    public func getValue<T>(type : T.Type, namespace : String = "", key : String, defaultValue: T? = nil, scope : Scope? = nil) throws -> T {
+    open func getValue<T>(_ type : T.Type, namespace : String = "", key : String, defaultValue: T? = nil, scope : Scope? = nil) throws -> T {
         let resultItem = getEffectiveConfigurationItem(scope != nil ? scope! : self.scope, fqn: FQN(namespace: namespace, key: key));
         
         if resultItem == nil {
             if defaultValue != nil {
                 if (Tracer.ENABLED) {
-                    Tracer.trace("configuration", level: .HIGH, message: "\(namespace).\(key) = default value \(defaultValue)")
+                    Tracer.trace("configuration", level: .high, message: "\(namespace).\(key) = default value \(String(describing: defaultValue))")
                 }
                 
                 return try maybeConvert(type, value: defaultValue!) as! T
             }
             else {
-                throw ConfigurationErrors.Exception(message: "neither configuration value\(namespace):\(key) nor default found");
+                throw ConfigurationErrors.exception(message: "neither configuration value\(namespace):\(key) nor default found");
             }
         }
         else {
             if (Tracer.ENABLED) {
-                Tracer.trace("configuration", level: .HIGH, message: "\(namespace).\(key) = \(resultItem!.value)")
+                Tracer.trace("configuration", level: .high, message: "\(namespace).\(key) = \(resultItem!.value)")
             }
             
             if resultItem!.dynamic {
-                throw ConfigurationErrors.Exception(message: "the dynamic configuration value\(namespace):\(key) cannot be fetched via getValue");
+                throw ConfigurationErrors.exception(message: "the dynamic configuration value\(namespace):\(key) cannot be fetched via getValue");
             }
             
             return try maybeConvert(type, value: resultItem!.value) as! T

@@ -7,7 +7,7 @@
 //
 
 /// `ConfigurationValueInjection`  computes values for configuration value injections based on the class `InjectConfigurationValue`
-public class ConfigurationValueInjection : Injection {
+open class ConfigurationValueInjection : Injection {
     // MARK: instance data
     
     var configurationManager : ConfigurationManager
@@ -22,7 +22,7 @@ public class ConfigurationValueInjection : Injection {
     
     // implement
     
-    override func computeValue(inject : Inject, property: BeanDescriptor.PropertyDescriptor, environment: Environment) throws -> Any {
+    override func computeValue(_ inject : Inject, property: BeanDescriptor.PropertyDescriptor, environment: Environment) throws -> Any {
         if let injectConfigurationValue = inject as? InjectConfigurationValue {
             return try configurationManager.getValue(property.getPropertyType(), namespace: injectConfigurationValue.namespace, key: injectConfigurationValue.key, defaultValue: injectConfigurationValue.defaultValue)
         } // if
@@ -32,7 +32,7 @@ public class ConfigurationValueInjection : Injection {
 }
 
 /// A injection kind for configuration values
-public class InjectConfigurationValue : Inject {
+open class InjectConfigurationValue : Inject {
     // MARK: instance data
     
     var namespace : String

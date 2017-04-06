@@ -6,10 +6,10 @@
 //  Copyright © 2016 Andreas Ernst. All rights reserved.
 //
 
-public class StandardConversionFactory : ConversionFactory {
+open class StandardConversionFactory : ConversionFactory {
     // MARK: local classes
     
-    public class Key : Hashable {
+    open class Key : Hashable {
         // MARK: instance data
         
         var sourceType : Any.Type
@@ -24,7 +24,7 @@ public class StandardConversionFactory : ConversionFactory {
         
         // MARK: implement Hashable
         
-        public var hashValue: Int {
+        open var hashValue: Int {
             get {
                 return "\(sourceType)".hashValue &+ "\(targetType)".hashValue
             }
@@ -33,7 +33,7 @@ public class StandardConversionFactory : ConversionFactory {
     
     // MARK: singleton
     
-    public static var instance = StandardConversionFactory()
+    open static var instance = StandardConversionFactory()
     
     // MARK: instance data
     
@@ -53,7 +53,7 @@ public class StandardConversionFactory : ConversionFactory {
                 return result
             }
             else {
-                throw ConversionErrors.ConversionException(value: $0, targetType: Int.self, context: nil)
+                throw ConversionErrors.conversionException(value: $0, targetType: Int.self, context: nil)
             }
         })
         
@@ -62,7 +62,7 @@ public class StandardConversionFactory : ConversionFactory {
                 return result
             }
             else {
-                throw ConversionErrors.ConversionException(value: $0, targetType: Float.self, context: nil)
+                throw ConversionErrors.conversionException(value: $0, targetType: Float.self, context: nil)
             }
         })
         
@@ -71,7 +71,7 @@ public class StandardConversionFactory : ConversionFactory {
                 return result
             }
             else {
-                throw ConversionErrors.ConversionException(value: $0, targetType: Double.self, context: nil)
+                throw ConversionErrors.conversionException(value: $0, targetType: Double.self, context: nil)
             }
         })
         
@@ -163,26 +163,26 @@ public class StandardConversionFactory : ConversionFactory {
     /// - Parameter sourceType: the source type
     /// - Parameter targetType: the target type
     /// - Parameter conversion: the conversion
-    public func register<S,T>(sourceType : S.Type, targetType : T.Type, conversion : (S) throws -> T) -> Void {
+    open func register<S,T>(_ sourceType : S.Type, targetType : T.Type, conversion : @escaping (S) throws -> T) -> Void {
         registry[Key(sourceType : sourceType, targetType : targetType)] = { value in try conversion(value as! S)}
     }
     
     // MARK: implement ConversionFactory
     
-    public func hasConversion(sourceType : Any.Type, targetType : Any.Type) -> Bool {
+    open func hasConversion(_ sourceType : Any.Type, targetType : Any.Type) -> Bool {
         return registry[Key(sourceType : sourceType, targetType : targetType)] != nil
     }
     
-    public func getConversion(sourceType : Any.Type, targetType : Any.Type) throws -> Conversion {
+    open func getConversion(_ sourceType : Any.Type, targetType : Any.Type) throws -> Conversion {
         if let conversion = registry[Key(sourceType : sourceType, targetType : targetType)] {
             return conversion
         }
         else {
-            throw ConversionErrors.UnknownConversion(sourceType: sourceType, targetType: targetType)
+            throw ConversionErrors.unknownConversion(sourceType: sourceType, targetType: targetType)
         }
     }
     
-    public func findConversion(sourceType : Any.Type, targetType : Any.Type) -> Conversion? {
+    open func findConversion(_ sourceType : Any.Type, targetType : Any.Type) -> Conversion? {
         return registry[Key(sourceType : sourceType, targetType : targetType)]
     }
 }

@@ -8,22 +8,22 @@
 
 import Foundation
 
-public class ObjectIdentityKey: Hashable {
+open class ObjectIdentityKey: Hashable {
     // MARK: instance data
     
-    private var object: AnyObject
-    private var hash: Int
+    fileprivate var object: AnyObject
+    fileprivate var hash: Int
     
     // init
 
     public init(object: AnyObject) {
         self.object = object
-        self.hash = unsafeAddressOf(object).hashValue
+        self.hash = Unmanaged.passUnretained(object).toOpaque().hashValue
     }
     
     // Hashable
     
-    public var hashValue: Int {
+    open var hashValue: Int {
         get {
             return hash
         }
@@ -34,26 +34,26 @@ public func ==(lhs: ObjectIdentityKey, rhs: ObjectIdentityKey) -> Bool {
     return lhs.object === rhs.object
 }
 
-public class IdentitySet<T:AnyObject> {
+open class IdentitySet<T:AnyObject> {
     // MARK: instance data
     
-    private var set = Set<ObjectIdentityKey>()
+    fileprivate var set = Set<ObjectIdentityKey>()
     
     // MARK: public
     
-    public func insert(object: T) -> Void {
+    open func insert(_ object: T) -> Void {
         set.insert(ObjectIdentityKey(object: object))
     }
     
-    public func contains(object: T) -> Bool {
+    open func contains(_ object: T) -> Bool {
         return set.contains(ObjectIdentityKey(object: object))
     }
 }
 
-public class IdentityMap<K:AnyObject, V:AnyObject> {
+open class IdentityMap<K:AnyObject, V:AnyObject> {
     // MARK: instance data
     
-    private var map = [ObjectIdentityKey: V]()
+    fileprivate var map = [ObjectIdentityKey: V]()
     
     // MARK: public
     

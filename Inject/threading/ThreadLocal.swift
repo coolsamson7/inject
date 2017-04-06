@@ -7,7 +7,7 @@
 //
 
 /// a thread local for the specified dgeneric type
-public class ThreadLocal<T> {
+open class ThreadLocal<T> {
     // MARK: types
 
     /// a generator function for initial values
@@ -22,17 +22,17 @@ public class ThreadLocal<T> {
 
     // Create a new `ThreadLocal` given a generator for inital values
     /// - Parameter generator : the generator
-    public init(generator : Generator) {
+    public init(generator : @escaping Generator) {
         self.generator = generator
-        self.id =  NSUUID().UUIDString
+        self.id =  UUID().uuidString
     }
     
     // MARK: public
 
     /// Return the thread local value associated to the current thread. If no value is set, the generator will be called
     /// Returns: the associated value
-    public func get() -> T {
-        let threadDictionary = NSThread.currentThread().threadDictionary;
+    open func get() -> T {
+        let threadDictionary = Thread.current.threadDictionary;
         
         if let cachedObject = threadDictionary[id] as? T {
             return cachedObject
@@ -40,7 +40,7 @@ public class ThreadLocal<T> {
         else {
             let value = generator()
             
-            threadDictionary[id] = value as? AnyObject
+            threadDictionary[id] = value as AnyObject
             
             return value
         }
@@ -48,12 +48,12 @@ public class ThreadLocal<T> {
 
     /// Set the thread lcoal to the specified value
     /// - Parameter value: the new value
-    public func set(value : T) -> Void {
-        NSThread.currentThread().threadDictionary[id] = value as? AnyObject
+    open func set(_ value : T) -> Void {
+        Thread.current.threadDictionary[id] = value as AnyObject
     }
 
     /// remove any associated thread local
-    public func remove() -> Void {
-        NSThread.currentThread().threadDictionary.removeObjectForKey(id)
+    open func remove() -> Void {
+        Thread.current.threadDictionary.removeObject(forKey: id)
     }
 }

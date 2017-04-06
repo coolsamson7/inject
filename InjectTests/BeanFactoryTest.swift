@@ -43,7 +43,7 @@ class Data : NSObject, Bean, BeanDescriptorInitializer {
 
     // ClassInitializer
 
-    func initializeBeanDescriptor(beanDescriptor : BeanDescriptor) {
+    func initializeBeanDescriptor(_ beanDescriptor : BeanDescriptor) {
         beanDescriptor["foo"].inject(InjectBean())
     }
 
@@ -56,7 +56,7 @@ class Data : NSObject, Bean, BeanDescriptorInitializer {
     // CustomStringConvertible
 
     override var description : String {
-        return "data[string: \(string) foo: \(foo)]"
+        return "data[string: \(string) foo: \(String(describing: foo))]"
     }
 }
 
@@ -87,7 +87,7 @@ class FooBean: FooBase {
     // CustomStringConvertible
 
     override var description : String {
-        return "foo[name: \(name) age: \(age)]"
+        return "foo[name: \(String(describing: name)) age: \(age)]"
     }
 }
 
@@ -99,12 +99,12 @@ class BeanFactoryTests: XCTestCase {
 
         // set tracing
 
-        Tracer.setTraceLevel("inject", level: .FULL)
+        Tracer.setTraceLevel("inject", level: .off)
 
         // set logging
 
         LogManager()
-           .registerLogger("", level : .OFF, logs: [QueuedLog(name: "async-console", delegate: ConsoleLog(name: "console", synchronize: false))])
+           .registerLogger("", level : .off, logs: [QueuedLog(name: "async-console", delegate: ConsoleLog(name: "console", synchronize: false))])
     }
 
     // tests
@@ -114,8 +114,8 @@ class BeanFactoryTests: XCTestCase {
 
         // load parent xml
 
-        let parentData = NSData(contentsOfURL: NSBundle(forClass: BeanFactoryTests.self).URLForResource("parent", withExtension: "xml")!)!
-        let childData  = NSData(contentsOfURL: NSBundle(forClass: BeanFactoryTests.self).URLForResource("application", withExtension: "xml")!)!
+        let parentData = try! Foundation.Data(contentsOf: Bundle(for: BeanFactoryTests.self).url(forResource: "parent", withExtension: "xml")!)
+        let childData  = try! Foundation.Data(contentsOf: Bundle(for: BeanFactoryTests.self).url(forResource: "application", withExtension: "xml")!)
 
         var environment = try! Environment(name: "parent")
 
@@ -175,7 +175,7 @@ class BeanFactoryTests: XCTestCase {
         let parent = try Environment(name: "parent")
 
         try parent.getConfigurationManager().addSource(ProcessInfoConfigurationSource())
-        try parent.getConfigurationManager().addSource(PlistConfigurationSource(name: "Info", forClass: self.dynamicType))
+        try parent.getConfigurationManager().addSource(PlistConfigurationSource(name: "Info", forClass: type(of: self)))
 
         try parent
            .define(parent.settings()
@@ -199,7 +199,7 @@ class BeanFactoryTests: XCTestCase {
                .abstract()
                .property("name", resolve: "${andi=Andreas?}"))
 */
-        print(parent.getConfigurationManager().report())
+        //print(parent.getConfigurationManager().report())
 
         let child = try! Environment(name: "child", parent: parent)
 
@@ -237,7 +237,7 @@ class BeanFactoryTests: XCTestCase {
              //.define(child.bean(BarFactory.self)
              //   .target("Bar"))
 
-        print(parent.getConfigurationManager().report())
+        //print(parent.getConfigurationManager().report())
 
         // check
 
@@ -323,6 +323,6 @@ class BeanFactoryTests: XCTestCase {
                     .property("double", value: 2.2)).startup()
             
             return true
-            }, times: 1)
+            }, times: 1000)
     }
 }

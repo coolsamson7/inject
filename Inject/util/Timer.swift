@@ -8,7 +8,7 @@ import Foundation
 public struct Timer : CustomStringConvertible {
     // MARK: class methods
 
-    static func measure(block: (() throws -> AnyObject?), times : Int = 1) throws -> Void {
+    static func measure(_ block: (() throws -> Any?), times : Int = 1) throws -> Void {
         var timer = Timer();
 
         timer.start()

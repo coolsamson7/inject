@@ -6,4 +6,4 @@
 //  Copyright © 2016 Andreas Ernst. All rights reserved.
 //
 
-public typealias Conversion = (object : Any) throws -> Any
+public typealias Conversion = (_ object : Any) throws -> Any

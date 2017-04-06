@@ -6,12 +6,12 @@
 //  Copyright © 2016 Andreas Ernst. All rights reserved.
 //
 
-public class ArrayOf<T : Equatable> : SequenceType {
+open class ArrayOf<T : Equatable> : Sequence {
     // MARK: instance data
     
-    private var values : [T]; // cannot put an array in a map!
+    fileprivate var values : [T]; // cannot put an array in a map!
     
-    public var count : Int {
+    open var count : Int {
         get {
             return values.count
         }
@@ -25,7 +25,7 @@ public class ArrayOf<T : Equatable> : SequenceType {
     
     // subscript
     
-    public subscript(index: Int) -> T {
+    open subscript(index: Int) -> T {
         get {
             return values[index]
         }
@@ -33,17 +33,17 @@ public class ArrayOf<T : Equatable> : SequenceType {
     
     // SequenceType
     
-    public func generate() -> IndexingGenerator<[T]> {
-        return values.generate()
+    open func makeIterator() -> IndexingIterator<[T]> {
+        return values.makeIterator()
     }
     
     // func
 
-    public func contains(value : T) -> Bool {
-        return values.contains({$0 == value})
+    open func contains(_ value : T) -> Bool {
+        return values.contains(where: {$0 == value})
     }
     
-    public func append(value : T) -> Void {
+    open func append(_ value : T) -> Void {
         values.append(value)
     }
 }

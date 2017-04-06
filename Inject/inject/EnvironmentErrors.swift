@@ -7,19 +7,19 @@
 //
 
 // all possible errors in the context of an environment
-public enum EnvironmentErrors: ErrorType , CustomStringConvertible {
-    case ParseError(message: String)
-    case NoCandidateForType(type : Any.Type)
-    case AmbiguousCandidatesForType(type : Any.Type)
-    case UnknownBeanByType(type : Any.Type)
-    case AmbiguousBeanByType(type : Any.Type)
-    case AmbiguousBeanById(id : String, context: String)
-    case UnknownBeanById(id : String, context: String)
-    case UnknownProperty(property:String, bean : Environment.BeanDeclaration)
-    case CylicDependencies(message:String)
-    case UnknownScope(scope : String, context: String)
-    case TypeMismatch(message: String)
-    case Exception(message: String)
+public enum EnvironmentErrors: Error , CustomStringConvertible {
+    case parseError(message: String)
+    case noCandidateForType(type : Any.Type)
+    case ambiguousCandidatesForType(type : Any.Type)
+    case unknownBeanByType(type : Any.Type)
+    case ambiguousBeanByType(type : Any.Type)
+    case ambiguousBeanById(id : String, context: String)
+    case unknownBeanById(id : String, context: String)
+    case unknownProperty(property:String, bean : Environment.BeanDeclaration)
+    case cylicDependencies(message:String)
+    case unknownScope(scope : String, context: String)
+    case typeMismatch(message: String)
+    case exception(message: String)
     
     // CustomStringConvertible
     
@@ -27,44 +27,44 @@ public enum EnvironmentErrors: ErrorType , CustomStringConvertible {
         let builder = StringBuilder();
         
         switch self {
-        case .ParseError(let message):
-            builder.append("\(self.dynamicType).ParseError: \(message)");
+        case .parseError(let message):
+            builder.append("\(type(of: self)).ParseError: \(message)");
             
-        case .NoCandidateForType(let type):
-            builder.append("\(self.dynamicType).NoCandidateForType: no matching candidate for type \(type)");
+        case .noCandidateForType(let type):
+            builder.append("\(type(of: self)).NoCandidateForType: no matching candidate for type \(type)");
             
-        case .AmbiguousCandidatesForType(let type):
-            builder.append("\(self.dynamicType).AmbiguousCandidatesForType: ambiguous candidates for type \(type)");
+        case .ambiguousCandidatesForType(let type):
+            builder.append("\(type(of: self)).AmbiguousCandidatesForType: ambiguous candidates for type \(type)");
             
-        case .AmbiguousBeanByType(let type):
-            builder.append("\(self.dynamicType).AmbiguousBeanByType: ambiguous bean by type \(type)");
+        case .ambiguousBeanByType(let type):
+            builder.append("\(type(of: self)).AmbiguousBeanByType: ambiguous bean by type \(type)");
             
-        case .AmbiguousBeanById(let id, _):
-            builder.append("\(self.dynamicType).AmbiguousBeanById: ambiguous bean by id \(id)");
+        case .ambiguousBeanById(let id, _):
+            builder.append("\(type(of: self)).AmbiguousBeanById: ambiguous bean by id \(id)");
             
-        case .UnknownBeanByType(let type):
-            builder.append("\(self.dynamicType).UnknownBeanByType: no bean by type \(type)");
+        case .unknownBeanByType(let type):
+            builder.append("\(type(of: self)).UnknownBeanByType: no bean by type \(type)");
             
-        case .UnknownBeanById(let id, let context):
-            builder.append("\(self.dynamicType).UnknownBeanRef: no bean with id \(id) in \(context)");
+        case .unknownBeanById(let id, let context):
+            builder.append("\(type(of: self)).UnknownBeanRef: no bean with id \(id) in \(context)");
             
-        case .CylicDependencies(let message):
-            builder.append("\(self.dynamicType).CylicDependencies: \(message)");
+        case .cylicDependencies(let message):
+            builder.append("\(type(of: self)).CylicDependencies: \(message)");
             
-        case .UnknownProperty(let property, let bean):
-            builder.append("\(self.dynamicType).UnknownProperty: \(bean.clazz!).\(property)")
+        case .unknownProperty(let property, let bean):
+            builder.append("\(type(of: self)).UnknownProperty: \(bean.clazz!).\(property)")
             if bean.origin != nil {
                 builder.append(" in [\(bean.origin!.line):\(bean.origin!.column)]")
             }
             
-        case .TypeMismatch(let message):
-            builder.append("\(self.dynamicType).TypeMismatch: \(message)");
+        case .typeMismatch(let message):
+            builder.append("\(type(of: self)).TypeMismatch: \(message)");
             
-        case .UnknownScope(let scope):
-            builder.append("\(self.dynamicType).UnknownScope: unknown scope \"\(scope)\"");
+        case .unknownScope(let scope):
+            builder.append("\(type(of: self)).UnknownScope: unknown scope \"\(scope)\"");
 
-            case .Exception(let message):
-                builder.append("\(self.dynamicType).Exception: \"\(message)\"");
+            case .exception(let message):
+                builder.append("\(type(of: self)).Exception: \"\(message)\"");
         } // switch
         
         return builder.toString()

@@ -7,15 +7,14 @@ import Inject
 
 // logger
 
-//var formatter = LogFormatter.timestamp("dd/M/yyyy, H:mm:s") + " [" + LogFormatter.logger() + "] " + LogFormatter.level() // TODO whats wrong with timestamp in the playground?
-var formatter : LogFormatter = LogFormatter.string("[") + /*LogFormatter.timestamp() + "["*/  LogFormatter.logger()  + "] " + LogFormatter.level() + " - " + LogFormatter.message()
+var formatter = LogFormatter.timestamp("dd/M/yyyy, H:mm:s") + " [" + LogFormatter.logger() + "] " + LogFormatter.level()
 
 let consoleLog = ConsoleLog(name: "console", formatter: formatter)
 
 LogManager.getSingleton()
-    .registerLogger("", level : .OFF, logs: [QueuedLog(name: "console", delegate: consoleLog)]) // root logger
-    .registerLogger("Inject", level : .WARN) // will inherit all log destinations
-    .registerLogger("Inject.Environment", level : .ALL)
+    .registerLogger("", level : .off, logs: [QueuedLog(name: "console", delegate: consoleLog)]) // root logger
+    .registerLogger("Inject", level : .warn) // will inherit all log destinations
+    .registerLogger("Inject.Environment", level : .all)
 
 
 // this is usually a static var in a class!
@@ -32,7 +31,7 @@ logger.warn("ouch!") // this is a autoclosure!
 class SamplePostProcessor : BeanPostProcessor {
     // implement BeanPostProcessor
     
-    func process(bean : AnyObject) throws -> AnyObject {
+    func process(_ bean : AnyObject) throws -> AnyObject {
         print("post process \(bean)...")
         
         return bean
@@ -41,7 +40,7 @@ class SamplePostProcessor : BeanPostProcessor {
 
 // the famous foo
 
-class Foo : NSObject, Bean, BeanDescriptorInitializer { // the inejction requires a NSObject
+class Foo : NSObject, Bean, BeanDescriptorInitializer { // the injection requires a NSObject
     // instance data
     
     var id : String = ""
@@ -62,14 +61,14 @@ class Foo : NSObject, Bean, BeanDescriptorInitializer { // the inejction require
     
     // implement BeanDescriptorInitializer
     
-    func initializeBeanDescriptor(beanDescriptor : BeanDescriptor) {
+    func initializeBeanDescriptor(_ beanDescriptor : BeanDescriptor) {
         beanDescriptor["bar"].inject(InjectBean())
     }
     
     // CustomStringConvertible
     
     override internal var description: String {
-        return "foo[id: \(id), number: \(number), bar: \(bar)]"
+        return "foo[id: \(id), number: \(number), bar: \(String(describing: bar))]"
     }
 }
 
@@ -162,7 +161,7 @@ class Baz : Initializable {
 
 // setup tracing
 
-Tracer.setTraceLevel("inject", level : .FULL)
+Tracer.setTraceLevel("inject", level : .full)
 
 // create the environment
 

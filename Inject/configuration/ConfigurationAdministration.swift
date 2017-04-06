@@ -8,9 +8,9 @@
 
 /// the administrative protocol
 public protocol ConfigurationAdministration {
-    func addSource(source : ConfigurationSource) throws -> Void
+    func addSource(_ source : ConfigurationSource) throws -> Void
     
-    func configurationAdded(item: ConfigurationItem , source : ConfigurationSource) throws -> Void
+    func configurationAdded(_ item: ConfigurationItem , source : ConfigurationSource) throws -> Void
     
-    func configurationChanged(item : ConfigurationItem) throws -> Void
+    func configurationChanged(_ item : ConfigurationItem) throws -> Void
 }

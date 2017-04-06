@@ -9,9 +9,9 @@
 /// A `ConfigurationSource` is a source for configuration values
 
 public protocol ConfigurationSource {
-    func load(configurationManager : ConfigurationManager) throws -> Void
+    func load(_ configurationManager : ConfigurationManager) throws -> Void
 
-    func startListening(configurationManager : ConfigurationManager, seconds : Int) -> Void
+    func startListening(_ configurationManager : ConfigurationManager, seconds : Int) -> Void
     
     var url : String { get }
 

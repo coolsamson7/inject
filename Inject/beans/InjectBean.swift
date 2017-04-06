@@ -9,7 +9,7 @@
 import Foundation
 
 /// `InjectBean` is a injection kind for beans
-public class InjectBean : Inject {
+open class InjectBean : Inject {
     // MARK: instance data
     
     var id : String?

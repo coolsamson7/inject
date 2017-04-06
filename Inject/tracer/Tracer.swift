@@ -7,7 +7,7 @@
 //
 
 /// `Tracer` is a helper class that offers tracing functions
-public class Tracer {
+open class Tracer {
     // -D DEBUG !
     #if DEBUG
     static var ENABLED = true
@@ -17,11 +17,11 @@ public class Tracer {
     // local classes
     
     public enum Level : Int , Comparable {
-        case OFF = 0
-        case LOW
-        case MEDIUM
-        case HIGH
-        case FULL
+        case off = 0
+        case low
+        case medium
+        case high
+        case full
     }
     
     // data
@@ -30,8 +30,8 @@ public class Tracer {
     static var cachedTraceLevels = [String:Level]();
     static var modifications = 0;
     
-    static var formatter : NSDateFormatter = {
-        var result = NSDateFormatter()
+    static var formatter : DateFormatter = {
+        var result = DateFormatter()
         
         result.dateFormat = "dd/M/yyyy, H:mm:s"
         
@@ -41,20 +41,20 @@ public class Tracer {
     // methods
     
     class func now() -> String {
-        return formatter.stringFromDate(NSDate())
+        return formatter.string(from: Date())
     }
     
-    public class func setTraceLevel(path : String, level : Level)  -> Void {
+    open class func setTraceLevel(_ path : String, level : Level)  -> Void {
         traceLevels[path] = level;
         
         modifications += 1
     }
     
-    class func getTraceLevel(path : String) -> Level {
+    class func getTraceLevel(_ path : String) -> Level {
         // check dirty state
         
         if modifications > 0 {
-            cachedTraceLevels.removeAll(keepCapacity: true); // restart from scratch
+            cachedTraceLevels.removeAll(keepingCapacity: true); // restart from scratch
             modifications = 0;
         } // if
         
@@ -63,7 +63,7 @@ public class Tracer {
             level = traceLevels[path];
             if level == nil {
                 let index = path.lastIndexOf(".");
-                level = index != -1 ? getTraceLevel(path[0..<index]) : .OFF;
+                level = index != -1 ? getTraceLevel(path[0..<index]) : .off;
             } // if
             
             // cache
@@ -74,7 +74,7 @@ public class Tracer {
         return level!
     }
     
-    public class func trace(path : String, level : Level, message : String) -> Void {
+    open class func trace(_ path : String, level : Level, message : String) -> Void {
         if getTraceLevel(path).rawValue >= level.rawValue {
             // format
             

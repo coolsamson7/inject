@@ -6,17 +6,17 @@
 //  Copyright © 2016 Andreas Ernst. All rights reserved.
 //
 
-public class XMLEnvironmentLoader: XMLParser {
+open class XMLEnvironmentLoader: XMLParser {
     // local classes
     
-    public class Declaration : NSObject, OriginAware {
+    open class Declaration : NSObject, OriginAware {
         // MARK: instance data
         
         var _origin : Origin?
         
         // OriginAware
         
-        public var origin : Origin? {
+        open var origin : Origin? {
             get {
                 return _origin
             }
@@ -33,7 +33,7 @@ public class XMLEnvironmentLoader: XMLParser {
         
         // Ancestor
         
-        func addChild(child : AnyObject) -> Void {
+        func addChild(_ child : AnyObject) -> Void {
             if let declaration = child as? OriginAware {
                 declarations.append(declaration)
             }
@@ -51,7 +51,7 @@ public class XMLEnvironmentLoader: XMLParser {
         }
     }
     
-    public class Bean : Declaration, Ancestor {
+    open class Bean : Declaration, Ancestor {
         // MARK: instance data
         
         var scope = "singleton"
@@ -72,7 +72,7 @@ public class XMLEnvironmentLoader: XMLParser {
         
         // MARK: public
         
-        public func convert(environment: Environment) throws -> Environment.BeanDeclaration {
+        open func convert(_ environment: Environment) throws -> Environment.BeanDeclaration {
             let bean = Environment.BeanDeclaration()
             
             bean.origin = origin
@@ -98,7 +98,7 @@ public class XMLEnvironmentLoader: XMLParser {
         
         // fluent stuff
         
-        func property(property: Property) -> Bean {
+        func property(_ property: Property) -> Bean {
             properties.append(property)
             
             return self
@@ -107,7 +107,7 @@ public class XMLEnvironmentLoader: XMLParser {
         
         // Ancestor
         
-        public func addChild(child : AnyObject) -> Void {
+        open func addChild(_ child : AnyObject) -> Void {
             if let property = child as? Property {
                 properties.append(property)
             }
@@ -115,10 +115,10 @@ public class XMLEnvironmentLoader: XMLParser {
         
         // CustomStringConvertible
         
-        override public var description: String {
+        override open var description: String {
             let builder = StringBuilder();
             
-            builder.append("bean(class: \(clazz)")
+            builder.append("bean(class: \(String(describing: clazz))")
             if id != nil {
                 builder.append(", id: \"\(id!)\"")
             }
@@ -144,7 +144,7 @@ public class XMLEnvironmentLoader: XMLParser {
         
         // MARK: public
         
-        internal func convert(environment: Environment) throws -> Environment.PropertyDeclaration {
+        internal func convert(_ environment: Environment) throws -> Environment.PropertyDeclaration {
             let property = Environment.PropertyDeclaration()
             
             property.origin = origin
@@ -166,7 +166,7 @@ public class XMLEnvironmentLoader: XMLParser {
         
         // Node
         
-        func addChild(child : AnyObject) -> Void {
+        func addChild(_ child : AnyObject) -> Void {
             if let bean = child as? Bean {
                 declaration = bean
             }
@@ -218,15 +218,15 @@ public class XMLEnvironmentLoader: XMLParser {
     
     // override
     
-    override public func parse(data : NSData) throws -> AnyObject? {
+    override open func parse(_ data : Data) throws -> AnyObject? {
         if (Tracer.ENABLED) {
-            Tracer.trace("inject.xml", level: .HIGH, message: "parse")
+            Tracer.trace("inject.xml", level: .high, message: "parse")
         }
 
         let beans = try super.parse(data) as! Beans
 
         if (Tracer.ENABLED) {
-            Tracer.trace("inject.xml", level: .HIGH, message: "process")
+            Tracer.trace("inject.xml", level: .high, message: "process")
         }
 
         for declaration in beans.declarations {

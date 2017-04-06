@@ -8,8 +8,8 @@
 
 import Foundation
 
-public enum ClassesErrors : ErrorType, CustomStringConvertible {
-    case Exception(message: String)
+public enum ClassesErrors : Error, CustomStringConvertible {
+    case exception(message: String)
 
     // CustomStringConvertible
 
@@ -17,44 +17,44 @@ public enum ClassesErrors : ErrorType, CustomStringConvertible {
         let builder = StringBuilder();
 
         switch self {
-            case .Exception(let message):
-                builder.append("\(self.dynamicType).Exception: ").append(message);
+            case .exception(let message):
+                builder.append("\(type(of: self)).Exception: ").append(message);
         } // switch
 
         return builder.toString()
     }
 }
 
-public class Classes {
+open class Classes {
     // private
 
-    private class func bundleName(bundle : NSBundle) -> String {
+    fileprivate class func bundleName(_ bundle : Bundle) -> String {
         return bundle.infoDictionary?["CFBundleName"] as? String ?? ""
     }
 
-    public class func setDefaultBundle(bundle : NSBundle) {
+    open class func setDefaultBundle(_ bundle : Bundle) {
         mainBundleName = bundleName(bundle)
     }
 
-    public class func setDefaultBundle(clazz : AnyClass) {
-        mainBundleName = bundleName(NSBundle(forClass: clazz))
+    open class func setDefaultBundle(_ clazz : AnyClass) {
+        mainBundleName = bundleName(Bundle(for: clazz))
     }
 
     // data
 
-    static var mainBundleName = Classes.bundleName(NSBundle.mainBundle())
+    static var mainBundleName = Classes.bundleName(Bundle.main)
 
     // MARK: class funcs
     
     /// return a class instance given a class name
-    public class func class4Name(className : String) throws -> AnyClass {
+    open class func class4Name(_ className : String) throws -> AnyClass {
         var result : AnyClass? = NSClassFromString(className)
 
         if result != nil {
             return result!
         }
         else {
-            if !className.containsString(".") {
+            if !className.contains(".") {
                 result = NSClassFromString("\(mainBundleName).\(className)")
                 if result != nil {
                     return result!
@@ -64,19 +64,19 @@ public class Classes {
 
         // darn
 
-        throw ClassesErrors.Exception(message: "no class named \"\(className)\"")
+        throw ClassesErrors.exception(message: "no class named \"\(className)\"")
     }
 
-    public class func className(clazz : AnyClass, qualified : Bool = false) -> String {
+    open class func className(_ clazz : AnyClass, qualified : Bool = false) -> String {
         if !qualified {
             return "\(clazz)"
         }
         else {
-            return bundleName(NSBundle(forClass: clazz)) + ".\(clazz)"
+            return bundleName(Bundle(for: clazz)) + ".\(clazz)"
         }
     }
     
     // prevent
     
-    private init() {}
+    fileprivate init() {}
 }

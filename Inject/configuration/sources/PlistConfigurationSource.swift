@@ -7,14 +7,14 @@
 //
 
 /// A configuration source based on plists
-public class PlistConfigurationSource : AbstractConfigurationSource {
+open class PlistConfigurationSource : AbstractConfigurationSource {
     // MARK: class func
 
-    class func bundle(forClass: AnyClass? = nil) -> NSBundle {
-        var bundle = NSBundle.mainBundle()
+    class func bundle(_ forClass: AnyClass? = nil) -> Bundle {
+        var bundle = Bundle.main
 
         if forClass != nil {
-            bundle = NSBundle(forClass: forClass!)
+            bundle = Bundle(for: forClass!)
         }
 
         return bundle
@@ -27,19 +27,19 @@ public class PlistConfigurationSource : AbstractConfigurationSource {
     }
 
     public init(name : String, forClass: AnyClass? = nil) {
-        super.init(url: PlistConfigurationSource.bundle(forClass).pathForResource(name, ofType: "plist")!, mutable: false, canOverrule: true)
+        super.init(url: PlistConfigurationSource.bundle(forClass).path(forResource: name, ofType: "plist")!, mutable: false, canOverrule: true)
 
     }
 
     // MARK: override AbstractConfigurationSource
 
-    override public func load(configurationManager : ConfigurationManager) throws -> Void {
+    override open func load(_ configurationManager : ConfigurationManager) throws -> Void {
         let dict = NSDictionary(contentsOfFile: url) as! [String: AnyObject]
 
         // noop
 
         for (key, value) in dict {
-            try configurationManager.configurationAdded(ConfigurationItem(fqn: FQN.fromString(key), type: value.dynamicType, value: value, source: url, scope: Scope.WILDCARD, dynamic: false), source: self)
+            try configurationManager.configurationAdded(ConfigurationItem(fqn: FQN.fromString(key), type: type(of: value), value: value, source: url, scope: Scope.WILDCARD, dynamic: false), source: self)
         }
     }
 }

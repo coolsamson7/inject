@@ -7,7 +7,7 @@
 //
 
 
-public class Scope : Hashable, CustomStringConvertible {
+open class Scope : Hashable, CustomStringConvertible {
     static var WILDCARD = Scope()
     
     // MARK: instance data
@@ -45,7 +45,7 @@ public class Scope : Hashable, CustomStringConvertible {
     
     // Hashable
     
-    public var hashValue: Int {
+    open var hashValue: Int {
         get {
             var result = 0
             for leg in path {
@@ -58,8 +58,8 @@ public class Scope : Hashable, CustomStringConvertible {
     
     // CustomStringConvertible
     
-    public var description: String {
-        return path.reduce("",  combine: {($0.characters.count == 0 ? "" : $0 + ".") + $1})
+    open var description: String {
+        return path.reduce("",  {($0.characters.count == 0 ? "" : $0 + ".") + $1})
     }
 }
 

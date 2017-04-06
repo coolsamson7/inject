@@ -6,10 +6,10 @@
 //  Copyright © 2016 Andreas Ernst. All rights reserved.
 //
 
-public enum XMLParserErrors : ErrorType, CustomStringConvertible {
-    case ParseException(message: String)
-    case ValidationException(message: String)
-    case Exception(message: String)
+public enum XMLParserErrors : Error, CustomStringConvertible {
+    case parseException(message: String)
+    case validationException(message: String)
+    case exception(message: String)
     
     // CustomStringConvertible
     
@@ -17,12 +17,12 @@ public enum XMLParserErrors : ErrorType, CustomStringConvertible {
         let builder = StringBuilder();
         
         switch self {
-        case .ParseException(let message):
-            builder.append("\(self.dynamicType).ParseException: ").append(message);
-        case .ValidationException(let message):
-            builder.append("\(self.dynamicType).ValidationException: ").append(message);
-        case .Exception(let message):
-            builder.append("\(self.dynamicType).Exception: ").append(message);
+        case .parseException(let message):
+            builder.append("\(type(of: self)).ParseException: ").append(message);
+        case .validationException(let message):
+            builder.append("\(type(of: self)).ValidationException: ").append(message);
+        case .exception(let message):
+            builder.append("\(type(of: self)).Exception: ").append(message);
         } // switch
         
         return builder.toString()

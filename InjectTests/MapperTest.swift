@@ -62,8 +62,8 @@ class MapperTests: XCTestCase {
     // lifecycle
 
     override class func setUp() {
-        Tracer.setTraceLevel("mapper", level: .OFF)
-        Tracer.setTraceLevel("beans", level: .OFF)
+        Tracer.setTraceLevel("mapper", level: .off)
+        Tracer.setTraceLevel("beans", level: .off)
     }
 
     // test
@@ -80,7 +80,7 @@ class MapperTests: XCTestCase {
 
         // map
 
-        let otherPerson = try! mapper.map(person, direction: .SOURCE_2_TARGET) as! OtherPerson // warm up
+        let otherPerson = try! mapper.map(person, direction: .source_2_TARGET) as! OtherPerson // warm up
 
         XCTAssert(person.name == otherPerson.name)
 

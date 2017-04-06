@@ -16,7 +16,7 @@ import Foundation
 ///    - action: The critical section of code to be protected
 /// - Returns: Result of `action()`
 
-public func synchronized<ReturnType>(lockToken: AnyObject, @noescape action: () -> ReturnType) -> ReturnType {
+public func synchronized<ReturnType>(_ lockToken: AnyObject, action: () -> ReturnType) -> ReturnType {
     return synchronized(lockToken, action: action())
 }
 
@@ -28,7 +28,7 @@ public func synchronized<ReturnType>(lockToken: AnyObject, @noescape action: () 
 ///    - action: The critical section of code to be protected
 /// - Returns: Result of `action()`
 
-public func synchronized<ReturnType>(lockToken: AnyObject, @autoclosure action: () -> ReturnType) -> ReturnType {
+public func synchronized<ReturnType>(_ lockToken: AnyObject, action: @autoclosure () -> ReturnType) -> ReturnType {
     defer { objc_sync_exit(lockToken) }
 
     objc_sync_enter(lockToken)

@@ -12,5 +12,5 @@ public protocol BeanPostProcessor {
     // - Parameter bean: the bean
     // - Returns: the possibly modified object
     // - Throws any error
-    func process(bean : AnyObject) throws -> AnyObject
+    func process(_ bean : AnyObject) throws -> AnyObject
 }

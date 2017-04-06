@@ -8,9 +8,9 @@
 
 /// All possible errors with respect to conversions
 
-public enum ConversionErrors : ErrorType, CustomStringConvertible {
-    case UnknownConversion(sourceType: Any.Type, targetType: Any.Type)
-    case ConversionException(value: Any, targetType: Any.Type, context : String?)
+public enum ConversionErrors : Error, CustomStringConvertible {
+    case unknownConversion(sourceType: Any.Type, targetType: Any.Type)
+    case conversionException(value: Any, targetType: Any.Type, context : String?)
 
     // CustomStringConvertible
     
@@ -18,11 +18,11 @@ public enum ConversionErrors : ErrorType, CustomStringConvertible {
         let builder = StringBuilder();
         
         switch self {
-        case .UnknownConversion(let sourceType, let targetType):
-            builder.append("\(self.dynamicType).UnknownConversion: no conversion between \(sourceType) and \(targetType)");
+        case .unknownConversion(let sourceType, let targetType):
+            builder.append("\(type(of: self)).UnknownConversion: no conversion between \(sourceType) and \(targetType)");
             
-        case .ConversionException(let value, let targetType, let context):
-            builder.append("\(self.dynamicType).ConversionException: could not convert \(value) into type \(targetType)");
+        case .conversionException(let value, let targetType, let context):
+            builder.append("\(type(of: self)).ConversionException: could not convert \(value) into type \(targetType)");
             if context != nil {
                 builder.append("\(context!)")
             }

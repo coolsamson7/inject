@@ -15,9 +15,9 @@ protocol OptionalType {
 extension Optional : OptionalType {
     public func isSome() -> Bool {
         switch self {
-            case .None:
+            case .none:
                 return false
-            case .Some:
+            case .some:
                 return true
         }
     }
@@ -28,10 +28,10 @@ extension Optional : OptionalType {
 
     public func unwrap() -> Any {
         switch self {
-            case .None:
+            case .none:
                 fatalError("cannot unwrap empty optional")
 
-            case .Some(let unwrapped):
+            case .some(let unwrapped):
                 return unwrapped
         }
     }

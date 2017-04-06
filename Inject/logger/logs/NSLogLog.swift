@@ -7,7 +7,7 @@
 //
 
 /// This log calls 'NSLog'
-public class NSLogLog: LogManager.Log {
+open class NSLogLog: LogManager.Log {
     // MARK: init
 
     var mutex : Mutex?
@@ -24,7 +24,7 @@ public class NSLogLog: LogManager.Log {
 
     // MARK: override LogManager.Log
 
-    override func log(entry : LogManager.LogEntry) -> Void {
+    override func log(_ entry : LogManager.LogEntry) -> Void {
         if let mutex = self.mutex {
             mutex.synchronized {
                 NSLog("%@", self.format(entry))

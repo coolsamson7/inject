@@ -40,7 +40,7 @@ class JSONTests: XCTestCase {
     // lifecycle
 
     override class func setUp() {
-        Tracer.setTraceLevel("mapper", level: .FULL)
+        Tracer.setTraceLevel("mapper", level: .full)
     }
 
     // test

@@ -10,31 +10,31 @@ import Foundation
 
 
 /// base class for all constraints
-public class Constraint<T> {
+open class Constraint<T> {
     // MARK: public
 
     /// Create a constraint that is the logical and of the specified constraints
     /// Returns: the combined constraint
-    public func and(constraints : Constraint<T>...) -> Constraint<T> {
+    open func and(_ constraints : Constraint<T>...) -> Constraint<T> {
         return AndConstraint<T>(constraints: constraints)
     }
 
     /// Create a constraint that is the logical or of the specified constraints
     /// Returns: the combined constraint
-    public func or(constraints : Constraint<T>...) -> Constraint<T> {
+    open func or(_ constraints : Constraint<T>...) -> Constraint<T> {
         return OrConstraint<T>(constraints: constraints)
     }
 
     /// Create a constraint that is the negation of the specified constraint
     /// Returns: the combined constraint
-    public func not(constraint : Constraint<T>) -> Constraint<T> {
+    open func not(_ constraint : Constraint<T>) -> Constraint<T> {
         return NotConstraint<T>(constraint: constraint)
     }
 
     // MARK: abstract
 
-    public func eval(value : T) -> Bool {
-        fatalError("\(self.dynamicType).eval is not implemented")
+    open func eval(_ value : T) -> Bool {
+        fatalError("\(type(of: self)).eval is not implemented")
     }
 }
 
@@ -64,7 +64,7 @@ class AndConstraint<T> : Constraint<T> {
 
     // MARK: implement Constraint
 
-    override func eval(value : T) -> Bool {
+    override func eval(_ value : T) -> Bool {
         for constraint in constraints {
             if !constraint.eval(value) {
                 return false
@@ -89,7 +89,7 @@ class OrConstraint<T> : Constraint<T> {
 
     // MARK: implement Constraint
 
-    override func eval(value : T) -> Bool {
+    override func eval(_ value : T) -> Bool {
         for constraint in constraints {
             if constraint.eval(value) {
                 return true
@@ -114,26 +114,26 @@ class NotConstraint<T> : Constraint<T> {
 
     // MARK: implement Constraint
 
-    override func eval(value : T) -> Bool {
+    override func eval(_ value : T) -> Bool {
         return !constraint.eval(value)
     }
 }
 
 /// constraint based on closure
-public class ClosureConstraint<T> : Constraint<T> {
+open class ClosureConstraint<T> : Constraint<T> {
     // MARK: instance data
 
     var closure : (T) -> Bool
 
     // MARK: init
 
-    init(closure: (T) -> Bool) {
+    init(closure: @escaping (T) -> Bool) {
         self.closure = closure
     }
 
     // MARK: override Constraint
 
-    public override func eval(value : T) -> Bool {
+    open override func eval(_ value : T) -> Bool {
         return closure(value)
     }
 }

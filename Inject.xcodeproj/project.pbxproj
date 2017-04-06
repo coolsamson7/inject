@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		28D3502622023131504CC16F /* Transformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D359F33852B7EA679981FA /* Transformer.swift */; };
+		28D35045D79515C68159ACF4 /* EnvironmentModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D3547A395D2A670EFFD318 /* EnvironmentModule.swift */; };
 		28D350604BA95B1B07EAE9F2 /* LogFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D35FCF12F48608C278B618 /* LogFormatter.swift */; };
 		28D350F6CBA57DC29F96568C /* sample.xml in Resources */ = {isa = PBXBuildFile; fileRef = 28D357B0FA73643C7B6BCB0C /* sample.xml */; };
 		28D35128D7E8CB7562C1909A /* RollingFileLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D35EA53633B674D1F43EA8 /* RollingFileLog.swift */; };
@@ -40,6 +41,7 @@
 		28D359A0306F5BB2F63983DC /* Trigger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D35354E2BDB232FAFD6572 /* Trigger.swift */; };
 		28D359D491BD163AD8316AA5 /* CPL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D3558AA9C455146078B75E /* CPL.swift */; };
 		28D359F76B2AACD6EACDC9CC /* Constraints.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D3501EC3E82104D06F7758 /* Constraints.swift */; };
+		28D35B1CB648E03D3AF28B44 /* EnvironmentModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D3547A395D2A670EFFD318 /* EnvironmentModule.swift */; };
 		28D35B2FC01B153417AEC4B3 /* JSONTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D35528B4682760F2643853 /* JSONTest.swift */; };
 		28D35B32992669F931AA5F25 /* Mutex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D3575E22AAD939D050ACAE /* Mutex.swift */; };
 		28D35BAFA905939FA85D612A /* Stacktrace.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D351E415C61A9D24388665 /* Stacktrace.swift */; };
@@ -51,6 +53,8 @@
 		28D35CCF8BA4308CCFCD5FAE /* Future.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D35EA05D3041A74BA7B450 /* Future.swift */; };
 		28D35DD8D093400CEB8CA98D /* RollingFileLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D35EA53633B674D1F43EA8 /* RollingFileLog.swift */; };
 		28D35DEE4D681F77A74E3576 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D356269EC574249B36A472 /* Logger.swift */; };
+		28D35E881E1778155A9A5766 /* EnvironmentModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D3547A395D2A670EFFD318 /* EnvironmentModule.swift */; };
+		28D35EA62D3C5D4A920D6E9E /* EnvironmentModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D3547A395D2A670EFFD318 /* EnvironmentModule.swift */; };
 		28D35EFBF0D1B00E09DEDA55 /* Constraints.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D3501EC3E82104D06F7758 /* Constraints.swift */; };
 		B003C0281D7043AD00B2EC2B /* Types.swift in Sources */ = {isa = PBXBuildFile; fileRef = B003C0271D7043AD00B2EC2B /* Types.swift */; };
 		B003C0291D7043B300B2EC2B /* Types.swift in Sources */ = {isa = PBXBuildFile; fileRef = B003C0271D7043AD00B2EC2B /* Types.swift */; };
@@ -373,6 +377,7 @@
 		28D35354E2BDB232FAFD6572 /* Trigger.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Trigger.swift; sourceTree = "<group>"; };
 		28D353F6EBA43DDB0EC12AFB /* ConfigurationTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConfigurationTest.swift; sourceTree = "<group>"; };
 		28D3545F51EBBF18F295CCA0 /* ConversionTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConversionTest.swift; sourceTree = "<group>"; };
+		28D3547A395D2A670EFFD318 /* EnvironmentModule.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EnvironmentModule.swift; sourceTree = "<group>"; };
 		28D35528B4682760F2643853 /* JSONTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JSONTest.swift; sourceTree = "<group>"; };
 		28D3558AA9C455146078B75E /* CPL.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CPL.swift; sourceTree = "<group>"; };
 		28D3559793F614E3502B5A0F /* Optional.extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Optional.extension.swift; sourceTree = "<group>"; };
@@ -668,6 +673,7 @@
 				B09233511D3CFCCA008267A2 /* NamespaceHandler.swift */,
 				28D356CE5B72AE61DACA2634 /* FactoryBean.swift */,
 				28D35754F0C89ABFA9A702C2 /* XMLEnvironmentLoader.swift */,
+				28D3547A395D2A670EFFD318 /* EnvironmentModule.swift */,
 			);
 			path = inject;
 			sourceTree = "<group>";
@@ -964,14 +970,18 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0730;
-				LastUpgradeCheck = 0730;
+				LastUpgradeCheck = 0830;
 				ORGANIZATIONNAME = "Andreas Ernst";
 				TargetAttributes = {
 					B0E8D7311D3CE01D000CCE0C = {
 						CreatedOnToolsVersion = 7.3.1;
+						LastSwiftMigration = 0830;
 					};
 					B0E8D73B1D3CE01D000CCE0C = {
 						CreatedOnToolsVersion = 7.3.1;
+						DevelopmentTeam = ANXTF458L2;
+						LastSwiftMigration = 0830;
+						ProvisioningStyle = Automatic;
 					};
 				};
 			};
@@ -1123,6 +1133,7 @@
 				B03D7AFD1D6EE56C004169E6 /* Stacktrace.swift in Sources */,
 				28D35C2547427B968CA6D17F /* Constraints.swift in Sources */,
 				28D353588064DE930A9243E0 /* RollingFileLog.swift in Sources */,
+				28D35EA62D3C5D4A920D6E9E /* EnvironmentModule.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1210,6 +1221,7 @@
 				B03D7B551D6EE634004169E6 /* Stacktrace.swift in Sources */,
 				28D359F76B2AACD6EACDC9CC /* Constraints.swift in Sources */,
 				28D35DD8D093400CEB8CA98D /* RollingFileLog.swift in Sources */,
+				28D35E881E1778155A9A5766 /* EnvironmentModule.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1297,6 +1309,7 @@
 				B03D7BAD1D6EE646004169E6 /* Stacktrace.swift in Sources */,
 				28D35BB1A3A57528FB087214 /* Constraints.swift in Sources */,
 				28D35978FCC99A8F1C431251 /* RollingFileLog.swift in Sources */,
+				28D35B1CB648E03D3AF28B44 /* EnvironmentModule.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1384,6 +1397,7 @@
 				28D35BAFA905939FA85D612A /* Stacktrace.swift in Sources */,
 				28D35EFBF0D1B00E09DEDA55 /* Constraints.swift in Sources */,
 				28D35128D7E8CB7562C1909A /* RollingFileLog.swift in Sources */,
+				28D35045D79515C68159ACF4 /* EnvironmentModule.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1469,7 +1483,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.serious.Inject;
 				PRODUCT_NAME = Inject;
-				SDKROOT = appletvos9.2;
+				SDKROOT = appletvos;
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
@@ -1488,7 +1502,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.serious.Inject;
 				PRODUCT_NAME = Inject;
-				SDKROOT = appletvos9.2;
+				SDKROOT = appletvos;
 				SKIP_INSTALL = YES;
 			};
 			name = Release;
@@ -1506,7 +1520,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.serious.Inject;
 				PRODUCT_NAME = Inject;
-				SDKROOT = watchos2.2;
+				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
@@ -1525,7 +1539,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.serious.Inject;
 				PRODUCT_NAME = Inject;
-				SDKROOT = watchos2.2;
+				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
 			};
 			name = Release;
@@ -1544,8 +1558,10 @@
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
@@ -1593,8 +1609,10 @@
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
@@ -1614,6 +1632,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -1625,6 +1644,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -1636,6 +1656,7 @@
 				PRODUCT_NAME = Inject;
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
 		};
@@ -1643,6 +1664,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -1653,26 +1675,35 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.serious.Inject;
 				PRODUCT_NAME = Inject;
 				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 3.0;
 			};
 			name = Release;
 		};
 		B0E8D74A1D3CE01D000CCE0C /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = InjectTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.serious.InjectTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
 		};
 		B0E8D74B1D3CE01D000CCE0C /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = InjectTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.serious.InjectTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_VERSION = 3.0;
 			};
 			name = Release;
 		};

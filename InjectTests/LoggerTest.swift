@@ -19,7 +19,7 @@ class LoggerTests: XCTestCase {
 
         // MARK: init
 
-        init(name : String, formatter: LogFormatter, callback: (LogManager.LogEntry) -> Void) {
+        init(name : String, formatter: LogFormatter, callback: @escaping (LogManager.LogEntry) -> Void) {
             self.callback = callback
 
             super.init(name: name, formatter: formatter, colorize: false)
@@ -27,7 +27,7 @@ class LoggerTests: XCTestCase {
 
         // MARK: override Destination
 
-        override func log(entry : LogManager.LogEntry) -> Void {
+        override func log(_ entry : LogManager.LogEntry) -> Void {
             print(format(entry))
             
             callback(entry)
@@ -59,9 +59,9 @@ class LoggerTests: XCTestCase {
         })
 
         manager
-           .registerLogger("", level : .OFF, logs: [testLog])
-           .registerLogger("com", level : .WARN, inherit: true)
-           .registerLogger("com.foo", level : .ALL, inherit: true)
+           .registerLogger("", level : .off, logs: [testLog])
+           .registerLogger("com", level : .warn, inherit: true)
+           .registerLogger("com.foo", level : .all, inherit: true)
 
         var logger : LogManager.Logger = manager.getLogger(forName: "")
 
@@ -95,7 +95,7 @@ class LoggerTests: XCTestCase {
         logger.debug("com")
         logger.info("com")
         logger.warn("com")
-        logger.fatal(BeanDescriptorErrors.Exception(message: "ouch"), message: "com")
+        logger.fatal(BeanDescriptorErrors.exception(message: "ouch"), message: "com")
 
         XCTAssert(logs == 2)
     }

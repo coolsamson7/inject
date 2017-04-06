@@ -7,7 +7,7 @@
 //
 
 /// A `FQN` is a fully qualified name containing a namespace and a key
-public class FQN : Hashable, CustomStringConvertible {
+open class FQN : Hashable, CustomStringConvertible {
     // MARK: instance data
     
     var namespace : String
@@ -15,11 +15,11 @@ public class FQN : Hashable, CustomStringConvertible {
     
     // MARK: class func
     
-    public class func fromString(str : String) -> FQN {
-        let colon  = str.rangeOfString(":", range: str.startIndex..<str.endIndex)
+    open class func fromString(_ str : String) -> FQN {
+        let colon  = str.range(of: ":")
         if colon != nil {
-            let namespace = str[str.startIndex..<colon!.startIndex]
-            let key = str[colon!.endIndex..<str.endIndex]
+            let namespace = str[str.startIndex..<colon!.lowerBound]
+            let key = str[colon!.upperBound..<str.endIndex]
             
             return FQN(namespace: namespace, key: key)
         }
@@ -37,7 +37,7 @@ public class FQN : Hashable, CustomStringConvertible {
     
     // Hashable
     
-    public var hashValue: Int {
+    open var hashValue: Int {
         get {
             return namespace.hash &+ key.hash
         }
@@ -45,7 +45,7 @@ public class FQN : Hashable, CustomStringConvertible {
     
     // MARK: implement CustomStringConvertible
     
-    public var description: String {
+    open var description: String {
         return "[namespace: \"\(namespace)\", key: \"\(key)\"]"
     }
 }

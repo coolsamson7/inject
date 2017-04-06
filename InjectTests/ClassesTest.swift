@@ -24,12 +24,15 @@ class ClassesTests: XCTestCase {
     func testClass4Name() {
 
 
-        func foo(o : Any?) -> Any? {
+        func foo(_ o : Any?) -> Any? {
             if o != nil {
-                print(o!.dynamicType)
+                print(type(of: o!))
             }
             return nil
         }
+
+        print(Bundle.main)
+        print(Bundle.main.object(forInfoDictionaryKey: "CFBundleName"))
 
         foo(nil)
 
@@ -37,6 +40,7 @@ class ClassesTests: XCTestCase {
 
         for name in [
             "TestClass",
+            "InjectTests_IOS.TestClass",
             "TestObjectClass",
             "ClassesTests.LocalClass",
             "InjectTests.ClassesTests.LocalClass",
@@ -46,7 +50,7 @@ class ClassesTests: XCTestCase {
         do {
            try Classes.class4Name(name)
         }
-        catch ClassesErrors.Exception(let message) {
+        catch ClassesErrors.exception(let message) {
             print("##### " + message)
         }
         catch {

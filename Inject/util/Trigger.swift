@@ -6,10 +6,10 @@
 import Foundation
 
 public protocol TriggerListener {
-    func stateChanged(trigger : Trigger) -> Void;
+    func stateChanged(_ trigger : Trigger) -> Void;
 }
 
-public class Trigger {
+open class Trigger {
     // local classes
 
     // Trigger
@@ -41,7 +41,7 @@ public class Trigger {
             }
         }
 
-        override func invalidate(recursive : Bool) -> Void  {
+        override func invalidate(_ recursive : Bool) -> Void  {
             super.invalidate(recursive)
 
             if recursive {
@@ -51,7 +51,7 @@ public class Trigger {
             }
         }
 
-        func stateChanged(trigger : Trigger) -> Void {
+        func stateChanged(_ trigger : Trigger) -> Void {
             updateState();
         }
 
@@ -93,7 +93,7 @@ public class Trigger {
             }
         }
 
-        override func invalidate(recursive : Bool) -> Void  {
+        override func invalidate(_ recursive : Bool) -> Void  {
             super.invalidate(recursive)
 
             if recursive {
@@ -103,7 +103,7 @@ public class Trigger {
             }
         }
 
-        func stateChanged(trigger : Trigger) -> Void {
+        func stateChanged(_ trigger : Trigger) -> Void {
             updateState();
         }
 
@@ -136,7 +136,7 @@ public class Trigger {
 
         // override
 
-        func stateChanged(trigger : Trigger) -> Void {
+        func stateChanged(_ trigger : Trigger) -> Void {
             updateState();
         }
 
@@ -168,19 +168,19 @@ public class Trigger {
         return Not(trigger: self);
     }
 
-    func and(triggers : Trigger...) -> Trigger {
+    func and(_ triggers : Trigger...) -> Trigger {
         return And(triggers: triggers);
     }
 
-    func or(triggers : Trigger...) -> Trigger {
+    func or(_ triggers : Trigger...) -> Trigger {
         return Or(triggers: triggers);
     }
 
-    public func addListener(listener : TriggerListener) -> Void {
+    open func addListener(_ listener : TriggerListener) -> Void {
         listeners.append(listener)
     }
 
-    public func getState() -> Bool {
+    open func getState() -> Bool {
         if cachedState == nil {
             updateState();
         }
@@ -188,29 +188,29 @@ public class Trigger {
         return cachedState!;
     }
 
-    public func invalidate(recursive : Bool) -> Void  {
+    open func invalidate(_ recursive : Bool) -> Void  {
         cachedState = nil
     }
 
-    public func revalidate() -> Void {
+    open func revalidate() -> Void {
         invalidate(true); // recursive invalidation
 
         getState(); // force recompute
     }
 
-    public func remove() -> Void {
+    open func remove() -> Void {
         // noop TODO naming
     }
 
     // abstract
 
-    public func computeState() -> Bool {
+    open func computeState() -> Bool {
         return false;
     }
 
     // protected
 
-    func setState(newState : Bool) -> Void {
+    func setState(_ newState : Bool) -> Void {
         if (newState != cachedState) {
             cachedState = newState
 

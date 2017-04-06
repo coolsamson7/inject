@@ -8,36 +8,36 @@
 
 /// A `LogManager` is singleton that collects different log specifications and to return them
 
-public class LogManager {
+open class LogManager {
     // MARK: inner classes
 
     /// `Level` describes the different severity levels of a log entry
     public enum Level : Int , Comparable, CustomStringConvertible {
-        case ALL = 0
-        case DEBUG
-        case INFO
-        case WARN
-        case ERROR
-        case FATAL
-        case OFF
+        case all = 0
+        case debug
+        case info
+        case warn
+        case error
+        case fatal
+        case off
 
         // MARK: CustomStringConvertible
 
         public var description: String {
             switch self {
-                case .OFF:
+                case .off:
                     return "OFF"
-                case .INFO:
+                case .info:
                     return "INFO"
-                case .WARN:
+                case .warn:
                     return "WARN"
-                case .DEBUG:
+                case .debug:
                     return "DEBUG"
-                case .ERROR:
+                case .error:
                     return "ERROR"
-                case .FATAL:
+                case .fatal:
                     return "FATAL"
-                case .ALL:
+                case .all:
                     return "ALL"
 
             } // switch
@@ -45,24 +45,24 @@ public class LogManager {
     }
 
     // `LogEntry` is an internal class that contains the log payload and is used by `LogManager.Log` implementations
-    public class LogEntry {
+    open class LogEntry {
         // MARK: instance data
 
         var level     : Level
         var logger    : String
         var message   : String
-        var error     : ErrorType?
+        var error     : Error?
         var stacktrace : Stacktrace?
         var thread    : String
         var file      : String
         var function  : String
         var line      : Int
         var column    : Int
-        var timestamp : NSDate
+        var timestamp : Date
 
         // MARK: init
 
-        init(logger: String, level : Level, message: String, error : ErrorType? = nil, stacktrace : Stacktrace? = nil, thread: String, file: String, function: String, line: Int, column: Int, timestamp : NSDate) {
+        init(logger: String, level : Level, message: String, error : Error? = nil, stacktrace : Stacktrace? = nil, thread: String, file: String, function: String, line: Int, column: Int, timestamp : Date) {
             self.logger   = logger
             self.level    = level
             self.error    = error
@@ -82,7 +82,7 @@ public class LogManager {
     /// * a dot separated path
     /// * a severity level
     /// * a list of `Log` instances
-    public class Logger {
+    open class Logger {
         // MARK: instance data
 
         internal var path : String
@@ -119,13 +119,13 @@ public class LogManager {
             }
         }
 
-        func addChild(logger : Logger) {
+        func addChild(_ logger : Logger) {
             logger.parent = self
 
             children.append(logger)
         }
 
-        func inheritFrom(logger : Logger) {
+        func inheritFrom(_ logger : Logger) {
             if inherit {
                 for log in logger.allLogs {
                     self.allLogs.append(log)
@@ -133,20 +133,20 @@ public class LogManager {
             }
         }
 
-        func isApplicable(level : Level) -> Bool {
+        func isApplicable(_ level : Level) -> Bool {
             return level.rawValue >= self.level.rawValue
         }
 
         func currentThreadName() -> String {
-            if NSThread.isMainThread() {
+            if Thread.isMainThread {
                 return "main"
             }
             else {
-               if let threadName = NSThread.currentThread().name where !threadName.isEmpty {
+               if let threadName = Thread.current.name, !threadName.isEmpty {
                    return threadName
                }
                 else {
-                    return String(format:"%p", NSThread.currentThread())
+                    return String(format:"%p", Thread.current)
                 }
             }
         }
@@ -156,10 +156,10 @@ public class LogManager {
         /// create a log entry
         /// - Parameter level: the severity level
         /// - Parameter message: the message - auto - closure
-        public func log<T>(level : Level, error: ErrorType? = nil, stackTrace : Stacktrace? = nil, @autoclosure message: () -> T, file: String = #file, function: String = #function, line: Int = #line, column: Int = #column) -> Void {
+        open func log<T>(_ level : Level, error: Error? = nil, stackTrace : Stacktrace? = nil, message: @autoclosure () -> T, file: String = #file, function: String = #function, line: Int = #line, column: Int = #column) -> Void {
             if isApplicable(level) {
                 let msg = message()
-                let entry = LogEntry(logger: path, level : level, message: "\(msg)", error: error, stacktrace : stackTrace, thread: currentThreadName(), file: file, function: function, line: line, column: column, timestamp : NSDate())
+                let entry = LogEntry(logger: path, level : level, message: "\(msg)", error: error, stacktrace : stackTrace, thread: currentThreadName(), file: file, function: function, line: line, column: column, timestamp : Date())
 
                 for log in allLogs {
                     log.log(entry)
@@ -171,37 +171,37 @@ public class LogManager {
 
         /// create a log entry with severity info
         /// - Parameter message: the message - auto - closure
-        public func info<T>(@autoclosure message: () -> T, file: String = #file, function: String = #function, line: Int = #line, column: Int = #column) -> Void {
-            log(.INFO, message: message, file: file, function: function, line: line, column: column)
+        open func info<T>( _ message: @autoclosure () -> T, file: String = #file, function: String = #function, line: Int = #line, column: Int = #column) -> Void {
+            log(.info, message: message, file: file, function: function, line: line, column: column)
         }
 
         /// create a log entry with severity warn
         /// - Parameter message: the message - auto - closure
-        public func warn<T>(@autoclosure message: () -> T, file: String = #file, function: String = #function, line: Int = #line, column: Int = #column) -> Void {
-            log(.WARN, message: message, file: file, function: function, line: line, column: column)
+        open func warn<T>( _ message: @autoclosure () -> T, file: String = #file, function: String = #function, line: Int = #line, column: Int = #column) -> Void {
+            log(.warn, message: message, file: file, function: function, line: line, column: column)
         }
 
         /// create a log entry with severity debug
         /// - Parameter message: the message - auto - closure
-        public func debug<T>(@autoclosure message: () -> T, file: String = #file, function: String = #function, line: Int = #line, column: Int = #column) -> Void {
-            log(.DEBUG, message: message, file: file, function: function, line: line, column: column)
+        open func debug<T>( _ message: @autoclosure () -> T, file: String = #file, function: String = #function, line: Int = #line, column: Int = #column) -> Void {
+            log(.debug, message: message, file: file, function: function, line: line, column: column)
         }
 
         /// create a log entry with severity error
         /// - Parameter message: the message - auto - closure
-        public func error<T>(error: ErrorType? = nil, stackTrace : Stacktrace = Stacktrace(frames: NSThread.callStackSymbols()), @autoclosure message: () -> T, file: String = #file, function: String = #function, line: Int = #line, column: Int = #column) -> Void {
-            log(.ERROR, error: error, stackTrace: stackTrace, message: message, file: file, function: function, line: line, column: column)
+        open func error<T>(_ error: Error? = nil, stackTrace : Stacktrace = Stacktrace(frames: Thread.callStackSymbols), message: @autoclosure () -> T, file: String = #file, function: String = #function, line: Int = #line, column: Int = #column) -> Void {
+            log(.error, error: error, stackTrace: stackTrace, message: message, file: file, function: function, line: line, column: column)
         }
 
         /// create a log entry with severity fatal
         /// - Parameter message: the message - auto - closure
-        public func fatal<T>(error: ErrorType? = nil, stackTrace : Stacktrace = Stacktrace(frames: NSThread.callStackSymbols()), @autoclosure message: () -> T, file: String = #file, function: String = #function, line: Int = #line, column: Int = #column) -> Void {
-            log(.FATAL, error: error, stackTrace: stackTrace, message: message, file: file, function: function, line: line, column: column)
+        open func fatal<T>(_ error: Error? = nil, stackTrace : Stacktrace = Stacktrace(frames: Thread.callStackSymbols), message: @autoclosure () -> T, file: String = #file, function: String = #function, line: Int = #line, column: Int = #column) -> Void {
+            log(.fatal, error: error, stackTrace: stackTrace, message: message, file: file, function: function, line: line, column: column)
         }
     }
 
     /// A `Log` is an endpoint that will store log entries ( e.g. console, file, etc. )
-    public class Log {
+    open class Log {
         // MARK: static data
 
         static var defaultFormatter : LogFormatter = LogFormatter.timestamp() + " [" + LogFormatter.logger() + "] " + LogFormatter.level() + " - " + LogFormatter.message()
@@ -225,7 +225,7 @@ public class LogManager {
         /// format the given entry with the corresponding format
         /// - Parameter entry: the log entry
         /// - Returns: the formatted entry
-        public func format(entry : LogManager.LogEntry) -> String {
+        open func format(_ entry : LogManager.LogEntry) -> String {
             var result : String = formatter.format(entry)
 
             if colorize {
@@ -237,8 +237,8 @@ public class LogManager {
 
         // MARK: abstract
 
-        func log(entry : LogManager.LogEntry) -> Void {
-            precondition(false, "\(self.dynamicType).log must be implemented")
+        func log(_ entry : LogManager.LogEntry) -> Void {
+            precondition(false, "\(type(of: self)).log must be implemented")
         }
     }
 
@@ -248,7 +248,7 @@ public class LogManager {
 
     // this logger is used fot internal log entries on the console...
 
-    static var fatalLogger = Logger(path: "", level: .ALL, logs: [
+    static var fatalLogger = Logger(path: "", level: .all, logs: [
             ConsoleLog(
                     name: "fatal",
                     formatter: LogFormatter.timestamp()  + " - " + LogFormatter.message()
@@ -257,12 +257,12 @@ public class LogManager {
 
     // MARK: class funcs
 
-    static func error<T>(@autoclosure message: () -> T, file: String = #file, function: String = #function, line: Int = #line, column: Int = #column) -> Void {
-        fatalLogger.log(.ERROR, message: message, file: file, function: function, line: line, column: column)
+    static func error<T>( _ message: @autoclosure () -> T, file: String = #file, function: String = #function, line: Int = #line, column: Int = #column) -> Void {
+        fatalLogger.log(.error, message: message, file: file, function: function, line: line, column: column)
     }
 
-    static func fatal<T>(@autoclosure message: () -> T, file: String = #file, function: String = #function, line: Int = #line, column: Int = #column) -> Void {
-        fatalLogger.log(.FATAL, message: message, file: file, function: function, line: line, column: column)
+    static func fatal<T>( _ message: @autoclosure () -> T, file: String = #file, function: String = #function, line: Int = #line, column: Int = #column) -> Void {
+        fatalLogger.log(.fatal, message: message, file: file, function: function, line: line, column: column)
 
         fatalError("\(message())")
     }
@@ -270,20 +270,20 @@ public class LogManager {
     /// Return a `Logger` given a specific class. This function will build the fully qualified class name and try to find an appropriate logger
     /// - Parameter forClass: the specific class
     /// - Returns a Logger
-    public static func getLogger(forClass clazz : AnyClass) -> Logger {
+    open static func getLogger(forClass clazz : AnyClass) -> Logger {
         return instance.getLogger(forClass: clazz)
     }
 
     /// Return a `Logger` given a name. This will either return a direct matching logger or the next parent logger by stripping the last legs of the name
     /// - Parameter forName: the logger name
     /// - Returns a Logger
-    public static func getLogger(forName name : String) -> Logger {
+    open static func getLogger(forName name : String) -> Logger {
         return instance.getLogger(forName: name)
     }
 
     /// Return the singleton
     /// Returns: the singleton
-    public static func getSingleton() -> LogManager {
+    open static func getSingleton() -> LogManager {
         return instance
     }
 
@@ -299,8 +299,8 @@ public class LogManager {
     // MARK: init
 
     // this is the initial log manager
-    private init(initial : Bool) {
-        registerLogger("", level: .OFF, logs: [])
+    fileprivate init(initial : Bool) {
+        registerLogger("", level: .off, logs: [])
     }
 
     /// Create a new `LogManager` which will overwrite the singleton!
@@ -310,10 +310,10 @@ public class LogManager {
 
     // MARK: internal
 
-    func parentLogger(logger : Logger) -> Logger? {
+    func parentLogger(_ logger : Logger) -> Logger? {
         var path = logger.path
 
-        while path.containsString(".") {
+        while path.contains(".") {
             let index = path.lastIndexOf(".");
             path = path[0..<index]
 
@@ -335,7 +335,7 @@ public class LogManager {
         // check for root logger
 
         if loggers[""] == nil {
-            loggers[""] = Logger(path: "", level: .OFF, logs: [])
+            loggers[""] = Logger(path: "", level: .off, logs: [])
         }
 
         // link parents
@@ -353,11 +353,11 @@ public class LogManager {
 
     // MARK: public
 
-    public func log(name : String) -> Log {
+    open func log(_ name : String) -> Log {
         return logs[name]!
     }
 
-    public func registerLog(log: Log) -> Self {
+    open func registerLog(_ log: Log) -> Self {
         mutex.synchronized {
             self.modifications += 1
 
@@ -373,7 +373,7 @@ public class LogManager {
     /// - Parameter logs: a list of associated logs
     /// - Parameter inherit: if `true`, all `Log`s of the parent are inherited
     /// - Returns: Self
-    public func registerLogger(path : String, level : Level, logs: [Log] = [], inherit : Bool = true) -> Self {
+    open func registerLogger(_ path : String, level : Level, logs: [Log] = [], inherit : Bool = true) -> Self {
         mutex.synchronized {
             self.modifications += 1
 
@@ -386,17 +386,17 @@ public class LogManager {
     /// Return a `Logger` given a specific class. This function will build the fully qualified class name and try to find an appropriate logger
     /// - Parameter forClass: the specific class
     /// - Returns: a Logger
-    public func getLogger(forClass clazz : AnyClass) -> Logger {
+    open func getLogger(forClass clazz : AnyClass) -> Logger {
         return getLogger(forName: Classes.className(clazz, qualified: true))
     }
 
     /// Return a `Logger` given a name. This will either return a direct matching logger or the next parent logger by stripping the last legs of the name
     /// - Parameter forName: the logger name
     /// - Returns: a Logger
-    public func getLogger(forName path : String) -> Logger {
+    open func getLogger(forName path : String) -> Logger {
         var logger : Logger?
 
-        func find(name: String) -> Logger? {
+        func find(_ name: String) -> Logger? {
             var logger = self.cachedLoggers[name]
             if logger == nil {
                 logger = self.loggers[name]
@@ -422,7 +422,7 @@ public class LogManager {
             // check dirty state
 
             if self.modifications > 0 {
-                self.cachedLoggers.removeAll(keepCapacity: true); // restart from scratch
+                self.cachedLoggers.removeAll(keepingCapacity: true); // restart from scratch
 
                 // and reset loggers
 

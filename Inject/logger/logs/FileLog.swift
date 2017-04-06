@@ -7,12 +7,12 @@
 //
 
 /// A `FileLog` logs entries in a file
-public class FileLog : LogManager.Log {
+open class FileLog : LogManager.Log {
     // MARK: init
 
-    var url : NSURL
+    var url : URL
     var mutex : Mutex?
-    var fileHandle: NSFileHandle?
+    var fileHandle: FileHandle?
 
     // MARK: init
 
@@ -26,7 +26,7 @@ public class FileLog : LogManager.Log {
             mutex = Mutex()
         }
 
-        self.url = NSURL(fileURLWithPath: fileName)
+        self.url = URL(fileURLWithPath: fileName)
 
         super.init(name: name, formatter: formatter, colorize: colorize)
 
@@ -39,24 +39,24 @@ public class FileLog : LogManager.Log {
 
     // MARK: public
 
-    public func lastModificationDate() -> NSDate {
-        let attributes = try! url.resourceValuesForKeys([NSURLContentModificationDateKey, NSURLNameKey])
+    open func lastModificationDate() -> Date {
+        let attributes = try! (url as NSURL).resourceValues(forKeys: [URLResourceKey.contentModificationDateKey, URLResourceKey.nameKey])
 
-        return attributes[NSURLContentModificationDateKey] as! NSDate
+        return attributes[URLResourceKey.contentModificationDateKey] as! Date
     }
 
     // MARK: internal
 
-    func openFile(fileName : String) throws -> NSFileHandle {
+    func openFile(_ fileName : String) throws -> FileHandle {
         // possibly create
 
-        if !NSFileManager.defaultManager().fileExistsAtPath(fileName) {
-            NSFileManager.defaultManager().createFileAtPath(fileName, contents: nil, attributes: nil)
+        if !FileManager.default.fileExists(atPath: fileName) {
+            FileManager.default.createFile(atPath: fileName, contents: nil, attributes: nil)
         }
 
         // open
 
-        if let handle = NSFileHandle(forWritingAtPath: fileName) {
+        if let handle = FileHandle(forWritingAtPath: fileName) {
             return handle
         }
         else {
@@ -74,17 +74,17 @@ public class FileLog : LogManager.Log {
         }
     }
 
-    func reallyLog(entry : LogManager.LogEntry) -> Void {
+    func reallyLog(_ entry : LogManager.LogEntry) -> Void {
         fileHandle!.seekToEndOfFile()
 
-        if let data = (format(entry) + "\n").dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false) {
-            fileHandle!.writeData(data)
+        if let data = (format(entry) + "\n").data(using: String.Encoding.utf8, allowLossyConversion: false) {
+            fileHandle!.write(data)
         }
     }
 
     // MARK: override LogManager.Log
 
-    override func log(entry : LogManager.LogEntry) -> Void {
+    override func log(_ entry : LogManager.LogEntry) -> Void {
         if let mutex = self.mutex {
             mutex.synchronized {
                 self.reallyLog(entry)

@@ -5,7 +5,7 @@
 
 import Foundation
 
-public class MappingOperation: Operation<MappingContext> {
+open class MappingOperation: Operation<MappingContext> {
     // Compiler ERROR WTF
     // init
 
@@ -14,9 +14,9 @@ public class MappingOperation: Operation<MappingContext> {
     }
 }
 
-public enum MapperError: ErrorType, CustomStringConvertible {
-    case Definition(message:String, definition : MappingDefinition?, match: MappingDefinition.Match?, accessor: Accessor?)
-    case Operation(message:String, mapping: Mapping?, operation : MappingOperation?, source: AnyObject?, target : AnyObject?)
+public enum MapperError: Error, CustomStringConvertible {
+    case definition(message:String, definition : MappingDefinition?, match: MappingDefinition.Match?, accessor: Accessor?)
+    case operation(message:String, mapping: Mapping?, operation : MappingOperation?, source: AnyObject?, target : AnyObject?)
 
     // CustomStringConvertible
 
@@ -24,7 +24,7 @@ public enum MapperError: ErrorType, CustomStringConvertible {
         let builder = StringBuilder();
 
         switch self {
-            case .Operation(let message, let mapping, let operation, let source, let target):
+            case .operation(let message, let mapping, let operation, let source, let target):
                 builder.append(message).append(" ");
 
                 if mapping != nil {
@@ -36,14 +36,14 @@ public enum MapperError: ErrorType, CustomStringConvertible {
                 }
 
                 if source != nil {
-                    builder.append("source: \(source) ")
+                    builder.append("source: \(String(describing: source)) ")
                 }
 
                 if target != nil {
-                    builder.append("target: \(target) ")
+                    builder.append("target: \(String(describing: target)) ")
                 }
 
-            case .Definition(let message, let definition, let match, let accessor):
+            case .definition(let message, let definition, let match, let accessor):
                 builder.append(message).append(" ");
 
                 if accessor != nil {
@@ -63,7 +63,7 @@ public enum MapperError: ErrorType, CustomStringConvertible {
     }
 }
 
-public class Accessor: CustomStringConvertible {
+open class Accessor: CustomStringConvertible {
     // instance data
 
     var overrideType: Any.Type?;
@@ -76,69 +76,69 @@ public class Accessor: CustomStringConvertible {
 
     // implement Accessor
 
-    public func cast(clazz: AnyClass) -> Accessor {
+    open func cast(_ clazz: AnyClass) -> Accessor {
         overrideType = clazz;
 
         return self;
     }
 
-    public func isReadOnly() -> Bool {
+    open func isReadOnly() -> Bool {
         return false;
     }
 
-    public func deep() -> Bool {
+    open func deep() -> Bool {
         return false;
     }
 
-    public func getIndex() -> Int {
+    open func getIndex() -> Int {
         fatalError("is only valid for BeanPropertyAccessor!s");
     }
 
-    public func getOverallIndex() -> Int {
+    open func getOverallIndex() -> Int {
         fatalError("is only valid for BeanPropertyAccessor!s");
     }
 
     // CustomStringConvertible
 
-    public var description: String {
+    open var description: String {
         return getName()
     }
 
     // abstract
 
-    public func getName() -> String {
+    open func getName() -> String {
         fatalError("Accessor.getName is abstract");
     }
 
-    public func resolve(clazz: Any.Type) throws -> Void {
+    open func resolve(_ clazz: Any.Type) throws -> Void {
         fatalError("Accessor.resolve is abstract");
     }
 
-    public func isAttribute() -> Bool {
+    open func isAttribute() -> Bool {
         return false;
     }
 
-    public func isArray() -> Bool {
+    open func isArray() -> Bool {
         return false
     }
 
-    public func getType() -> Any.Type {
+    open func getType() -> Any.Type {
         fatalError("Accessor.getType is abstract");
     }
 
-    public func makeTransformerProperty(mode: MappingDefinition.Mode, expectedType: Any.Type?, transformerSourceProperty: Property<MappingContext>?) -> Property<MappingContext> {
+    open func makeTransformerProperty(_ mode: MappingDefinition.Mode, expectedType: Any.Type?, transformerSourceProperty: Property<MappingContext>?) -> Property<MappingContext> {
         fatalError("Accessor.makeTransformerProperty is abstract");
     }
 
-    public func getValue(instance: AnyObject) throws -> Any? {
+    open func getValue(_ instance: AnyObject) throws -> Any? {
         fatalError("Accessor.getValue is abstract");
     }
 
-    public func setValue(instance: AnyObject, value: Any?, mappingContext: MappingContext) throws -> Void {
+    open func setValue(_ instance: AnyObject, value: Any?, mappingContext: MappingContext) throws -> Void {
         fatalError("Accessor.setValue is abstract");
     }
 
-    public func equals(object: AnyObject) -> Bool {
+    open func equals(_ object: AnyObject) -> Bool {
         return false
     }
 }
@@ -151,14 +151,14 @@ public protocol ObjectFactory {
      * @param clazz  the class
      * @return the new instance
      */
-    func createBean(source: AnyObject, clazz: AnyClass) -> AnyObject;
+    func createBean(_ source: Any, clazz: AnyClass) -> AnyObject;
 }
 
 public protocol CompositeFactory {
-    func createComposite(clazz: AnyClass, arguments: AnyObject...) -> AnyObject;
+    func createComposite(_ clazz: AnyClass, arguments: AnyObject...) -> AnyObject;
 }
 
-public class MappingConversion {
+open class MappingConversion {
     // instance data
 
     var sourceConversion : Conversion?
@@ -179,7 +179,7 @@ public class MappingConversion {
      * @param source the source
      * @return the target format
      */
-    func convertSource(source: Any?) throws -> Any? {
+    func convertSource(_ source: Any?) throws -> Any? {
         return sourceConversion != nil ? try sourceConversion!(object: source) : source
     }
 
@@ -189,12 +189,12 @@ public class MappingConversion {
      * @param target the target
      * @return the source format
      */
-    func convertTarget(target: Any?) throws -> Any? {
+    func convertTarget(_ target: Any?) throws -> Any? {
         return targetConversion != nil ? try targetConversion!(object: target) : target
     }
 }
 
-public class MappingFinalizer {
+open class MappingFinalizer {
     /**
      * finalize a source object.
      *
@@ -202,7 +202,7 @@ public class MappingFinalizer {
      * @param target  the target
      * @param context the specific context
      */
-    func finalizeSource(source: AnyObject, target: AnyObject, context: MappingContext) -> Void {
+    func finalizeSource(_ source: AnyObject, target: AnyObject, context: MappingContext) -> Void {
 
     }
 
@@ -213,7 +213,7 @@ public class MappingFinalizer {
      * @param target  the target object
      * @param context the context
      */
-    func finalizeTarget(source: AnyObject, target: AnyObject, context: MappingContext) -> Void {
+    func finalizeTarget(_ source: AnyObject, target: AnyObject, context: MappingContext) -> Void {
 
     }
 }
@@ -225,7 +225,7 @@ public func ==(lhs: MappingDefinition.Match, rhs: MappingDefinition.Match) -> Bo
 }
 
 
-public class MappingDefinition: CustomStringConvertible, CustomDebugStringConvertible {
+open class MappingDefinition: CustomStringConvertible, CustomDebugStringConvertible {
     // local classes
 
     static var SOURCE = 0;
@@ -234,11 +234,11 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
     static var TARGET_2_SOURCE = 1;
 
     public enum Mode {
-        case READ
-        case WRITE
+        case read
+        case write
     }
 
-    public class CompositeDefinition {
+    open class CompositeDefinition {
         // instance data
 
         var nArgs: Int;
@@ -255,16 +255,16 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
 
         // public
 
-        public func makeCreator(mapper: Mapper) -> Mapping.CompositeBuffer {
+        open func makeCreator(_ mapper: Mapper) -> Mapping.CompositeBuffer {
             fatalError("CompositeDefinition.makeCreator NYI");
         }
     }
 
-    public class ImmutableCompositeDefinition: CompositeDefinition {
+    open class ImmutableCompositeDefinition: CompositeDefinition {
         // instance data
 
-        private var clazz: AnyClass;
-        private var parentAccessor: Accessor?;
+        fileprivate var clazz: AnyClass;
+        fileprivate var parentAccessor: Accessor?;
 
         // constructor
 
@@ -279,16 +279,16 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
 
         // public
 
-        override public func makeCreator(mapper: Mapper) -> Mapping.CompositeBuffer {
+        override open func makeCreator(_ mapper: Mapper) -> Mapping.CompositeBuffer {
             return Mapping.ImmutableCompositeBuffer(mapper: mapper, clazz: clazz, nargs: nArgs, outerComposite: outerComposite, outerIndex: outerIndex, parentAccessor: parentAccessor!);
         }
     }
 
-    public class MutableCompositeDefinition: CompositeDefinition {
+    open class MutableCompositeDefinition: CompositeDefinition {
         // instance data
 
-        private var clazz: AnyClass;
-        private var parentAccessor: Accessor?;
+        fileprivate var clazz: AnyClass;
+        fileprivate var parentAccessor: Accessor?;
 
         // constructor
 
@@ -303,12 +303,12 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
 
         // public
 
-        override public func makeCreator(mapper: Mapper) -> Mapping.CompositeBuffer {
+        override open func makeCreator(_ mapper: Mapper) -> Mapping.CompositeBuffer {
             return Mapping.MutableCompositeBuffer(mapper: mapper, clazz: clazz, nargs: nArgs, outerComposite: outerComposite, outerIndex: outerIndex, parentAccessor: parentAccessor!);
         }
     }
 
-    public class BeanPropertyAccessor: Accessor {
+    open class BeanPropertyAccessor: Accessor {
         // instance data
 
         var propertyName: String;
@@ -338,29 +338,29 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
 
         // public
 
-        public func getProperty() -> BeanDescriptor.PropertyDescriptor {
+        open func getProperty() -> BeanDescriptor.PropertyDescriptor {
             return property!;
         }
 
         // implement Accessor
 
-        override public func getName() -> String {
-            return "\(property?.bean.type).\(property)"
+        override open func getName() -> String {
+            return "\(String(describing: property?.bean.type)).\(String(describing: property))"
         }
 
-        public override func getIndex() -> Int {
+        open override func getIndex() -> Int {
             return property!.getIndex();
         }
 
-        override public func getOverallIndex() -> Int {
+        override open func getOverallIndex() -> Int {
             return property!.getOverallIndex();
         }
 
-        override public func resolve(clazz: Any.Type) throws -> Void {
+        override open func resolve(_ clazz: Any.Type) throws -> Void {
             property = try BeanDescriptor.forClass(clazz as! AnyClass).findProperty(propertyName);
 
             if (property == nil) {
-                throw MapperError.Definition(message: "unknown property \(clazz).\(propertyName)", definition: nil, match: nil, accessor: nil);
+                throw MapperError.definition(message: "unknown property \(clazz).\(propertyName)", definition: nil, match: nil, accessor: nil);
             }
 
             // TODO if (overrideType != nil && !property.getPropertyType().isAssignableFrom(overrideType)) {
@@ -368,40 +368,40 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
             //}
         }
 
-        override public func getType() -> Any.Type {
+        override open func getType() -> Any.Type {
             return overrideType != nil ? overrideType! : property!.getPropertyType()
         }
 
-        override public func isAttribute() -> Bool {
+        override open func isAttribute() -> Bool {
             return property!.isAttribute()
         }
 
-        override public func isArray() -> Bool {
+        override open func isArray() -> Bool {
             return property!.isArray()
         }
 
 
-        override public func makeTransformerProperty(mode: MappingDefinition.Mode, expectedType: Any.Type?, transformerSourceProperty: Property<MappingContext>?) -> Property<MappingContext> {
+        override open func makeTransformerProperty(_ mode: MappingDefinition.Mode, expectedType: Any.Type?, transformerSourceProperty: Property<MappingContext>?) -> Property<MappingContext> {
             return BeanProperty<MappingContext>(property: property!);
         }
 
-        override public func getValue(instance: AnyObject) throws -> Any? {
+        override open func getValue(_ instance: AnyObject) throws -> Any? {
             return property!.get(instance);
         }
 
-        override public func setValue(instance: AnyObject, value: Any?, mappingContext: MappingContext) throws -> Void {
+        override open func setValue(_ instance: AnyObject, value: Any?, mappingContext: MappingContext) throws -> Void {
             try property!.set(instance, value: value);
         }
 
-        override public func isReadOnly() -> Bool {
+        override open func isReadOnly() -> Bool {
             return false; // TODO property.isReadOnly();
         }
 
-        override public func deep() -> Bool {
+        override open func deep() -> Bool {
             return !property!.isAttribute();
         }
 
-        override public func equals(object: AnyObject) -> Bool {
+        override open func equals(_ object: AnyObject) -> Bool {
             if let accessor = object as? BeanPropertyAccessor {
                 return propertyName == accessor.propertyName
             }
@@ -413,12 +413,12 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
 
         // CustomStringConvertible
 
-        override public var description: String {
+        override open var description: String {
             return propertyName
         }
     }
 
-    public class PropertyQualifier: CustomStringConvertible {
+    open class PropertyQualifier: CustomStringConvertible {
         // instance data
 
         var except: [String];
@@ -433,7 +433,7 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
 
         // public
 
-        public func except(except: [String]) -> PropertyQualifier {
+        open func except(_ except: [String]) -> PropertyQualifier {
             self.except = except;
 
             return self;
@@ -441,11 +441,11 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
 
         // abstract
 
-        public func computeProperties(sourceBean: AnyClass, targetBean: AnyClass) -> [String] {
+        open func computeProperties(_ sourceBean: AnyClass, targetBean: AnyClass) -> [String] {
             return []; // darn, abstract
         }
 
-        public func traceMapping(builder : StringBuilder) -> Void {
+        open func traceMapping(_ builder : StringBuilder) -> Void {
             if (except.count > 0) {
                 builder.append(" except {");
                 for i in 0..<except.count {
@@ -462,7 +462,7 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
 
         // CustomStringConvertible
 
-        public var description: String {
+        open var description: String {
             let builder = StringBuilder(string: "properties")
 
             traceMapping(builder);
@@ -471,7 +471,7 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
         }
     }
 
-    public class Properties: PropertyQualifier {
+    open class Properties: PropertyQualifier {
         // instance data
 
         var properties: [String];
@@ -486,7 +486,7 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
 
         // implement PropertyQualifier
 
-        override public func computeProperties(sourceClass: AnyClass, targetBean targetClass: AnyClass) -> [String] {
+        override open func computeProperties(_ sourceClass: AnyClass, targetBean targetClass: AnyClass) -> [String] {
             let sourceBean = try! BeanDescriptor.forClass(sourceClass);
             let targetBean = try! BeanDescriptor.forClass(targetClass);
 
@@ -505,7 +505,7 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
             return result;
         }
 
-        override public func traceMapping(builder : StringBuilder) -> Void {
+        override open func traceMapping(_ builder : StringBuilder) -> Void {
             for i in 0..<properties.count {
                 if (i > 0) {
                     builder.append(", ");
@@ -518,7 +518,7 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
         }
     }
 
-    public class AllProperties : PropertyQualifier {
+    open class AllProperties : PropertyQualifier {
         // constructor
 
         override init(local : Bool, except: [String]) {
@@ -527,7 +527,7 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
 
         // implement PropertyQualifier
 
-        override public func computeProperties(sourceBean : AnyClass, targetBean : AnyClass) -> [String] {
+        override open func computeProperties(_ sourceBean : AnyClass, targetBean : AnyClass) -> [String] {
             let sourceBean = try! BeanDescriptor.forClass(sourceBean);
             let targetBean = try! BeanDescriptor.forClass(targetBean);
 
@@ -546,14 +546,14 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
             return properties;
         }
 
-        override public func traceMapping(builder : StringBuilder) -> Void {
+        override open func traceMapping(_ builder : StringBuilder) -> Void {
             builder.append("properties");
 
             super.traceMapping(builder);
         }
     }
 
-    public class MapOperation: CustomStringConvertible {
+    open class MapOperation: CustomStringConvertible {
         // instance data
 
         var conversion: MappingConversion?;
@@ -566,36 +566,36 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
 
         // public
 
-        public func getConversion() -> MappingConversion? {
+        open func getConversion() -> MappingConversion? {
             return conversion;
         }
 
         // CustomStringConvertible
 
-        public var description: String {
-            return "\(self.dynamicType)"
+        open var description: String {
+            return "\(type(of: self))"
         }
 
         // abstract
 
-        public func traceMapping(builder : StringBuilder) -> Void {
+        open func traceMapping(_ builder : StringBuilder) -> Void {
         }
 
-        func findMatches(definition: MappingDefinition, matches: Matches) -> Void {
+        func findMatches(_ definition: MappingDefinition, matches: Matches) -> Void {
             fatalError("MapOperation.findMatches is abstract")
         }
 
-        public func deep() -> Bool {
+        open func deep() -> Bool {
             fatalError("implement")
         }
     }
 
-    public class MapAccessor: MapOperation {
+    open class MapAccessor: MapOperation {
         // instance data
 
-        private var source: [Accessor];
-        private var target: [Accessor];
-        private var _deep: Bool;
+        fileprivate var source: [Accessor];
+        fileprivate var target: [Accessor];
+        fileprivate var _deep: Bool;
 
         // constructor
 
@@ -609,11 +609,11 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
 
         // implement MapOperation
 
-        override public func findMatches(definition: MappingDefinition, matches: Matches) -> Void {
+        override open func findMatches(_ definition: MappingDefinition, matches: Matches) -> Void {
             matches.addMatch(Match(source: source, target: target, mapOperation: self));
         }
 
-        override public func traceMapping(builder : StringBuilder) -> Void {
+        override open func traceMapping(_ builder : StringBuilder) -> Void {
             builder.append("   ");
             for i in 0..<source.count {
                 if (i > 0) {
@@ -633,13 +633,13 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
             builder.append("\n");
         }
 
-        override public func deep() -> Bool {
+        override open func deep() -> Bool {
             return _deep;
         }
 
         // override
 
-        override public var description: String {
+        override open var description: String {
             let builder = StringBuilder(string: "map ");
 
             // source
@@ -662,7 +662,7 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
             }
 
             if (conversion != nil) {
-                builder.append(" conversion \(conversion)");
+                builder.append(" conversion \(String(describing: conversion))");
             }
 
             // done
@@ -671,7 +671,7 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
         }
     }
 
-    public class MapProperties: MapOperation {
+    open class MapProperties: MapOperation {
         // instance data
 
         var propertyQualifier: PropertyQualifier;
@@ -686,13 +686,13 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
 
         // implement MapOperation
 
-        override func findMatches(definition: MappingDefinition, matches: Matches) -> Void {
+        override func findMatches(_ definition: MappingDefinition, matches: Matches) -> Void {
             for property in propertyQualifier.computeProperties(definition.target[SOURCE], targetBean: definition.target[TARGET]) {
                 matches.addMatch(Match(source: [property], target: [property], mapOperation: self))
             }
         }
 
-        override public func traceMapping(builder : StringBuilder) -> Void {
+        override open func traceMapping(_ builder : StringBuilder) -> Void {
             builder.append("   ");
 
             propertyQualifier.traceMapping(builder);
@@ -700,29 +700,29 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
             builder.append("\n");
         }
 
-        override public func deep() -> Bool {
+        override open func deep() -> Bool {
             return false;
         }
 
         // override
 
-        override public var description: String {
+        override open var description: String {
             let builder = StringBuilder();
 
             builder.append("map ").append(propertyQualifier);
 
             if (conversion != nil) {
-                builder.append(" conversion \(conversion)");
+                builder.append(" conversion \(String(describing: conversion))");
             }
 
             return builder.toString();
         }
     }
 
-    public class Match: Hashable, CustomStringConvertible {
+    open class Match: Hashable, CustomStringConvertible {
         // class methods
 
-        class func makePath(path: [String]) -> [Accessor] {
+        class func makePath(_ path: [String]) -> [Accessor] {
             var accessor = [Accessor]();
 
             for element in path {
@@ -779,7 +779,7 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
 
         // private
 
-        private class func computeHash(source: [String], target: [String]) -> Int {
+        fileprivate class func computeHash(_ source: [String], target: [String]) -> Int {
             var hash = 0;
 
             for leg in source {
@@ -793,7 +793,7 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
             return hash
         }
 
-        private class func computeHash(source: [Accessor], target: [Accessor]) -> Int {
+        fileprivate class func computeHash(_ source: [Accessor], target: [Accessor]) -> Int {
             var hash = 0;
 
             for leg in source {
@@ -809,7 +809,7 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
 
         // Hashable
 
-        public var hashValue: Int {
+        open var hashValue: Int {
             get {
                 return hash
             }
@@ -817,7 +817,7 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
 
         // called by ==
 
-        public func equals(object: AnyObject) -> Bool {
+        open func equals(_ object: AnyObject) -> Bool {
             if let match = object as? Match {
                 if match === self {
                     return true;
@@ -849,7 +849,7 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
 
         // CustomStringConvertible
 
-        public var description: String {
+        open var description: String {
             let builder = StringBuilder();
 
             builder.append("operation: ").append(mapOperation);
@@ -874,12 +874,12 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
 
     // ConvertSource
 
-    public class ConvertSource : Property<MappingContext> {
+    open class ConvertSource : Property<MappingContext> {
         // instance data
 
-        private var  property : Property<MappingContext>
-        private var  conversion : MappingConversion
-        private var sourceAllowNull = true
+        fileprivate var  property : Property<MappingContext>
+        fileprivate var  conversion : MappingConversion
+        fileprivate var sourceAllowNull = true
 
         // constructor
 
@@ -891,7 +891,7 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
 
         // implement Property
 
-        public override func get(object : AnyObject!, context : MappingContext ) throws -> Any? {
+        open override func get(_ object : AnyObject!, context : MappingContext ) throws -> Any? {
             let value = try property.get(object, context: context);
 
             // if (value == nil) {
@@ -903,7 +903,7 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
         }
 
 
-        override public func set(object : AnyObject!, value : Any?, context : MappingContext ) throws -> Void {
+        override open func set(_ object : AnyObject!, value : Any?, context : MappingContext ) throws -> Void {
             //if (value == nil) {
             //    value = sourceAllowNull ? conversion.convertSource(nil) : nil;
             //}
@@ -916,7 +916,7 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
 
         // CustomStringConvertible
 
-        override public var description: String {
+        override open var description: String {
             //if (conversion instanceof ConversionFactory.DefaultConversion) {
             //    return "cast(" + ((ConversionFactory.DefaultConversion) conversion).getTargetClass().getSimpleName() + ") " + property.toString();
             //}
@@ -928,12 +928,12 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
 
     // ConvertTarget
 
-    public class ConvertTarget : Property<MappingContext> {
+    open class ConvertTarget : Property<MappingContext> {
         // instance data
 
-        private var property : Property<MappingContext>
-        private var conversion : MappingConversion
-        private var sourceAllowNull = true
+        fileprivate var property : Property<MappingContext>
+        fileprivate var conversion : MappingConversion
+        fileprivate var sourceAllowNull = true
 
         // constructor
 
@@ -945,7 +945,7 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
 
         // implement Property
 
-        override public func get(object : AnyObject!, context : MappingContext) throws -> Any? {
+        override open func get(_ object : AnyObject!, context : MappingContext) throws -> Any? {
             let value = try property.get(object, context: context);
 
             // if (value == nil) {
@@ -957,7 +957,7 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
         }
 
 
-        override public func set(object : AnyObject!, value : Any?, context : MappingContext ) throws -> Void {
+        override open func set(_ object : AnyObject!, value : Any?, context : MappingContext ) throws -> Void {
             //if (value == nil) {
             //    value = sourceAllowNull ? conversion.convertSource(nil) : nil;
             //}
@@ -970,7 +970,7 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
 
         // CustomStringConvertible
 
-        override public var description: String {
+        override open var description: String {
             //if (conversion instanceof ConversionFactory.DefaultConversion) {
             //    return "cast(" + ((ConversionFactory.DefaultConversion) conversion).getTargetClass().getSimpleName() + ") " + property.toString();
             //}
@@ -982,10 +982,10 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
 
     //
 
-    public class Matches /*: CustomStringConvertible*/ {
+    open class Matches /*: CustomStringConvertible*/ {
         // local classes
 
-        public class PathNode {
+        open class PathNode {
             // instance data
 
             var accessor: Accessor
@@ -1032,16 +1032,16 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
             }
 
             func getIndex() -> Int {
-                return parent != nil ? parent!.getChildren().indexOf({ $0 === self })! : 0;
+                return parent != nil ? parent!.getChildren().index(where: { $0 === self })! : 0;
             }
 
             // public
 
-            public func rootNode() -> PathNode {
+            open func rootNode() -> PathNode {
                 return parent != nil ? parent!.rootNode() : self;
             }
 
-            public func insertMatch(tree: PathTree, match: Match, index: Int, side: Int) throws -> Void {
+            open func insertMatch(_ tree: PathTree, match: Match, index: Int, side: Int) throws -> Void {
                 var root: PathNode? = nil;
                 for node in children {
                     if node.accessor.equals(match.paths[side][index] as AnyObject) {
@@ -1067,7 +1067,7 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
 
             // pre: this node matches index - 1
 
-            public func findMatchingNode(match: Match, index: Int, side: Int) -> PathNode {
+            open func findMatchingNode(_ match: Match, index: Int, side: Int) -> PathNode {
                 if (index < match.paths[side].count) {
                     for child in children {
                         if (child.accessor.equals(match.paths[side][index])) {
@@ -1080,7 +1080,7 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
             }
         }
 
-        public class PathTree {
+        open class PathTree {
             // instance data
 
             var roots = [PathNode]();
@@ -1094,17 +1094,17 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
 
             // public
 
-            public func getSide() -> Int {
+            open func getSide() -> Int {
                 return side;
             }
 
-            public func getRoots() -> [PathNode] {
+            open func getRoots() -> [PathNode] {
                 return roots;
             }
 
             // protected
 
-            func makeNode(parent: PathNode?, step: Accessor, match: Match?) throws -> PathNode {
+            func makeNode(_ parent: PathNode?, step: Accessor, match: Match?) throws -> PathNode {
                 return PathNode(
                         parent: parent, // parent
                         step: step, // step
@@ -1114,7 +1114,7 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
 
             // protected
 
-            func insertMatch(match: Match) throws -> Void {
+            func insertMatch(_ match: Match) throws -> Void {
                 var root: PathNode? = nil;
                 for node in roots {
                     if (node.match == match || (node.accessor.equals(match.paths[side][0]))) {
@@ -1140,7 +1140,7 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
                 }
             }
 
-            func findNode(match: Match) -> PathNode {
+            func findNode(_ match: Match) -> PathNode {
                 for node in roots {
                     if (node.match == match) {
                         return node;
@@ -1183,7 +1183,7 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
 
             // private
 
-            func fetchValue(sourceTree: SourceTree, expectedType: Any.Type, inout operations: [Operation<MappingContext>]) -> Void {
+            func fetchValue(_ sourceTree: SourceTree, expectedType: Any.Type, operations: inout [Operation<MappingContext>]) -> Void {
                 // recursion
 
                 if (!isRoot()) {
@@ -1196,7 +1196,7 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
                     // root, no children...
 
                     if (isRoot()) {
-                        fetchProperty = accessor.makeTransformerProperty(Mode.READ, expectedType: expectedType, transformerSourceProperty: nil);
+                        fetchProperty = accessor.makeTransformerProperty(Mode.read, expectedType: expectedType, transformerSourceProperty: nil);
 
                         type = accessor.getType();
                     }
@@ -1204,7 +1204,7 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
                     else {
                         // inner node or leaf
 
-                        fetchProperty = PeekValueProperty(int: getSourceParent()!.index, property: accessor.makeTransformerProperty(Mode.READ, expectedType: expectedType, transformerSourceProperty: nil));
+                        fetchProperty = PeekValueProperty(int: getSourceParent()!.index, property: accessor.makeTransformerProperty(Mode.read, expectedType: expectedType, transformerSourceProperty: nil));
                         type = accessor.getType();
 
                     }
@@ -1246,7 +1246,7 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
 
             // override
 
-            override func makeNode(parent: PathNode?, step: Accessor, match: Match?) throws -> PathNode {
+            override func makeNode(_ parent: PathNode?, step: Accessor, match: Match?) throws -> PathNode {
                 // constant value instead of a path
 
                 try step.resolve(parent == nil ? type : parent!.accessor.getType());
@@ -1275,12 +1275,12 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
 
             // protected
 
-            func childIndex(child: TargetNode) -> Int {
+            func childIndex(_ child: TargetNode) -> Int {
                 if immutable {
                     return child.accessor.getOverallIndex();
                 }
                 else {
-                    return getChildren().indexOf({ $0 === child })!;
+                    return getChildren().index(where: { $0 === child })!;
                 }
             }
 
@@ -1290,7 +1290,7 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
 
             // public
 
-            func makeOperations(direction: Int, sourceTree: SourceTree, mapper: Mapper, definition: MappingDefinition, inout operations: [Operation<MappingContext>]) throws -> Void {
+            func makeOperations(_ direction: Int, sourceTree: SourceTree, mapper: Mapper, definition: MappingDefinition, operations: inout [Operation<MappingContext>]) throws -> Void {
                 // check if i am a composite
 
                 let type: Any.Type = accessor.getType();
@@ -1313,7 +1313,7 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
                         // check if all arguments are mapped
 
                         if try (getChildren().count <  BeanDescriptor.forClass(type as! AnyClass).getProperties().count) {
-                            throw MapperError.Definition(message: "not all properties of the composite \(type) are mapped", definition: definition, match: match, accessor: accessor);
+                            throw MapperError.definition(message: "not all properties of the composite \(type) are mapped", definition: definition, match: match, accessor: accessor);
                         }
 
                         // done
@@ -1349,7 +1349,7 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
                 } // if
             }
 
-            private func maybeConvert(property: Property<MappingContext>, conversion: MappingConversion?, direction: Int) -> Property<MappingContext> {
+            fileprivate func maybeConvert(_ property: Property<MappingContext>, conversion: MappingConversion?, direction: Int) -> Property<MappingContext> {
                 if (conversion == nil) {
                     return property;
                 }
@@ -1363,14 +1363,14 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
                 }
             }
 
-            func mapDeep(mapper: Mapper, source: Accessor, target: Accessor, targetProperty: Property<MappingContext>, conversion: MappingConversion?, int side: Int) throws -> Property<MappingContext> {
+            func mapDeep(_ mapper: Mapper, source: Accessor, target: Accessor, targetProperty: Property<MappingContext>, conversion: MappingConversion?, int side: Int) throws -> Property<MappingContext> {
                 let sourceType: Any.Type = source.getType()
                 let targetType: Any.Type = target.getType()
                 let isSourceMultiValued = source.isArray()
                 let isTargetMultiValued = target.isArray()
 
                 if (isSourceMultiValued != isTargetMultiValued) {
-                    throw MapperError.Definition(message: "relations must have the same cardinality", definition: nil, match: match, accessor: target);
+                    throw MapperError.definition(message: "relations must have the same cardinality", definition: nil, match: match, accessor: target);
                 }
 
                 //TODO if (target is RelationshipAccessor) {
@@ -1394,17 +1394,17 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
                 }
             }
 
-            private func needsConversion(fromType: Any.Type, toType: Any.Type) -> Bool {
+            fileprivate func needsConversion(_ fromType: Any.Type, toType: Any.Type) -> Bool {
                 return fromType != toType
             }
 
-            private func accessorName(accessor: Accessor) -> String {
+            fileprivate func accessorName(_ accessor: Accessor) -> String {
                 return accessor.getName();
             }
 
             // side is the target index: either SOURCE or TARGET
 
-            private func makeOperation(mapper: Mapper, sourceNode: SourceNode, side: Int) throws -> Operation<MappingContext> {
+            fileprivate func makeOperation(_ mapper: Mapper, sourceNode: SourceNode, side: Int) throws -> Operation<MappingContext> {
                 let transformerSourceProperty = sourceNode.fetchProperty; // whatever property
 
                 // is needed to fetch the value, see fetchValue!
@@ -1456,7 +1456,7 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
 
                 if (conversion == nil && !deep) {
                     if (sourceNode.type == nil) {
-                        throw MapperError.Definition(message: "unknown source type \(sourceNode.accessor)", definition: nil, match: match, accessor: accessor); // rethrow
+                        throw MapperError.definition(message: "unknown source type \(sourceNode.accessor)", definition: nil, match: match, accessor: accessor); // rethrow
                     }
 
                     if (needsConversion(sourceNode.type!, toType: accessor.getType())) {
@@ -1474,14 +1474,14 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
                             conversion = MappingConversion(sourceConversion: side == TARGET ? conversionFunction : nil, targetConversion: side == SOURCE ? conversionFunction : nil)
                         }
                         else {
-                            throw MapperError.Definition(message: "unknown conversion from \(sourceNode.type) to \(accessor.getType())", definition: nil, match: match, accessor: accessor)
+                            throw MapperError.definition(message: "unknown conversion from \(String(describing: sourceNode.type)) to \(accessor.getType())", definition: nil, match: match, accessor: accessor)
                         }
                     }
                 } // if
 
                 if (!isRoot()) {
                     if (rootNode().accessor.isReadOnly()) {
-                        throw  MapperError.Definition(message: "accessorName(rootNode()!.accessor)" + " is read only!", definition: nil, match: match, accessor: accessor); // TODO
+                        throw  MapperError.definition(message: "accessorName(rootNode()!.accessor)" + " is read only!", definition: nil, match: match, accessor: accessor); // TODO
                     }
                     // fill a composite
 
@@ -1502,10 +1502,10 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
                     // leaf node
 
                     if (accessor.isReadOnly()) {
-                        throw MapperError.Definition(message: "accessorName(rootNode()!.accessor)" + " is read only!", definition: nil, match: match, accessor: accessor); // TODO
+                        throw MapperError.definition(message: "accessorName(rootNode()!.accessor)" + " is read only!", definition: nil, match: match, accessor: accessor); // TODO
                     }
 
-                    let writeProperty = accessor.makeTransformerProperty(Mode.WRITE, expectedType: nil, transformerSourceProperty: transformerSourceProperty);
+                    let writeProperty = accessor.makeTransformerProperty(Mode.write, expectedType: nil, transformerSourceProperty: transformerSourceProperty);
                     if (deep && match!.getConversion() == nil) {
                         return try MappingOperation(source: transformerSourceProperty!, target: mapDeep(mapper, source: sourceNode.accessor, target: accessor, targetProperty: writeProperty, conversion: conversion, int: side));
                     }
@@ -1516,7 +1516,7 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
             } // else
         }
 
-        private class TargetTree: PathTree {
+        fileprivate class TargetTree: PathTree {
             // instance data
 
             var bean: AnyClass;
@@ -1535,23 +1535,23 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
                     do {
                         try insertMatch(m);
                     }
-                    catch MapperError.Definition(let message, let definition, _/*match*/, let accessor) {
-                        throw MapperError.Definition(message: message, definition: definition, match: m, accessor: accessor)
+                    catch MapperError.definition(let message, let definition, _/*match*/, let accessor) {
+                        throw MapperError.definition(message: message, definition: definition, match: m, accessor: accessor)
                     }
                 }
             }
 
             // public
 
-            func makeOperations(direction: Int, sourceTree: SourceTree, mapper: Mapper, definition: MappingDefinition) throws -> [Operation<MappingContext>] {
+            func makeOperations(_ direction: Int, sourceTree: SourceTree, mapper: Mapper, definition: MappingDefinition) throws -> [Operation<MappingContext>] {
                 var operations = [Operation<MappingContext>]();
 
                 for node in getRoots() {
                     do {
                         try (node as! TargetNode).makeOperations(direction, sourceTree: sourceTree, mapper: mapper, definition: definition, operations: &operations);
                     }
-                    catch MapperError.Definition(let message, let definition, _/*match*/, let accessor) {
-                        throw MapperError.Definition(message: message, definition: definition, match: node.match, accessor: accessor)
+                    catch MapperError.definition(let message, let definition, _/*match*/, let accessor) {
+                        throw MapperError.definition(message: message, definition: definition, match: node.match, accessor: accessor)
                     }
                 }
 
@@ -1560,7 +1560,7 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
 
             // override
 
-            override func makeNode(parent: PathNode?, step: Accessor, match: Match?) throws -> PathNode {
+            override func makeNode(_ parent: PathNode?, step: Accessor, match: Match?) throws -> PathNode {
                 do {
                     try step.resolve(parent == nil ? bean : parent!.accessor.getType());
 
@@ -1570,8 +1570,8 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
                             match: match
                             );
                 }
-                catch MapperError.Definition(let message, let definition, _, _/*accessor*/) {
-                    throw MapperError.Definition(message: message, definition: definition, match: match, accessor: step)
+                catch MapperError.definition(let message, let definition, _, _/*accessor*/) {
+                    throw MapperError.definition(message: message, definition: definition, match: match, accessor: step)
                 }
             }
         }
@@ -1583,7 +1583,7 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
 
         // public
 
-        public func addMatch(match: Match) -> Void {
+        open func addMatch(_ match: Match) -> Void {
             if (!matchSet.contains(match)) {
                 matches.append(match);
 
@@ -1591,7 +1591,7 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
             } // if
         }
 
-        public func exclude(exclude: Accessor) -> Void {
+        open func exclude(_ exclude: Accessor) -> Void {
             /*TODO func from set
 
             for (Iterator<Match> matches = matchSet.iterator(); matches.hasNext(); ) {
@@ -1611,7 +1611,7 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
             } */
         }
 
-        public func makeOperations(mapper: Mapper, definition: MappingDefinition, direction: Int) throws -> (operations:[Operation<MappingContext>], stackSize:Int) {
+        open func makeOperations(_ mapper: Mapper, definition: MappingDefinition, direction: Int) throws -> (operations:[Operation<MappingContext>], stackSize:Int) {
             let sourceTree = try SourceTree(type: definition.target[direction], matches: matches, sourceIndex: direction);
 
             return try (
@@ -1642,41 +1642,41 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
 
     // private
 
-    private func addImmutableCompositeDefinition(int side: Int, clazz: AnyClass, outerComposite: Int, outerIndex: Int, parentAccessor: Accessor?) -> Int {
+    fileprivate func addImmutableCompositeDefinition(int side: Int, clazz: AnyClass, outerComposite: Int, outerIndex: Int, parentAccessor: Accessor?) -> Int {
         composites[side].append(ImmutableCompositeDefinition(clazz: clazz, int: try! BeanDescriptor.forClass(clazz).getProperties().count, outerComposite: outerComposite, outerIndex: outerIndex, parentAccessor: parentAccessor));
 
         return composites[side].count - 1;
     }
 
-    private func addMutableCompositeDefinition(side: Int, clazz: AnyClass, nargs: Int, outerComposite: Int, outerIndex: Int, parentAccessor: Accessor?) -> Int {
+    fileprivate func addMutableCompositeDefinition(_ side: Int, clazz: AnyClass, nargs: Int, outerComposite: Int, outerIndex: Int, parentAccessor: Accessor?) -> Int {
         composites[side].append(MutableCompositeDefinition(clazz: clazz, nargs: nargs, outerComposite: outerComposite, outerIndex: outerIndex, parentAccessor: parentAccessor));
 
         return composites[side].count - 1;
     }
 
 
-    public func getObjectFactories() -> [ObjectFactory?] {
+    open func getObjectFactories() -> [ObjectFactory?] {
         return objectFactories;
     }
 
     // fluent interface
 
-    public func createSource(objectFactory: ObjectFactory) -> MappingDefinition {
+    open func createSource(_ objectFactory: ObjectFactory) -> MappingDefinition {
         objectFactories[MappingDefinition.SOURCE] = objectFactory;
 
         return self;
     }
 
-    public func createTarget(objectFactory: ObjectFactory) -> MappingDefinition {
+    open func createTarget(_ objectFactory: ObjectFactory) -> MappingDefinition {
         objectFactories[MappingDefinition.TARGET] = objectFactory;
 
         return self;
     }
 
-    public func via(clazz : AnyClass, propertyName : String ) throws -> MappingDefinition{
+    open func via(_ clazz : AnyClass, propertyName : String ) throws -> MappingDefinition{
         let propertyDescriptor = try BeanDescriptor.forClass(clazz).findProperty(propertyName); // may return null
         if (propertyDescriptor == nil) {
-            throw  MapperError.Definition(message: "unknown property \(clazz).\(propertyName)", definition: self, match: nil, accessor: nil);
+            throw  MapperError.definition(message: "unknown property \(clazz).\(propertyName)", definition: self, match: nil, accessor: nil);
         }
 
         self.via.append(propertyDescriptor!);
@@ -1690,7 +1690,7 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
  * @param finalizer a  {@link MappingFinalizer}
  * @return self
  */
-    public func finalize(finalizer: MappingFinalizer) -> MappingDefinition {
+    open func finalize(_ finalizer: MappingFinalizer) -> MappingDefinition {
         /* TODO check types
 
         Class finalizerClass = finalizer.getClass();
@@ -1714,11 +1714,11 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
         return self;
     }
 
-    public func derives(mappingDefinition: MappingDefinition) throws -> MappingDefinition {
+    open func derives(_ mappingDefinition: MappingDefinition) throws -> MappingDefinition {
         // sanity checks
 
         if (baseMapping != nil) {
-            throw MapperError.Definition(message: "basemapping has been already defined", definition: self, match: nil, accessor: nil);
+            throw MapperError.definition(message: "basemapping has been already defined", definition: self, match: nil, accessor: nil);
         }
 
         // check types
@@ -1736,7 +1736,7 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
         return self;
     }
 
-    public func include(explicitProperties: String...) -> MappingDefinition {
+    open func include(_ explicitProperties: String...) -> MappingDefinition {
         operations.append(MapProperties(propertyQualifier: Properties(properties: explicitProperties)));
 
         return self;
@@ -1754,19 +1754,19 @@ public class MappingDefinition: CustomStringConvertible, CustomDebugStringConver
         return self;
     }*/
 
-    public func map(propertyQualifier: PropertyQualifier) -> MappingDefinition {
+    open func map(_ propertyQualifier: PropertyQualifier) -> MappingDefinition {
         operations.append(MapProperties(propertyQualifier: propertyQualifier));
 
         return self;
     }
 
-    public func map(source: [Accessor], target: [Accessor], conversion: MappingConversion? = nil) -> MappingDefinition {
+    open func map(_ source: [Accessor], target: [Accessor], conversion: MappingConversion? = nil) -> MappingDefinition {
         operations.append(MappingDefinition.MapAccessor(source: source, target: target, conversion: conversion, deep: false));
 
         return self;
     }
 
-    public func mapDeep(source: [Accessor], target: [Accessor], conversion: MappingConversion? = nil) -> MappingDefinition {
+    open func mapDeep(_ source: [Accessor], target: [Accessor], conversion: MappingConversion? = nil) -> MappingDefinition {
         operations.append(MappingDefinition.MapAccessor(source: source, target: target, conversion: conversion, deep: true));
 
         return self;
@@ -1862,7 +1862,7 @@ public func map(String[] source, String... target) -> MappingDefinition{
     return map(toAccessors(source), toAccessors(target), null);
 }
 */
-    public func map(source: String, target: String, conversion: MappingConversion? = nil) -> MappingDefinition {
+    open func map(_ source: String, target: String, conversion: MappingConversion? = nil) -> MappingDefinition {
         return map(toAccessors([source]), target: toAccessors([target]), conversion: conversion);
     }
 
@@ -1975,13 +1975,13 @@ public MappingDefinition mapDeep(String[] source, String... target) {
 }
 */
 
-    public func mapDeep(source : String, target : String, conversion: MappingConversion? = nil) -> MappingDefinition {
+    open func mapDeep(_ source : String, target : String, conversion: MappingConversion? = nil) -> MappingDefinition {
         return mapDeep(toAccessors([source]), target: toAccessors([target]), conversion: conversion);
     }
 
     // caching
 
-    public func cache(cache: Bool) -> MappingDefinition {
+    open func cache(_ cache: Bool) -> MappingDefinition {
         self.cache = cache;
 
         return self;
@@ -1989,7 +1989,7 @@ public MappingDefinition mapDeep(String[] source, String... target) {
 
     // introspection
 
-    public func traceMapping(builder : StringBuilder) -> Void {
+    open func traceMapping(_ builder : StringBuilder) -> Void {
         builder.append("Mapping[\(target[0])-\(target[1])] {")
 
         for operation in operations {
@@ -2001,11 +2001,11 @@ public MappingDefinition mapDeep(String[] source, String... target) {
 
     // private
 
-    private func toAccessors(strings: [String]) -> [Accessor] {
+    fileprivate func toAccessors(_ strings: [String]) -> [Accessor] {
         return strings.map({BeanPropertyAccessor(propertyName: $0)})
     }
 
-    private func findMatches(matches: Matches) -> Void {
+    fileprivate func findMatches(_ matches: Matches) -> Void {
         // recursion
 
         if (baseMapping != nil) {
@@ -2019,7 +2019,7 @@ public MappingDefinition mapDeep(String[] source, String... target) {
         }
     }
 
-    private func createOperations(mapper: Mapper) throws -> [(operations:[Operation<MappingContext>], stackSize:Int)] {
+    fileprivate func createOperations(_ mapper: Mapper) throws -> [(operations:[Operation<MappingContext>], stackSize:Int)] {
         // conversion are handled separately
 
         if (conversion != nil) {
@@ -2037,11 +2037,11 @@ public MappingDefinition mapDeep(String[] source, String... target) {
         } // else
     }
 
-    public func cacheResult() -> Bool {
+    open func cacheResult() -> Bool {
         return cache;
     }
 
-    func createMapping(mapper: Mapper) throws -> [Mapping] {
+    func createMapping(_ mapper: Mapper) throws -> [Mapping] {
         composites = [[], []];
 
         var operationsAndStackSize = try createOperations(mapper);
@@ -2064,7 +2064,7 @@ public MappingDefinition mapDeep(String[] source, String... target) {
         ]
     }
 
-    private func computeFinalizers() -> [MappingFinalizer] {
+    fileprivate func computeFinalizers() -> [MappingFinalizer] {
         let finalizerList = [MappingFinalizer]();
 
         /* TODO fetch all finalizers
@@ -2094,12 +2094,12 @@ public MappingDefinition mapDeep(String[] source, String... target) {
 
     // CustomStringConvertible
 
-    public var debugDescription: String {
+    open var debugDescription: String {
         return description
     }
 
-    public var description: String {
-        let builder = StringBuilder(string: "MappingDefinition \(self.dynamicType)")
+    open var description: String {
+        let builder = StringBuilder(string: "MappingDefinition \(type(of: self))")
 
         traceMapping(builder);
 
@@ -2108,14 +2108,14 @@ public MappingDefinition mapDeep(String[] source, String... target) {
 }
 
 
-public class MappingContext {
+open class MappingContext {
     // local classes
 
-    public class State {
+    open class State {
         // instance data
 
-        private var compositeBuffers: [Mapping.CompositeBuffer]; // for every operation this field will be initialized by the corresponding mapper!
-        private var stack: [Any?];
+        fileprivate var compositeBuffers: [Mapping.CompositeBuffer]; // for every operation this field will be initialized by the corresponding mapper!
+        fileprivate var stack: [Any?];
 
         // constructor
 
@@ -2130,7 +2130,7 @@ public class MappingContext {
 
         // public
 
-        public func restore(context: MappingContext) -> Void {
+        open func restore(_ context: MappingContext) -> Void {
             context.compositeBuffers = compositeBuffers;
             context.stack = stack;
 
@@ -2140,15 +2140,15 @@ public class MappingContext {
 
     // instance data
 
-    private var level: Int = 0;
-    private var sourceAndTarget: [AnyObject] = [];
-    private var direction: Int;
+    fileprivate var level: Int = 0;
+    fileprivate var sourceAndTarget: [AnyObject] = [];
+    fileprivate var direction: Int;
     internal var mapper: Mapper;
-    private var mappedObjects = IdentityMap<AnyObject, AnyObject>()
-    private var compositeBuffers: [Mapping.CompositeBuffer] = []; // for every mapping operation this field will be initialized by the corresponding mapper!
-    private var stack: [Any?] = [];
+    fileprivate var mappedObjects = IdentityMap<AnyObject, AnyObject>()
+    fileprivate var compositeBuffers: [Mapping.CompositeBuffer] = []; // for every mapping operation this field will be initialized by the corresponding mapper!
+    fileprivate var stack: [Any?] = [];
     //private var List<ForeignKeyReference> references;
-    private var origin: BeanDescriptor.PropertyDescriptor?;
+    fileprivate var origin: BeanDescriptor.PropertyDescriptor?;
     //private var Keywords keywords;
 
     // constructor
@@ -2161,39 +2161,39 @@ public class MappingContext {
 
     // public
 
-    public func isRoot() -> Bool {
+    open func isRoot() -> Bool {
         return level == 1;
     }
 
-    public func increment() -> Void {
+    open func increment() -> Void {
         level += 1;
     }
 
-    public func decrement() -> Void {
+    open func decrement() -> Void {
         level -= 1;
     }
 
-    public func setOrigin(origin: BeanDescriptor.PropertyDescriptor?) -> Void {
+    open func setOrigin(_ origin: BeanDescriptor.PropertyDescriptor?) -> Void {
         self.origin = origin;
     }
 
-    public func getOrigin() -> BeanDescriptor.PropertyDescriptor? {
+    open func getOrigin() -> BeanDescriptor.PropertyDescriptor? {
         return origin;
     }
 
-    public func setSourceAndTarget(source: AnyObject, target: AnyObject) -> Void {
+    open func setSourceAndTarget(_ source: AnyObject, target: AnyObject) -> Void {
         sourceAndTarget = [source, target]
     }
 
-    public func getInstance(direction: Int) -> AnyObject {
+    open func getInstance(_ direction: Int) -> AnyObject {
         return sourceAndTarget[direction];
     }
 
-    public func getDirection() -> Int {
+    open func getDirection() -> Int {
         return direction;
     }
 
-    public func getMapper() -> Mapper {
+    open func getMapper() -> Mapper {
         return mapper;
     }
 
@@ -2204,7 +2204,7 @@ public class MappingContext {
 //references.add(reference);
 //}
 
-    public func remember(source: AnyObject, target: AnyObject) -> MappingContext {
+    open func remember(_ source: AnyObject, target: AnyObject) -> MappingContext {
         mappedObjects[source] = target;
 
         setSourceAndTarget(source, target: target); // also remember the current involved objects!
@@ -2212,11 +2212,11 @@ public class MappingContext {
         return self;
     }
 
-    public func mappedObject(source: AnyObject) -> AnyObject? {
+    open func mappedObject(_ source: AnyObject) -> AnyObject? {
         return mappedObjects[source];
     }
 
-    public func setupComposites(buffers: [Mapping.CompositeBuffer]) -> [Mapping.CompositeBuffer] {
+    open func setupComposites(_ buffers: [Mapping.CompositeBuffer]) -> [Mapping.CompositeBuffer] {
         let saved = compositeBuffers
 
         compositeBuffers = buffers
@@ -2224,21 +2224,21 @@ public class MappingContext {
         return saved
     }
 
-    public func setup(compositeDefinitions: [MappingDefinition.CompositeDefinition], stackSize: Int) -> [Mapping.CompositeBuffer] {
+    open func setup(_ compositeDefinitions: [MappingDefinition.CompositeDefinition], stackSize: Int) -> [Mapping.CompositeBuffer] {
         let buffers: [Mapping.CompositeBuffer] = compositeDefinitions.map({$0.makeCreator(getMapper())});
 
-        stack = [Any?](count: stackSize, repeatedValue: nil);
+        stack = [Any?](repeating: nil, count: stackSize);
 
         increment();
 
         return setupComposites(buffers);
     }
 
-    public func getCompositeBuffer(compositeIndex: Int) -> Mapping.CompositeBuffer {
+    open func getCompositeBuffer(_ compositeIndex: Int) -> Mapping.CompositeBuffer {
         return compositeBuffers[compositeIndex];
     }
 
-    public func finalizeMapping() -> Void {
+    open func finalizeMapping() -> Void {
         //if (references != nil) {
         /* sort according to the different resolvers
 
@@ -2281,34 +2281,34 @@ public class MappingContext {
         //} // if
     }
 
-    public func push(value: Any?, index: Int) -> Void {
+    open func push(_ value: Any?, index: Int) -> Void {
         stack[index] = value
     }
 
-    public func peek(index: Int) -> Any? {
+    open func peek(_ index: Int) -> Any? {
         return stack[index]
     }
 }
 
-public class Mapper: ObjectFactory, CompositeFactory, ConversionFactory {
+open class Mapper: ObjectFactory, CompositeFactory, ConversionFactory {
     // constants
 
     public enum Direction : Int {
-        case SOURCE_2_TARGET = 0
-        case TARGET_2_SOURCE
+        case source_2_TARGET = 0
+        case target_2_SOURCE
     }
 
     // class methods
 
-    public class func mapping(sourceClass: AnyClass, targetClass: AnyClass) -> MappingDefinition {
+    open class func mapping(_ sourceClass: AnyClass, targetClass: AnyClass) -> MappingDefinition {
         return MappingDefinition(sourceBean: sourceClass, targetBean: targetClass, conversion: nil);
     }
 
-    public class func mapping(sourceClass: AnyClass, targetClass: AnyClass, conversion: MappingConversion?) -> MappingDefinition {
+    open class func mapping(_ sourceClass: AnyClass, targetClass: AnyClass, conversion: MappingConversion?) -> MappingDefinition {
         return MappingDefinition(sourceBean: sourceClass, targetBean: targetClass, conversion: conversion);
     }
 
-    public class func properties(local: Bool = false, except: String...) -> MappingDefinition.PropertyQualifier {
+    open class func properties(_ local: Bool = false, except: String...) -> MappingDefinition.PropertyQualifier {
         return MappingDefinition.AllProperties(local: local, except: except);
     }
 
@@ -2336,7 +2336,7 @@ public class Mapper: ObjectFactory, CompositeFactory, ConversionFactory {
 
     // public
 
-    public func createContext(direction: Int) -> MappingContext {
+    open func createContext(_ direction: Int) -> MappingContext {
         return MappingContext(mapper: self, direction: direction);
     }
 
@@ -2347,7 +2347,7 @@ public class Mapper: ObjectFactory, CompositeFactory, ConversionFactory {
      * @param direction either {@link Mapper#SOURCE_2_TARGET} or {@link Mapper#TARGET_2_SOURCE}
      * @return the result
      */
-    public func map(source: AnyObject?, direction: Mapper.Direction, target: AnyObject? = nil) throws -> AnyObject? {
+    open func map(_ source: AnyObject?, direction: Mapper.Direction, target: AnyObject? = nil) throws -> AnyObject? {
         if (source == nil) {
             return nil; // that's easy ?
         }
@@ -2361,7 +2361,7 @@ public class Mapper: ObjectFactory, CompositeFactory, ConversionFactory {
         return try map(source, context: context, target: target);
     }
 
-    public func map(source: AnyObject?, context: MappingContext, target: AnyObject? = nil) throws -> AnyObject? {
+    open func map(_ source: AnyObject?, context: MappingContext, target: AnyObject? = nil) throws -> AnyObject? {
         if (source == nil) {
             context.setOrigin(nil);
 
@@ -2406,11 +2406,11 @@ public class Mapper: ObjectFactory, CompositeFactory, ConversionFactory {
 
     // internal
 
-    public func determineClass(object: AnyObject) -> AnyClass {
-        return object.dynamicType;
+    open func determineClass(_ object: AnyObject) -> AnyClass {
+        return type(of: object);
     }
 
-    private func registerMappings(mappings: [[Mapping]]) -> Void {
+    fileprivate func registerMappings(_ mappings: [[Mapping]]) -> Void {
         for mapping: [Mapping] in mappings {
             let source: AnyClass = mapping[0].getSourceBean();
             let target: AnyClass = mapping[0].getTargetBean();
@@ -2446,11 +2446,11 @@ public class Mapper: ObjectFactory, CompositeFactory, ConversionFactory {
         } // for
     }
 
-    private func createMappings(definitions: [MappingDefinition]) throws -> [[Mapping]] {
+    fileprivate func createMappings(_ definitions: [MappingDefinition]) throws -> [[Mapping]] {
         return try definitions.map({try $0.createMapping(self)});
     }
 
-    public func  specificMapping(source: Accessor , side: Int) -> BeanDescriptor.PropertyDescriptor? {
+    open func  specificMapping(_ source: Accessor , side: Int) -> BeanDescriptor.PropertyDescriptor? {
         var property : BeanDescriptor.PropertyDescriptor;
 
         if (source is MappingDefinition.BeanPropertyAccessor) {
@@ -2471,7 +2471,7 @@ public class Mapper: ObjectFactory, CompositeFactory, ConversionFactory {
         return property;
     }
 
-    private func initializeMappings(definitions: [MappingDefinition]) throws -> Void {
+    fileprivate func initializeMappings(_ definitions: [MappingDefinition]) throws -> Void {
         conversionFactory = makeConversionFactory();
 
         mappings[MappingDefinition.SOURCE_2_TARGET] = IdentityMap<AnyObject, Mapping>();
@@ -2482,17 +2482,17 @@ public class Mapper: ObjectFactory, CompositeFactory, ConversionFactory {
         registerMappings(mappingArray);
     }
 
-    private func makeConversionFactory() -> ConversionFactory {
+    fileprivate func makeConversionFactory() -> ConversionFactory {
         return StandardConversionFactory.instance;
     }
 
-    private func setup() throws -> Void {
+    fileprivate func setup() throws -> Void {
         try initializeMappings(definitions!);
 
         definitions = nil;
     }
 
-    private func slowFind(mappings: IdentityMap<AnyObject, Mapping>, clazz: AnyClass?) -> Mapping? {
+    fileprivate func slowFind(_ mappings: IdentityMap<AnyObject, Mapping>, clazz: AnyClass?) -> Mapping? {
         if (clazz == AnyObject.self || clazz == nil) {
             return nil; // that's easy
         }
@@ -2512,7 +2512,7 @@ public class Mapper: ObjectFactory, CompositeFactory, ConversionFactory {
         return mapping!;
     }
 
-    private func getMapping(type: AnyClass, direction: Int, origin: BeanDescriptor.PropertyDescriptor?) throws -> Mapping {
+    fileprivate func getMapping(_ type: AnyClass, direction: Int, origin: BeanDescriptor.PropertyDescriptor?) throws -> Mapping {
         // lazy initialization
 
         if definitions != nil {
@@ -2551,23 +2551,23 @@ public class Mapper: ObjectFactory, CompositeFactory, ConversionFactory {
         } // if
 
         if (mapping == nil) {
-            throw MapperError.Operation(message: "unknown mapping for class \(type)", mapping: nil, operation : nil, source: nil, target : nil);
+            throw MapperError.operation(message: "unknown mapping for class \(type)", mapping: nil, operation : nil, source: nil, target : nil);
         }
 
         return mapping!;
     }
 
-    public func getObjectFactory() -> ObjectFactory {
+    open func getObjectFactory() -> ObjectFactory {
         return objectFactory!;
     }
 
-    public func getCompositeFactory() -> CompositeFactory {
+    open func getCompositeFactory() -> CompositeFactory {
         return compositeFactory!;
     }
 
     // ObjectFactory
 
-    public func createBean(source: AnyObject, clazz: AnyClass) -> AnyObject {
+    open func createBean(_ source: Any, clazz: AnyClass) -> AnyObject {
         if let initializable = clazz as? Initializable.Type {
             return initializable.init()
         }
@@ -2578,30 +2578,30 @@ public class Mapper: ObjectFactory, CompositeFactory, ConversionFactory {
 
     // ConversionFactory
 
-    public func hasConversion(sourceType : Any.Type, targetType : Any.Type) -> Bool {
+    open func hasConversion(_ sourceType : Any.Type, targetType : Any.Type) -> Bool {
         return conversionFactory!.hasConversion(sourceType, targetType : targetType)
     }
 
-    public func findConversion(sourceType : Any.Type, targetType : Any.Type) -> Conversion? {
+    open func findConversion(_ sourceType : Any.Type, targetType : Any.Type) -> Conversion? {
         return conversionFactory!.findConversion(sourceType, targetType : targetType)
     }
 
-    public func getConversion(sourceType : Any.Type, targetType : Any.Type) throws -> Conversion {
+    open func getConversion(_ sourceType : Any.Type, targetType : Any.Type) throws -> Conversion {
         return try conversionFactory!.getConversion(sourceType, targetType : targetType)
     }
 
     // CompositeFactory
 
-    public func createComposite(clazz: AnyClass, arguments: AnyObject...) -> AnyObject {
+    open func createComposite(_ clazz: AnyClass, arguments: AnyObject...) -> AnyObject {
         return (clazz as! NSObject.Type).init() //"clazz.init()"// TODO
     }
 }
 
 
-public class Mapping: XFormer<MappingContext>, CustomStringConvertible {
+open class Mapping: XFormer<MappingContext>, CustomStringConvertible {
     // local class
 
-    private static var DEPTH = ThreadLocal<Int>(generator: {0})
+    fileprivate static var DEPTH = ThreadLocal<Int>(generator: {0})
 
     class func increment() {
         DEPTH.set(DEPTH.get() + 1)
@@ -2611,18 +2611,18 @@ public class Mapping: XFormer<MappingContext>, CustomStringConvertible {
         DEPTH.set(DEPTH.get() - 1)
     }
 
-    private class func indentation() -> String {
-        return String(count: DEPTH.get(), repeatedValue: Character("\t"))
+    fileprivate class func indentation() -> String {
+        return String(repeating: "\t", count: DEPTH.get())
     }
 
-    private class func trace(message : String) {
+    fileprivate class func trace(_ message : String) {
         print(indentation() + message)
     }
 
-    public class TracingMapping : Mapping {
+    open class TracingMapping : Mapping {
         // local classes
 
-        public class LoggingProperty : Property<MappingContext> {
+        open class LoggingProperty : Property<MappingContext> {
             // instance data
 
             var sourceProperty: Property<MappingContext>;
@@ -2637,20 +2637,20 @@ public class Mapping: XFormer<MappingContext>, CustomStringConvertible {
 
             // implement Property
 
-            override public func get(object: AnyObject!, context: MappingContext) throws -> Any? {
+            override open func get(_ object: AnyObject!, context: MappingContext) throws -> Any? {
                 let value =  try sourceProperty.get(object, context: context);
 
-                Mapping.trace("get \(sourceProperty) = \(value)");
+                Mapping.trace("get \(sourceProperty) = \(String(describing: value))");
 
                 return value
             }
 
-            override public func set(object: AnyObject!, value: Any?, context: MappingContext) throws -> Void {
+            override open func set(_ object: AnyObject!, value: Any?, context: MappingContext) throws -> Void {
                 if (targetProperty.description.hasPrefix("Push")) {
-                    Mapping.trace("\(targetProperty) \(sourceProperty)=\(value)")
+                    Mapping.trace("\(targetProperty) \(sourceProperty)=\(String(describing: value))")
                 }
                 else {
-                    Mapping .trace("set \(targetProperty) = \(value)")
+                    Mapping .trace("set \(targetProperty) = \(String(describing: value))")
                 }
 
                 try targetProperty.set(object, value: value, context: context);
@@ -2659,7 +2659,7 @@ public class Mapping: XFormer<MappingContext>, CustomStringConvertible {
 
         // instance data
 
-        private var originalMapping : Mapping;
+        fileprivate var originalMapping : Mapping;
 
         // constructor
 
@@ -2675,7 +2675,7 @@ public class Mapping: XFormer<MappingContext>, CustomStringConvertible {
 
         // private
 
-        private func patchOperations() -> Void {
+        fileprivate func patchOperations() -> Void {
             for operation in operations {
                 operation.source = LoggingProperty(source: operation.source, target: operation.target);
                 operation.target = LoggingProperty(source: operation.source, target: operation.target);
@@ -2684,16 +2684,16 @@ public class Mapping: XFormer<MappingContext>, CustomStringConvertible {
 
         // override
 
-        override public func createBean(source: AnyObject, target: Int) -> AnyObject {
+        override open func createBean(_ source: AnyObject, target: Int) -> AnyObject {
             return originalMapping.createBean(source, target: target); // ?
         }
 
-        override public func setupContext(context : MappingContext ) -> MappingContext.State {
+        override open func setupContext(_ context : MappingContext ) -> MappingContext.State {
             return originalMapping.setupContext(context);
         }
 
-        override public func xformTarget(source: AnyObject, target: AnyObject,  context : MappingContext ) throws -> Void {
-            Mapping.trace("map \(source.dynamicType) -> \(target.dynamicType) {")
+        override open func xformTarget(_ source: AnyObject, target: AnyObject,  context : MappingContext ) throws -> Void {
+            Mapping.trace("map \(type(of: source)) -> \(type(of: target)) {")
 
             Mapping.increment();
 
@@ -2717,8 +2717,8 @@ public class Mapping: XFormer<MappingContext>, CustomStringConvertible {
 
     // class funcs
 
-    class func maybeTrace(mapping: Mapping) -> Mapping {
-        if Tracer.ENABLED && Tracer.getTraceLevel("mapper") == .FULL {
+    class func maybeTrace(_ mapping: Mapping) -> Mapping {
+        if Tracer.ENABLED && Tracer.getTraceLevel("mapper") == .full {
             return TracingMapping(mapping: mapping)
         }
         else {
@@ -2726,21 +2726,21 @@ public class Mapping: XFormer<MappingContext>, CustomStringConvertible {
         }
     }
 
-    class func maybeTrace(objectFactory: ObjectFactory) -> ObjectFactory {
+    class func maybeTrace(_ objectFactory: ObjectFactory) -> ObjectFactory {
         return objectFactory; // TODO
     }
 
-    class func maybeTrace(compositeFactory: CompositeFactory) -> CompositeFactory {
+    class func maybeTrace(_ compositeFactory: CompositeFactory) -> CompositeFactory {
         return compositeFactory; // TODO
     }
 
     // local classes
 
 
-    public class CompositeBuffer {
+    open class CompositeBuffer {
         // static methods
 
-        class func allNull(args: [Any?]) -> Bool {
+        class func allNull(_ args: [Any?]) -> Bool {
             for arg in args {
                 if (arg != nil) {
                     return false;
@@ -2763,24 +2763,24 @@ public class Mapping: XFormer<MappingContext>, CustomStringConvertible {
         init(mapper: Mapper, nargs: Int, outerComposite: Int, outerIndex: Int) {
             self.mapper = mapper;
             self.nSuppliedArgs = nargs;
-            self.arguments = [Any?](count: nargs, repeatedValue: nil);
+            self.arguments = [Any?](repeating: nil, count: nargs);
             self.outerComposite = outerComposite;
             self.outerIndex = outerIndex;
         }
 
         // public
 
-        public func rememberCompositeArgument(accessor: Accessor, rootProperty: Accessor, index: Int, instance: AnyObject, value: Any?, mappingContext: MappingContext) throws -> Void {
+        open func rememberCompositeArgument(_ accessor: Accessor, rootProperty: Accessor, index: Int, instance: AnyObject, value: Any?, mappingContext: MappingContext) throws -> Void {
             // noop
         }
     }
 
-    public class MutableCompositeBuffer: CompositeBuffer {
+    open class MutableCompositeBuffer: CompositeBuffer {
         // instance data
 
-        private var clazz: AnyClass;
-        private var accessors: [Accessor?];
-        private var parentAccessor: Accessor;
+        fileprivate var clazz: AnyClass;
+        fileprivate var accessors: [Accessor?];
+        fileprivate var parentAccessor: Accessor;
 
         // constructor
 
@@ -2789,14 +2789,14 @@ public class Mapping: XFormer<MappingContext>, CustomStringConvertible {
 
             self.clazz = clazz;
             self.parentAccessor = parentAccessor;
-            self.accessors = [Accessor?](count: nargs, repeatedValue: nil);
+            self.accessors = [Accessor?](repeating: nil, count: nargs);
 
             super.init(mapper: mapper, nargs: nargs, outerComposite: outerComposite, outerIndex: outerIndex);
         }
 
         // public
 
-        override public func rememberCompositeArgument(accessor: Accessor, rootProperty: Accessor, index: Int, instance: AnyObject, value: Any?, mappingContext: MappingContext) throws -> Void {
+        override open func rememberCompositeArgument(_ accessor: Accessor, rootProperty: Accessor, index: Int, instance: AnyObject, value: Any?, mappingContext: MappingContext) throws -> Void {
             arguments[index] = value;
             accessors[index] = accessor
 
@@ -2818,7 +2818,7 @@ public class Mapping: XFormer<MappingContext>, CustomStringConvertible {
                                 try accessors[i]!.setValue(composite!, value: arguments[i]!, mappingContext: mappingContext);
                             }
                             catch {
-                                throw MapperError.Operation(message: "could not set composite value \(arguments[i]) in the class \(composite)", mapping: nil, operation : nil, source: nil, target : nil);
+                                throw MapperError.operation(message: "could not set composite value \(String(describing: arguments[i])) in the class \(String(describing: composite))", mapping: nil, operation : nil, source: nil, target : nil);
                             }
                         }
                     }
@@ -2837,17 +2837,17 @@ public class Mapping: XFormer<MappingContext>, CustomStringConvertible {
                         try rootProperty.setValue(instance, value: composite!, mappingContext: mappingContext);
                     }
                     catch {
-                        throw MapperError.Operation(message: "could not set composite value \(composite) in \(instance)", mapping: nil, operation : nil, source: nil, target : nil);
+                        throw MapperError.operation(message: "could not set composite value \(String(describing: composite)) in \(instance)", mapping: nil, operation : nil, source: nil, target : nil);
                     }
                 } // else
             } // if
         }
     }
 
-    public class ImmutableCompositeBuffer: CompositeBuffer {
+    open class ImmutableCompositeBuffer: CompositeBuffer {
         // instance data
 
-        private var clazz: AnyClass;
+        fileprivate var clazz: AnyClass;
         var parentAccessor: Accessor;
 
         // constructor
@@ -2864,7 +2864,7 @@ public class Mapping: XFormer<MappingContext>, CustomStringConvertible {
 
         // public
 
-        override public func rememberCompositeArgument(accessor: Accessor, rootProperty: Accessor, index: Int, instance: AnyObject, value: Any?, mappingContext: MappingContext) throws -> Void {
+        override open func rememberCompositeArgument(_ accessor: Accessor, rootProperty: Accessor, index: Int, instance: AnyObject, value: Any?, mappingContext: MappingContext) throws -> Void {
             /*arguments[index] = value;
 
             // are we done?
@@ -2897,13 +2897,13 @@ public class Mapping: XFormer<MappingContext>, CustomStringConvertible {
 
     // instance data
 
-    private var mapper: Mapper;
-    private var beans: [AnyClass];
-    private var composites: [MappingDefinition.CompositeDefinition];
-    private var objectFactory = [ObjectFactory?](count: 2, repeatedValue: nil);
-    private var stackSize: Int = 0;
-    private var finalizer: [MappingFinalizer] = [];
-    private var cache: Bool;
+    fileprivate var mapper: Mapper;
+    fileprivate var beans: [AnyClass];
+    fileprivate var composites: [MappingDefinition.CompositeDefinition];
+    fileprivate var objectFactory = [ObjectFactory?](repeating: nil, count: 2);
+    fileprivate var stackSize: Int = 0;
+    fileprivate var finalizer: [MappingFinalizer] = [];
+    fileprivate var cache: Bool;
     //public var viaRelationDescriptor = new BeanDescriptor.PropertyDescriptor[2][];
 
     // constructor
@@ -2956,7 +2956,7 @@ public class Mapping: XFormer<MappingContext>, CustomStringConvertible {
         }
     }
 
-    public func setupContext(context: MappingContext) -> MappingContext.State {
+    open func setupContext(_ context: MappingContext) -> MappingContext.State {
         let state = MappingContext.State(context: context);
 
         context.setup(composites, stackSize: stackSize);
@@ -2965,11 +2965,11 @@ public class Mapping: XFormer<MappingContext>, CustomStringConvertible {
     }
 
 
-    public func getBeans() -> [AnyClass] {
+    open func getBeans() -> [AnyClass] {
         return beans;
     }
 
-    public func getSourceBean() -> AnyClass {
+    open func getSourceBean() -> AnyClass {
         return beans[0];
     }
 
@@ -2977,7 +2977,7 @@ public class Mapping: XFormer<MappingContext>, CustomStringConvertible {
         return beans[1];
     }
 
-    func createBean(source: AnyObject, target: Int) -> AnyObject {
+    func createBean(_ source: AnyObject, target: Int) -> AnyObject {
         return objectFactory[target]!.createBean(source, clazz: beans[target]);
     }
 
@@ -2989,7 +2989,7 @@ public class Mapping: XFormer<MappingContext>, CustomStringConvertible {
 
     // add some context information...
 
-    override public func xformTarget(source: AnyObject, target: AnyObject, context: MappingContext) throws -> Void {
+    override open func xformTarget(_ source: AnyObject, target: AnyObject, context: MappingContext) throws -> Void {
         for operation in operations {
             do {
 
@@ -2997,11 +2997,11 @@ public class Mapping: XFormer<MappingContext>, CustomStringConvertible {
 
                 try operation.target.set(target, value: value, context: context);
             }
-            catch MapperError.Operation(let message, _, let operation, let source, let target) {
-                throw MapperError.Operation(message: message, mapping: self, operation : operation, source: source, target : target);
+            catch MapperError.operation(let message, _, let operation, let source, let target) {
+                throw MapperError.operation(message: message, mapping: self, operation : operation, source: source, target : target);
             }
             catch  {
-                throw MapperError.Operation(message: "mapping error", mapping: self, operation : operation as? MappingOperation, source: source, target : target);
+                throw MapperError.operation(message: "mapping error", mapping: self, operation : operation as? MappingOperation, source: source, target : target);
             }
         } // for
 
@@ -3021,7 +3021,7 @@ public class Mapping: XFormer<MappingContext>, CustomStringConvertible {
 
     // CustomStringConvertible
 
-    public var description : String {
+    open var description : String {
         let builder = StringBuilder(string: "Mapping[\(beans[0])-\(beans[1])]")
 
         for operation in operations {
@@ -3036,7 +3036,7 @@ public class Mapping: XFormer<MappingContext>, CustomStringConvertible {
 
 // Operations
 
-public class AccessorValue<CONTEXT:MappingContext>: Property<CONTEXT> {
+open class AccessorValue<CONTEXT:MappingContext>: Property<CONTEXT> {
     // instance data
 
     var accessor: Accessor;
@@ -3050,23 +3050,23 @@ public class AccessorValue<CONTEXT:MappingContext>: Property<CONTEXT> {
     // public
 
 
-    public override func get(object: AnyObject!, context: CONTEXT) throws -> Any? {
+    open override func get(_ object: AnyObject!, context: CONTEXT) throws -> Any? {
         return try accessor.getValue(object);
     }
 
 
-    override public func set(object: AnyObject!, value: Any?, context: CONTEXT) throws -> Void {
+    override open func set(_ object: AnyObject!, value: Any?, context: CONTEXT) throws -> Void {
         try accessor.setValue(object, value: value, mappingContext: context);
     }
 
     // override
 
-    override public var description : String {
+    override open var description : String {
         return accessor.description
     }
 }
 
-public class MapCollection2Collection : AccessorValue<MappingContext> {
+open class MapCollection2Collection : AccessorValue<MappingContext> {
     // instance data
 
     var origin: BeanDescriptor.PropertyDescriptor? = nil
@@ -3079,7 +3079,7 @@ public class MapCollection2Collection : AccessorValue<MappingContext> {
 
     // override
 
-    override public func set(object: AnyObject!, value: Any?, context: MappingContext) throws -> Void {
+    override open func set(_ object: AnyObject!, value: Any?, context: MappingContext) throws -> Void {
         let mapper = context.getMapper();
 
         if value != nil {
@@ -3102,10 +3102,10 @@ public class MapCollection2Collection : AccessorValue<MappingContext> {
     }
 }
 
-public class MapDeep<CONTEXT:MappingContext>: AccessorValue<CONTEXT> {
+open class MapDeep<CONTEXT:MappingContext>: AccessorValue<CONTEXT> {
     // instance data
 
-    private var origin: BeanDescriptor.PropertyDescriptor?;
+    fileprivate var origin: BeanDescriptor.PropertyDescriptor?;
 
     // constructor
 
@@ -3123,20 +3123,20 @@ public class MapDeep<CONTEXT:MappingContext>: AccessorValue<CONTEXT> {
 
     // override BeanProperty
 
-    override public func set(instance: AnyObject!, value: Any?, context: CONTEXT) throws -> Void {
+    override open func set(_ instance: AnyObject!, value: Any?, context: CONTEXT) throws -> Void {
         context.setOrigin(origin);
 
         defer {
             context.setOrigin(nil);
         }
 
-        let value = try context.getMapper().map((value as! AnyObject), context: context);
+        let value = try context.getMapper().map((value as AnyObject), context: context);
 
         try super.set(instance, value: value, context: context);
     }
 }
 
-public class PeekValue: Property<MappingContext> {
+open class PeekValue: Property<MappingContext> {
     // instance data
 
     var index: Int;
@@ -3149,25 +3149,25 @@ public class PeekValue: Property<MappingContext> {
 
     // implement Property
 
-    override public func get(object: AnyObject!, context: MappingContext) throws -> Any? {
+    override open func get(_ object: AnyObject!, context: MappingContext) throws -> Any? {
         return context.peek(index)
     }
 
-    override public func set(object: AnyObject!, value: Any?, context: MappingContext) throws -> Void {
+    override open func set(_ object: AnyObject!, value: Any?, context: MappingContext) throws -> Void {
         fatalError("not possible")
     }
 
     // override
 
-    override public var description : String {
+    override open var description : String {
         return "Peek(\(index)";
     }
 }
 
-public class PeekValueProperty: PeekValue {
+open class PeekValueProperty: PeekValue {
     // instance data
 
-    private var property: Property<MappingContext>;
+    fileprivate var property: Property<MappingContext>;
 
     // constructor
 
@@ -3179,27 +3179,27 @@ public class PeekValueProperty: PeekValue {
 
     // implement Property
 
-    override public func get(object: AnyObject!, context: MappingContext) throws -> Any? {
+    override open func get(_ object: AnyObject!, context: MappingContext) throws -> Any? {
         let value = try super.get(object, context: context)
 
-        return value != nil ? try property.get(value as! AnyObject, context: context)  :  nil
+        return value != nil ? try property.get(value as AnyObject, context: context)  :  nil
     }
 
-    override public func set(object: AnyObject!, value: Any?, context: MappingContext) throws -> Void {
+    override open func set(_ object: AnyObject!, value: Any?, context: MappingContext) throws -> Void {
         fatalError("not possible");
     }
 
     // override
 
-    override public var description : String {
+    override open var description : String {
         return "Peek(\(index).\(property)";
     }
 }
 
-public class PushValueProperty: Property<MappingContext> {
+open class PushValueProperty: Property<MappingContext> {
     // instance data
 
-    private var index: Int;
+    fileprivate var index: Int;
 
     // constructor
 
@@ -3209,29 +3209,29 @@ public class PushValueProperty: Property<MappingContext> {
 
     // implement Property
 
-    override public func get(object: AnyObject!, context: MappingContext) -> Any? {
+    override open func get(_ object: AnyObject!, context: MappingContext) -> Any? {
         fatalError("not possible");
     }
 
 
-    override public func set(object: AnyObject!, value: Any?, context: MappingContext) -> Void {
+    override open func set(_ object: AnyObject!, value: Any?, context: MappingContext) -> Void {
         context.push(value, index: index)
     }
 
     // override
 
-    override public var description : String {
+    override open var description : String {
         return "Push";
     }
 }
 
-public class SetCompositeArgument: Property<MappingContext> {
+open class SetCompositeArgument: Property<MappingContext> {
     // instance data
 
-    private var rootAccessor: Accessor;
-    private var compositeIndex: Int;
-    private var argumentIndex: Int;
-    private var accessor: Accessor;
+    fileprivate var rootAccessor: Accessor;
+    fileprivate var compositeIndex: Int;
+    fileprivate var argumentIndex: Int;
+    fileprivate var accessor: Accessor;
 
     // constructor
 
@@ -3244,11 +3244,11 @@ public class SetCompositeArgument: Property<MappingContext> {
 
     // implement Property
 
-    override public func get(instance: AnyObject!, context: MappingContext) throws -> Any? {
+    override open func get(_ instance: AnyObject!, context: MappingContext) throws -> Any? {
         fatalError("wrong direction"); // return property.getValue(instance);
     }
 
-    override public func set(instance: AnyObject!, value: Any?, context: MappingContext) throws -> Void {
+    override open func set(_ instance: AnyObject!, value: Any?, context: MappingContext) throws -> Void {
         // remember value at index index
         // the instance is irrelevant!
 
@@ -3257,7 +3257,7 @@ public class SetCompositeArgument: Property<MappingContext> {
 
     // override
 
-    override public var description : String {
+    override open var description : String {
         return "\(rootAccessor.getType()).\(rootAccessor.getName())[\(argumentIndex)]";
     }
 }

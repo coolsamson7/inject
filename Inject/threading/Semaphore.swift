@@ -6,36 +6,36 @@
 import Foundation
 
 /// Wrapper for `dispatch_semaphore_t`
-public class Semaphore {
+open class Semaphore {
     // MARK: instance data
 
-    let semaphore: dispatch_semaphore_t
+    let semaphore: DispatchSemaphore
 
     // init
 
     /// Create a new `Semaphore` given an initial count
     /// - Parameter value: the initial value or 0
     public init(value: Int = 0) {
-        semaphore = dispatch_semaphore_create(value)
+        semaphore = DispatchSemaphore(value: value)
     }
 
     /// Blocks the thread until the semaphore is free and returns true
     /// or until the timeout passes and returns false
 
-    public func wait(nanosecondTimeout: Int64) -> Bool {
-        return dispatch_semaphore_wait(semaphore, dispatch_time(DISPATCH_TIME_NOW, nanosecondTimeout)) != 0
+    open func wait(_ nanosecondTimeout: Int64) -> Bool {
+        return semaphore.wait(timeout: DispatchTime.now() + Double(nanosecondTimeout) / Double(NSEC_PER_SEC)) == DispatchTimeoutResult.success
     }
 
     /// Blocks the thread until the semaphore is free
 
-    public func wait() {
-        dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
+    open func wait() {
+        semaphore.wait(timeout: DispatchTime.distantFuture)
     }
 
     /// Alerts the semaphore that it is no longer being held by the current thread
     /// and returns a boolean indicating whether another thread was woken
 
-    public func signal() -> Bool {
-        return dispatch_semaphore_signal(semaphore) != 0
+    open func signal() -> Bool {
+        return semaphore.signal() != 0
     }
 }

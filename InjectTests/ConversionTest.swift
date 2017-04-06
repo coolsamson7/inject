@@ -17,12 +17,12 @@ class ConversionTest: XCTestCase {
 
         // set tracing
 
-        Tracer.setTraceLevel("inject", level: .FULL)
+        Tracer.setTraceLevel("inject", level: .full)
 
         // set logging
 
         LogManager()
-           .registerLogger("", level : .ALL, logs: [QueuedLog(name: "async-console", delegate: ConsoleLog(name: "console", synchronize: false))])
+           .registerLogger("", level : .all, logs: [QueuedLog(name: "async-console", delegate: ConsoleLog(name: "console", synchronize: false))])
     }
 
     // tests

@@ -8,10 +8,10 @@
 //
 import Foundation
 
-public class StringBuilder {
+open class StringBuilder {
     // MARK: instance data
     
-    private var stringValue: String
+    fileprivate var stringValue: String
     
     // init
     
@@ -30,7 +30,7 @@ public class StringBuilder {
      
      :return: String
      */
-    public func toString() -> String {
+    open func toString() -> String {
         return stringValue
     }
     
@@ -40,7 +40,7 @@ public class StringBuilder {
      
      :return: reference to this StringBuilder instance
      */
-    public func append(string: String) -> StringBuilder {
+    open func append(_ string: String) -> StringBuilder {
         stringValue += string
         return self
     }
@@ -52,7 +52,7 @@ public class StringBuilder {
      
      :return: reference to this StringBuilder instance
      */
-    public func append<T:CustomStringConvertible>(value: T) -> StringBuilder {
+    open func append<T:CustomStringConvertible>(_ value: T) -> StringBuilder {
         stringValue += value.description
         return self
     }
@@ -64,7 +64,7 @@ public class StringBuilder {
      
      :return: reference to this StringBuilder instance
      */
-    public func appendLine(string: String) -> StringBuilder {
+    open func appendLine(_ string: String) -> StringBuilder {
         stringValue += string + "\n"
         return self
     }
@@ -76,7 +76,7 @@ public class StringBuilder {
      
      :return: reference to this StringBuilder instance
      */
-    public func appendLine<T:CustomStringConvertible>(value: T) -> StringBuilder {
+    open func appendLine<T:CustomStringConvertible>(_ value: T) -> StringBuilder {
         stringValue += value.description + "\n"
         return self
     }
@@ -85,7 +85,7 @@ public class StringBuilder {
      Reset the object to an empty string
      :return: reference to this StringBuilder instance
      */
-    public func clear() -> StringBuilder {
+    open func clear() -> StringBuilder {
         stringValue = ""
         return self
     }

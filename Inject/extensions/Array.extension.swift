@@ -13,7 +13,7 @@ protocol ArrayType {
 
     func factory() -> () -> Any
 
-    mutating func _append(value : Any) -> Void
+    mutating func _append(_ value : Any) -> Void
 }
 
 extension Array : ArrayType {
@@ -27,7 +27,7 @@ extension Array : ArrayType {
         return {Array<Element>()}
     }
 
-    mutating func _append(value : Any) -> Void {
+    mutating func _append(_ value : Any) -> Void {
         self.append(value as! Element)
     }
 }

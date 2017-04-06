@@ -5,25 +5,25 @@
 
 import Foundation
 
-public class Property<C> : CustomStringConvertible {
+open class Property<C> : CustomStringConvertible {
     // MARK: abstract
 
-    func get(object: AnyObject!, context: C) throws -> Any? {
-        fatalError("\(self.dynamicType).get is not implemented")
+    func get(_ object: AnyObject!, context: C) throws -> Any? {
+        fatalError("\(type(of: self)).get is not implemented")
     }
 
-    func set(object: AnyObject!, value: Any?, context: C) throws -> Void {
-        fatalError("\(self.dynamicType).set is not implemented")
+    func set(_ object: AnyObject!, value: Any?, context: C) throws -> Void {
+        fatalError("\(type(of: self)).set is not implemented")
     }
 
     // MARK: implement CustomStringConvertible
 
-    public var description : String {
-        return "\(self.dynamicType)"
+    open var description : String {
+        return "\(type(of: self))"
     }
 }
 
-public class Operation<C> : CustomStringConvertible {
+open class Operation<C> : CustomStringConvertible {
     // instance data
 
     var source: Property<C>
@@ -38,22 +38,22 @@ public class Operation<C> : CustomStringConvertible {
 
     // methods
 
-    func setTarget(from: AnyObject, to: AnyObject, context: C) throws -> Void {
+    func setTarget(_ from: AnyObject, to: AnyObject, context: C) throws -> Void {
         try target.set(to, value: source.get(from, context: context), context: context)
     }
 
-    func setSource(to: AnyObject, from: AnyObject, context: C) throws -> Void {
+    func setSource(_ to: AnyObject, from: AnyObject, context: C) throws -> Void {
         try source.set(from, value: target.get(to, context: context), context: context)
     }
 
     // MARK: implement CustomStringConvertible
 
-    public var description : String {
+    open var description : String {
         return "Operation[source: \(source), target: \(target)]"
     }
 }
 
-public class XFormer<C> {
+open class XFormer<C> {
     // MARK: instance data
 
     var operations: [Operation<C>]
@@ -66,20 +66,20 @@ public class XFormer<C> {
 
     // MARK: public
 
-    public func xformTarget(source: AnyObject, target: AnyObject, context: C) throws -> Void {
+    open func xformTarget(_ source: AnyObject, target: AnyObject, context: C) throws -> Void {
         for operation in operations {
             try operation.setTarget(source, to: target, context: context)
         }
     }
 
-    public func xformSource(target: AnyObject, source: AnyObject, context: C) throws -> Void {
+    open func xformSource(_ target: AnyObject, source: AnyObject, context: C) throws -> Void {
         for operation in operations {
             try operation.setSource(target, from: source, context: context)
         }
     }
 }
 
-public class BeanProperty<C> : Property<C> {
+open class BeanProperty<C> : Property<C> {
     // MARK: instance data
 
     var property: BeanDescriptor.PropertyDescriptor
@@ -92,17 +92,17 @@ public class BeanProperty<C> : Property<C> {
 
     // MARK: override Property
 
-    override func get(object: AnyObject!, context: C) throws -> Any? {
+    override func get(_ object: AnyObject!, context: C) throws -> Any? {
         if (Tracer.ENABLED) {
-            Tracer.trace("beans", level: .HIGH, message: "get property \"\(property.name)\"")
+            Tracer.trace("beans", level: .high, message: "get property \"\(property.name)\"")
         }
 
         return property.get(object)
     }
 
-    override func set(object: AnyObject!, value: Any?, context: C) throws -> Void {
+    override func set(_ object: AnyObject!, value: Any?, context: C) throws -> Void {
         if (Tracer.ENABLED) {
-            Tracer.trace("beans", level: .HIGH, message: "set property \"\(property.name)\" to \(value)")
+            Tracer.trace("beans", level: .high, message: "set property \"\(property.name)\" to \(String(describing: value))")
         }
 
         try property.set(object, value: value)
@@ -110,7 +110,7 @@ public class BeanProperty<C> : Property<C> {
 
     // MARK: implement CustomStringConvertible
 
-    override public var description: String {
+    override open var description: String {
         get {
             return "\(property)"
         }

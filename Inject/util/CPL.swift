@@ -24,7 +24,7 @@ class Key : Hashable {
     }
 }
 
-public class CPLRegistry<T> {
+open class CPLRegistry<T> {
     // instance data
 
     var registry : [Key:T] = [Key:T]();
@@ -32,13 +32,13 @@ public class CPLRegistry<T> {
 
     // methods
 
-    func register(clazz: AnyClass, element : T) {
+    func register(_ clazz: AnyClass, element : T) {
         registry[Key(clazz: clazz)] = element;
 
         clearCache();
     }
 
-    func get(clazz : AnyClass) -> T? {
+    func get(_ clazz : AnyClass) -> T? {
         if cache == nil {
             cache = [Key:T]();
 
@@ -113,7 +113,7 @@ class CPLSorter {
 
         // methods
 
-        func link(node : ClassNode) -> Void {
+        func link(_ node : ClassNode) -> Void {
             next.append(node);
 
             node.inDegree += 1;
@@ -126,7 +126,7 @@ class CPLSorter {
 
     // private
 
-    func findNode(clazz : AnyClass) -> ClassNode {
+    func findNode(_ clazz : AnyClass) -> ClassNode {
         if let node = classes[clazz.description()] {
             return node;
         }
@@ -141,7 +141,7 @@ class CPLSorter {
 
     // constructor
 
-    init(classes : [AnyClass], inout objects : [AnyObject]) {
+    init(classes : [AnyClass], objects : inout [AnyObject]) {
         // add classes
 
         for clazz in classes {
@@ -158,7 +158,7 @@ class CPLSorter {
             next.append(findNode(clazz));
 
             while !next.isEmpty {
-                let cn = next.removeAtIndex(0);
+                let cn = next.remove(at: 0);
 
                 if cn.linked {
                     continue;
@@ -210,7 +210,7 @@ class CPLSorter {
 
         var i = 0;
         while !queue.isEmpty {
-            let classNode = queue.removeAtIndex(0);
+            let classNode = queue.remove(at: 0);
 
             classNode.index = i;
 
@@ -246,7 +246,7 @@ class CPLSorter {
             index += 1;
         }
 
-        sortedObjects.sortInPlace({findNode(classes[$0.index]).index > findNode(classes[$1.index]).index});
+        sortedObjects.sort(by: {findNode(classes[$0.index]).index > findNode(classes[$1.index]).index});
 
         //print(sortedObjects);
 

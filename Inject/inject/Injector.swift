@@ -7,7 +7,7 @@
 //
 
 /// `Injector` is the object that will execute injections based on registered injectors
-public class Injector {
+open class Injector {
     // MARK: local classes
     
     class ClassInjections {
@@ -21,22 +21,22 @@ public class Injector {
             analyze(injector, bean: bean);
         }
         
-        func inject(target : AnyObject, context: Environment) throws -> Void {
+        func inject(_ target : AnyObject, context: Environment) throws -> Void {
             for (inject, property, injection) in injections {
                 let value = try injection.computeValue(inject, property: property, environment: context)
                 
                 if (Tracer.ENABLED) {
-                    Tracer.trace("inject", level: .HIGH, message: "inject \(value) in property \(target.dynamicType).\(property.getName())")
+                    Tracer.trace("inject", level: .high, message: "inject \(value) in property \(type(of: target)).\(property.getName())")
                 }
                 
                 try property.set(target, value: value)
             }
         }
         
-        func analyze(injector : Injector, bean : BeanDescriptor) -> Void {
+        func analyze(_ injector : Injector, bean : BeanDescriptor) -> Void {
             for property in bean.allProperties {
                 if let inject = property.inject {
-                    if let injection = injector.injections[inject.dynamicType] {
+                    if let injection = injector.injections[type(of: inject)] {
                         injections.append((inject: inject, property: property, injection: injection))
                     }
                     else {
@@ -56,13 +56,13 @@ public class Injector {
     
     // MARK: public
 
-    public func register(injections : Injection...) {
+    open func register(_ injections : Injection...) {
         for injection in injections {
             self.injections[injection.clazz] = injection
         }
     }
 
-    public func inject(target : AnyObject, context: Environment) throws -> Void  {
+    open func inject(_ target : AnyObject, context: Environment) throws -> Void  {
         let bean = try BeanDescriptor.forInstance(target)
         
         if let classInjections = cachedInjections[bean.getClass()] {

@@ -7,14 +7,14 @@
 //
 
 public enum PromiseState<T>{
-    case Pending
-    case Resolved(value:T)
-    case Rejected(error:ErrorType)
+    case pending
+    case resolved(value:T)
+    case rejected(error:Error)
 
     // convenience funcs
 
     public var isPending: Bool {
-        if case .Pending = self {
+        if case .pending = self {
             return true
         }
         else {
@@ -24,7 +24,7 @@ public enum PromiseState<T>{
 
     func value() -> T {
         switch self {
-            case let .Resolved(value):
+            case let .resolved(value):
                 return value
             default:
                 fatalError("should not happen")
@@ -33,15 +33,15 @@ public enum PromiseState<T>{
 }
 
 // / Simple promise class.
-public class Promise<T> {
+open class Promise<T> {
     // MARK: alias
 
-    public typealias ErrorHandler = ErrorType -> Void
-    public typealias SuccessHandler = T -> Void
+    public typealias ErrorHandler = (Error) -> Void
+    public typealias SuccessHandler = (T) -> Void
 
     // internal
 
-    typealias Listener = Promise<T> -> Void
+    typealias Listener = (Promise<T>) -> Void
 
     // MARK: instance data
 
@@ -53,17 +53,17 @@ public class Promise<T> {
     // MARK: init
 
     public init() {
-        self.state = .Pending
+        self.state = .pending
     }
 
     // MARK: private
 
-    private func addListener<U>(promise: Promise<U>, _ body: T throws -> U?) {
+    fileprivate func addListener<U>(_ promise: Promise<U>, _ body: @escaping (T) throws -> U?) {
         listener = {
             result in
 
             switch result.state {
-                case let .Resolved(value):
+                case let .resolved(value):
                     do {
                         if let result = try body(value) { // execute body
                             promise.resolve(result)
@@ -72,7 +72,7 @@ public class Promise<T> {
                     catch {
                         promise.reject(error)
                     }
-                case let .Rejected(error):
+                case let .rejected(error):
                     promise.reject(error)
 
                 default:
@@ -81,7 +81,7 @@ public class Promise<T> {
         }
     }
 
-    private func update(state state: PromiseState<T>) {
+    fileprivate func update(state: PromiseState<T>) {
         // set state
 
         self.state = state
@@ -89,9 +89,9 @@ public class Promise<T> {
         // call handlers
 
         switch state {
-            case let .Resolved(value):
+            case let .resolved(value):
                 onSuccess?(value)
-            case let .Rejected(error):
+            case let .rejected(error):
                 onError?(error)
             default:
                 precondition(false, "should not happen")
@@ -110,7 +110,7 @@ public class Promise<T> {
         listener  = nil
     }
 
-    private func asVoid() -> Promise<Void> {
+    fileprivate func asVoid() -> Promise<Void> {
         return then() {
             _ in return
         }
@@ -121,7 +121,7 @@ public class Promise<T> {
     /// add a closure that will be called with the result of the previous promise
     /// - Parameter body: the closure function
     /// - Returns: the new promise with the generic type of the closure body return value
-    public func then<U>(body: T throws -> U) -> Promise<U> {
+    open func then<U>(_ body: @escaping (T) throws -> U) -> Promise<U> {
         let promise = Promise<U>()
 
         addListener(promise, body)
@@ -132,7 +132,7 @@ public class Promise<T> {
     /// add a closure that will be called with the result of the previous promise. In contrast to the first function, this clusure returns another `Promise` which will be integrated in the overall chain.
     /// - Parameter body: the closure function
     /// - Returns: the new promise with the generic type of the closure body return value
-    public func then<U>(body: T throws -> Promise<U>) -> Promise<U> {
+    open func then<U>(_ body: @escaping (T) throws -> Promise<U>) -> Promise<U> {
         let promise = Promise<U>()
 
         addListener(promise) {
@@ -152,7 +152,7 @@ public class Promise<T> {
     /// register a callback that will be executed whenever the current promise has been resolved with a value
     /// - Parameter handler: A `SuccessHandler`
     /// - Returns: self
-    public func onSuccess(handler: SuccessHandler) -> Self {
+    open func onSuccess(_ handler: @escaping SuccessHandler) -> Self {
         onSuccess = handler
 
         return self
@@ -161,7 +161,7 @@ public class Promise<T> {
     /// register a callback that will be executed whenever the current promise has been rejected with an error
     /// - Parameter handler: A `ErrorHandler`
     /// - Returns: self
-    public func onError(handler: ErrorHandler) -> Self {
+    open func onError(_ handler: @escaping ErrorHandler) -> Self {
         onError = handler
 
         return self
@@ -171,34 +171,34 @@ public class Promise<T> {
 
     /// Reject the promise with the specified error
     /// - Parameter error: the error
-    public func reject(error: ErrorType) {
+    open func reject(_ error: Error) {
         if !state.isPending {
-            update(state: .Rejected(error: error))
+            update(state: .rejected(error: error))
         }
     }
 
     /// Resolve the promise with the specified value
     /// - Parameter value: the value
-    public func resolve(value: T) -> Void {
+    open func resolve(_ value: T) -> Void {
         if !state.isPending {
-            update(state: .Resolved(value: value))
+            update(state: .resolved(value: value))
         }
     }
 }
 
-public func all<T, U>(p1: Promise<T>, _ p2: Promise<U>) -> Promise<(T, U)> {
+public func all<T, U>(_ p1: Promise<T>, _ p2: Promise<U>) -> Promise<(T, U)> {
     return all([p1.asVoid(), p2.asVoid()]).then() {
         (p1.state.value(), p2.state.value())
     }
 }
 
-public func all<T, U, V>(p1: Promise<T>, _ p2: Promise<U>, _ p3: Promise<V>) -> Promise<(T, U, V)> {
+public func all<T, U, V>(_ p1: Promise<T>, _ p2: Promise<U>, _ p3: Promise<V>) -> Promise<(T, U, V)> {
     return all([p1.asVoid(), p2.asVoid(), p3.asVoid()]).then() {
         (p1.state.value(), p2.state.value(), p3.state.value())
     }
 }
 
-private func all(promises: [Promise<Void>]) -> Promise<Void> {
+private func all(_ promises: [Promise<Void>]) -> Promise<Void> {
     let masterPromise = Promise<Void>()
 
     var (total, resolved) = (promises.count, 0)

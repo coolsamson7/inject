@@ -17,29 +17,29 @@ public protocol BeanScope {
     /// specific implementing classes may use this callback to create instacnes on demand
     /// - Parameter bean: the `BeanDeclaration`
     /// - Parameter factory: the factory that cerates an instance
-    func prepare(bean : Environment.BeanDeclaration, factory : BeanFactory) throws
+    func prepare(_ bean : Environment.BeanDeclaration, factory : BeanFactory) throws
 
     /// return a new or possibly cached instance given the bean declaration
     /// - Parameter bean: the `BeanDeclaration`
     /// - Parameter factory: the factory that cerates an instance
-    func get(bean : Environment.BeanDeclaration, factory : BeanFactory) throws -> AnyObject
+    func get(_ bean : Environment.BeanDeclaration, factory : BeanFactory) throws -> AnyObject
 
     /// execute any cleanup code after a scope has ended. ( e.g. after session removal )
     func finish()
 }
 
-public class AbstractBeanScope : NSObject, BeanScope, EnvironmentAware {
+open class AbstractBeanScope : NSObject, BeanScope, EnvironmentAware {
     // MARK: instance data
 
     var _name : String
 
-    public var name : String {
+    open var name : String {
         get {
             return _name
         }
     }
 
-    public var environment: Environment? {
+    open var environment: Environment? {
         get {
             return nil
         }
@@ -61,14 +61,14 @@ public class AbstractBeanScope : NSObject, BeanScope, EnvironmentAware {
 
     // MARK: implement BeanScope
 
-    public func prepare(bean : Environment.BeanDeclaration, factory : BeanFactory) throws {
+    open func prepare(_ bean : Environment.BeanDeclaration, factory : BeanFactory) throws {
     }
 
-    public func get(bean : Environment.BeanDeclaration, factory : BeanFactory) throws -> AnyObject {
-        fatalError("\(self.dynamicType).get not implemented ")
+    open func get(_ bean : Environment.BeanDeclaration, factory : BeanFactory) throws -> AnyObject {
+        fatalError("\(type(of: self)).get not implemented ")
     }
 
-    public func finish() {
+    open func finish() {
         // noop
     }
 }

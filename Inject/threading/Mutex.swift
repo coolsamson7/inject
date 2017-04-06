@@ -6,7 +6,7 @@
 import Foundation
 
 /// Warpper for `pthread_mutex_t`
-public class Mutex : Lock {
+open class Mutex : Lock {
     // MARK: instance data
 
     internal var mutex = pthread_mutex_t()
@@ -25,18 +25,18 @@ public class Mutex : Lock {
     // Lock
 
     /// lock
-    public func lock() -> Void {
+    open func lock() -> Void {
         pthread_mutex_lock(&mutex)
     }
 
     /// unlock
-    public func unlock() -> Void {
+    open func unlock() -> Void {
         pthread_mutex_unlock(&mutex)
     }
 
     /// execute the closure function guared by this lock
     /// - Parameter closure: the function
-    public func synchronized(closure : ()->()) {
+    open func synchronized(_ closure : ()->()) {
         lock()
 
         defer { unlock() }

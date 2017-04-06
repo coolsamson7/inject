@@ -6,14 +6,14 @@
 //  Copyright © 2016 Andreas Ernst. All rights reserved.
 //
 
-public class NamespaceHandler {
+open class NamespaceHandler {
     // static data
 
     static var handlers = [String:NamespaceHandler]()
 
     // class func name
 
-    class func byNamespace(namespace : String) -> NamespaceHandler {
+    class func byNamespace(_ namespace : String) -> NamespaceHandler {
         let handler = NamespaceHandler.handlers[namespace]
 
         if handler != nil {
@@ -39,11 +39,11 @@ public class NamespaceHandler {
     
     // fluent stuff
 
-    func scope(scope : String) throws -> BeanScope {
+    func scope(_ scope : String) throws -> BeanScope {
         return try environment!.getScope(scope)
     }
     
-    public func beanDeclaration(instance : AnyObject, id : String? = nil, scope :  String = "singleton") throws -> Environment.BeanDeclaration {
+    open func beanDeclaration(_ instance : AnyObject, id : String? = nil, scope :  String = "singleton") throws -> Environment.BeanDeclaration {
         let result = Environment.BeanDeclaration(instance: instance)
         
         if id != nil {
@@ -55,7 +55,7 @@ public class NamespaceHandler {
         return result
     }
     
-    public func beanDeclaration(clazz : String, id : String? = nil) throws -> Environment.BeanDeclaration {
+    open func beanDeclaration(_ clazz : String, id : String? = nil) throws -> Environment.BeanDeclaration {
         let result = Environment.BeanDeclaration()
         
         if id != nil {
@@ -67,7 +67,7 @@ public class NamespaceHandler {
         return result
     }
     
-    public func property(name: String? = nil) ->  Environment.PropertyDeclaration {
+    open func property(_ name: String? = nil) ->  Environment.PropertyDeclaration {
         let result =  Environment.PropertyDeclaration()
         
         if name != nil {
@@ -79,7 +79,7 @@ public class NamespaceHandler {
     
     // fluent parser stuff
     
-    public func mapping(clazz: AnyClass, element: String) -> XMLParser.ClassDefinition {
+    open func mapping(_ clazz: AnyClass, element: String) -> XMLParser.ClassDefinition {
         let result = XMLParser.ClassDefinition(clazz: clazz, element: element)
         
         return result
@@ -87,10 +87,10 @@ public class NamespaceHandler {
     
     // abstract
     
-    func register(loader : XMLEnvironmentLoader) throws {
+    func register(_ loader : XMLEnvironmentLoader) throws {
         self.environment = loader.environment
     }
     
-    func process(namespaceAware : NamespaceAware, environment : Environment) throws -> Void {
+    func process(_ namespaceAware : NamespaceAware, environment : Environment) throws -> Void {
     }
 }

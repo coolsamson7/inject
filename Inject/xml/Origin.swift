@@ -7,7 +7,7 @@
 //
 /// Stores information about the origin of a bean
 
-public class Origin : CustomStringConvertible {
+open class Origin : CustomStringConvertible {
     // MARK: instance data
 
     var file : String
@@ -24,7 +24,7 @@ public class Origin : CustomStringConvertible {
 
     // MARK: implement CustomStringConvertible
 
-    public var description: String {
+    open var description: String {
         let builder = StringBuilder()
 
         if !file.isEmpty {

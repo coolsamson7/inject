@@ -6,10 +6,10 @@
 //  Copyright © 2016 Andreas Ernst. All rights reserved.
 //
 
-public class XMLParser: NSObject {
+open class XMLParser: NSObject {
     // local classes
     
-   public class ClassDefinition {
+   open class ClassDefinition {
         // local class Name {
         
         class PropertyDefinition {
@@ -35,7 +35,7 @@ public class XMLParser: NSObject {
             
             // MARK: internal
             
-            func set(object : AnyObject, value : String) throws -> Void {
+            func set(_ object : AnyObject, value : String) throws -> Void {
                 var val : Any = value;
                 if conversion != nil {
                     val = try conversion!(object: val)
@@ -62,7 +62,7 @@ public class XMLParser: NSObject {
         
         // fluent
         
-        func property(property : String, xml : String? = nil, conversion : Conversion? = nil) throws -> Self {
+        func property(_ property : String, xml : String? = nil, conversion : Conversion? = nil) throws -> Self {
             let definition = try PropertyDefinition(bean: clazz, propertyName: property, xml: xml, conversion: conversion)
             
             properties[definition.xml] = definition
@@ -73,25 +73,25 @@ public class XMLParser: NSObject {
     
     // MARK: internal
     
-    class State : NSObject, NSXMLParserDelegate {
+    class State : NSObject, XMLParserDelegate {
         // MARK: locales classes
         
         class Operation {
-            func canHandle(element : String) -> Bool {
+            func canHandle(_ element : String) -> Bool {
                 return false
             }
             
-            func handle(elementName : String) -> Operation? {
+            func handle(_ elementName : String) -> Operation? {
                 return nil
             }
             
-            func processAttributes(parser: NSXMLParser, attributes : [String : String]) throws -> Void {
+            func processAttributes(_ parser: Foundation.XMLParser, attributes : [String : String]) throws -> Void {
             }
             
-            func characters(string : String) throws -> Void {
+            func characters(_ string : String) throws -> Void {
             }
             
-            func popped(state : State) -> Void {
+            func popped(_ state : State) -> Void {
                 
             }
         }
@@ -114,14 +114,14 @@ public class XMLParser: NSObject {
             
             // func
             
-            override func processAttributes(parser: NSXMLParser, attributes : [String : String]) throws -> Void {
+            override func processAttributes(_ parser: Foundation.XMLParser, attributes : [String : String]) throws -> Void {
                 for (key, value) in attributes {
                     if let property = definition.properties[key] {
                         do {
                             try property.set(instance, value: value)
                         }
-                        catch ConversionErrors.ConversionException(let value, let targetType, _) {
-                            throw ConversionErrors.ConversionException(value: value, targetType: targetType, context: "[\(parser.lineNumber):\(parser.columnNumber)]" )
+                        catch ConversionErrors.conversionException(let value, let targetType, _) {
+                            throw ConversionErrors.conversionException(value: value, targetType: targetType, context: "[\(parser.lineNumber):\(parser.columnNumber)]" )
                         }
                         //catch {
                         //    throw error
@@ -131,20 +131,20 @@ public class XMLParser: NSObject {
                         //TODO attributeContainer[key] = value
                     }
                     else {
-                        throw EnvironmentErrors.ParseError(message: "unknown xml attribute \"\(key)\" in [\(parser.lineNumber):\(parser.columnNumber)]")
+                        throw EnvironmentErrors.parseError(message: "unknown xml attribute \"\(key)\" in [\(parser.lineNumber):\(parser.columnNumber)]")
                     }
                 }
             }
             
-            override func canHandle(element : String) -> Bool {
+            override func canHandle(_ element : String) -> Bool {
                 return definition.properties[element] != nil
             }
             
-            override func handle(elementName : String) -> Operation? {
+            override func handle(_ elementName : String) -> Operation? {
                 return PropertyOperation(parent: self, definition: definition.properties[elementName]!)
             }
             
-            override func popped(state : State) {
+            override func popped(_ state : State) {
                 state.currentClass = parent
                 if parent == nil {
                     state.root = instance
@@ -172,7 +172,7 @@ public class XMLParser: NSObject {
             
             // override
             
-            override func characters(string : String) throws -> Void {
+            override func characters(_ string : String) throws -> Void {
                 try definition.set(parent.instance, value: string)
             }
         }
@@ -194,25 +194,25 @@ public class XMLParser: NSObject {
         
         // MARK: internal
         
-        func reportError(error : XMLParserErrors) {
+        func reportError(_ error : XMLParserErrors) {
             if self._error == nil {
                 self._error = error
             }
         }
         
-        func reportParseError(error : NSError) {
+        func reportParseError(_ error : NSError) {
             if self._error == nil {
-                self._error = XMLParserErrors.ParseException(message: error.description)
+                self._error = XMLParserErrors.parseException(message: error.description)
             }
         }
         
-        func reportValidationError(error : NSError) {
+        func reportValidationError(_ error : NSError) {
             if self._error == nil {
-                self._error = XMLParserErrors.ValidationException(message: error.description)
+                self._error = XMLParserErrors.validationException(message: error.description)
             }
         }
         
-        func push(operation : Operation) -> Void {
+        func push(_ operation : Operation) -> Void {
             operations.append(operation)
             currentOperation = operation
         }
@@ -230,7 +230,7 @@ public class XMLParser: NSObject {
         // NSXMLParserDelegate
         
         // didStartElement
-        internal func parser(parser: NSXMLParser, didStartElement elementName: String, namespaceURI: String?, qualifiedName qName: String?, attributes attributeDict: [String : String]) {
+        internal func parser(_ parser: Foundation.XMLParser, didStartElement elementName: String, namespaceURI: String?, qualifiedName qName: String?, attributes attributeDict: [String : String]) {
             if _error == nil {
                 do {
                     if currentOperation != nil && currentOperation!.canHandle(elementName) {
@@ -242,8 +242,8 @@ public class XMLParser: NSObject {
                             currentClass = ClassOperation(parent: currentClass, definition: definition!)
                             
                             if var namespaceAware = currentClass!.instance as? NamespaceAware {
-                                if let colon = qName!.rangeOfString(":", range: qName!.startIndex..<qName!.endIndex) {
-                                    let namespace = qName![qName!.startIndex..<colon.startIndex]
+                                if let colon = qName!.range(of: ":", range: qName!.startIndex..<qName!.endIndex) {
+                                    let namespace = qName![qName!.startIndex..<colon.lowerBound]
                                     
                                     namespaceAware.namespace = namespace
                                 }
@@ -256,58 +256,58 @@ public class XMLParser: NSObject {
                             push(currentClass!)
                         }
                         else {
-                            throw XMLParserErrors.ParseException(message: "unknown element \(qName!) in line \(parser.lineNumber)")
+                            throw XMLParserErrors.parseException(message: "unknown element \(qName!) in line \(parser.lineNumber)")
                         }
                     }
                     
                     try currentOperation!.processAttributes(parser, attributes: attributeDict)
                     
                 }
-                catch XMLParserErrors.ParseException(let message) {
-                    reportError(XMLParserErrors.ParseException(message: message))
+                catch XMLParserErrors.parseException(let message) {
+                    reportError(XMLParserErrors.parseException(message: message))
                 }
                 catch {
-                    reportError(XMLParserErrors.Exception(message: "\(error) in line \(parser.lineNumber)"))
+                    reportError(XMLParserErrors.exception(message: "\(error) in line \(parser.lineNumber)"))
                 }
             }
         }
         
         // didEndElement
-        internal func parser(parser: NSXMLParser, didEndElement elementName: String, namespaceURI: String?, qualifiedName qName: String?) {
+        internal func parser(_ parser: Foundation.XMLParser, didEndElement elementName: String, namespaceURI: String?, qualifiedName qName: String?) {
             if _error == nil {
                 pop()
             }
         }
         
         // foundCharacters
-        internal func parser(parser: NSXMLParser, foundCharacters string: String) {
+        internal func parser(_ parser: Foundation.XMLParser, foundCharacters string: String) {
             if _error == nil {
                 do {
                     try currentOperation!.characters(string)
                 }
-                catch XMLParserErrors.ParseException(let message) {
-                    reportError(XMLParserErrors.ParseException(message: message))
+                catch XMLParserErrors.parseException(let message) {
+                    reportError(XMLParserErrors.parseException(message: message))
                 }
                 catch {
-                    reportError(XMLParserErrors.Exception(message: "\(error)"))
+                    reportError(XMLParserErrors.exception(message: "\(error)"))
                 }
             }
         }
         
         //parseErrorOccurred
-        internal func parser(parser: NSXMLParser, parseErrorOccurred parseError: NSError) {
-            reportParseError(parseError)
+        internal func parser(_ parser: Foundation.XMLParser, parseErrorOccurred parseError: Error) {
+            reportParseError(parseError as! NSError)
         }
         
         //validationErrorOccurred
-        internal func parser(parser: NSXMLParser, validationErrorOccurred validationError: NSError) {
-            reportValidationError(validationError)
+        internal func parser(_ parser: Foundation.XMLParser, validationErrorOccurred validationError: Error) {
+            reportValidationError(validationError as! NSError)
         }
     }
 
     // MARK: static funcs
 
-    public static func mapping(clazz: AnyClass, element: String) -> ClassDefinition {
+    open static func mapping(_ clazz: AnyClass, element: String) -> ClassDefinition {
         let result = ClassDefinition(clazz: clazz, element: element)
 
         return result
@@ -319,7 +319,7 @@ public class XMLParser: NSObject {
     
     // register stuff
     
-    public func register(classes : ClassDefinition...) -> Self {
+    open func register(_ classes : ClassDefinition...) -> Self {
         for clazz in classes {
             self.classes[clazz.element] = clazz
         }
@@ -329,8 +329,8 @@ public class XMLParser: NSObject {
     
     // MARK: public
     
-    public func parse(data : NSData) throws -> AnyObject? {
-        let parser = NSXMLParser(data: data)
+    open func parse(_ data : Data) throws -> AnyObject? {
+        let parser = Foundation.XMLParser(data: data)
         parser.shouldProcessNamespaces = true
         
         let state = State(parser: self)
