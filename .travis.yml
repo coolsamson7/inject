@@ -5,5 +5,5 @@ xcode_sdk: iphoneos
 osx_image: xcode8.3
 
 script:
-- xctool clean build -project Inject.xcodeproj -scheme 'InjectTests' -sdk iphoneos CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO
+- xcodebuild clean build -project Inject.xcodeproj -scheme 'InjectTests' -sdk iphoneos CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO
 
