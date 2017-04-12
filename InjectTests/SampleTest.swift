@@ -332,4 +332,77 @@ class SampleTest: XCTestCase {
 
         XCTAssert(descriptoInitializers.count == 2)
     }
+
+    // FOO
+
+    // TEST
+
+    // test classes
+
+    class B {
+        init() {
+            print("B");
+        }
+    }
+
+    class A {
+        init() {
+            print("A");
+        }
+    }
+
+    class TestModuleA : EnvironmentBuilder.Module {
+        // init
+        
+        required init() {
+            super.init(name: "module A")
+        }
+        
+        // implement Module
+        
+        override func configure(_ environment : Environment) throws -> Void {
+            // require...
+
+            // own dependencies
+
+            try environment.define(bean(A.self, factory: A.init))
+        }
+    }
+
+    class TestModuleB : EnvironmentBuilder.Module {
+        // init
+        
+        required init() {
+            super.init(name: "module B")
+        }
+        
+        // implement Module
+
+        override func configure(_ environment : Environment) throws -> Void {
+            // require...
+
+            try require(TestModuleA.self);
+
+            //finish();
+
+            // own dependencies
+
+            try environment.define(bean(B.self, factory: B.init))
+        }
+    }
+
+    func testEnvironment() throws {
+        let builder = EnvironmentBuilder(name: "environment");
+
+        // register a couple of environments
+
+        try builder.register(module: TestModuleA());
+        //try builder.register(module: TestModuleB.self);
+
+        // go
+
+        let environment = try builder.build(module: TestModuleB());//.self);
+
+        print(environment.report());
+    }
 }
